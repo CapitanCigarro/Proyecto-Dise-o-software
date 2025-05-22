@@ -1,46 +1,102 @@
-# Getting Started with Create React App
+## Implementación Entrega 2
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+---
 
-## Available Scripts
+### **1. Autenticación y roles**
 
-In the project directory, you can run:
+* [ ] **Pantalla de login:**
 
-### `npm start`
+  * [ ] Diseñar formulario con campos de correo y contraseña.
+  * [ ] Validar credenciales contra backend o mock (`admin@test.com`, `admin123`).
+  * [ ] Mostrar mensaje de error si las credenciales son incorrectas.
+* [ ] **Protección de rutas:**
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+  * [ ] Implementar rutas privadas con `React Router` (`<PrivateRoute>`).
+  * [ ] Restringir acceso a rutas como "/asignar-rutas" y "/reportes" para rol "admin".
+* [ ] **Almacenamiento de sesión:**
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+  * [ ] Guardar token en `localStorage` o `sessionStorage`.
+  * [ ] Recuperar sesión al recargar la página para mantener sesión activa.
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### **2. Funcionalidades principales**
 
-### `npm run build`
+#### a. Gestión de envíos
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+* [ ] **Listado de envíos diarios:**
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+  * [ ] Crear tabla con filtros por estado.
+  * [ ] Columnas: ID, cliente, conductor, estado, fecha.
+  * [ ] Integrar con backend o usar datos mock.
+* [ ] **Detalles del envío:**
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+  * [ ] Mostrar detalles en modal o pantalla secundaria: remitente, destinatario, peso, dimensiones, ruta.
 
-### `npm run eject`
+#### b. Asignación de rutas a conductores
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+* [ ] **Interfaz de asignación:**
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+  * [ ] Selector de conductor desde backend.
+  * [ ] Campos con autocompletado para origen y destino (Google Places API).
+  * [ ] Botón para calcular ruta óptima (API Google Maps).
+* [ ] **Visualización de rutas:**
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+  * [ ] Mapa interactivo con `@react-google-maps/api`.
+  * [ ] Mostrar ruta, marcadores y detalles (distancia, duración).
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+#### c. Generación de reportes
 
-## Learn More
+* [ ] **Reporte de eficiencia de rutas:**
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+  * [ ] Gráficos con `Chart.js` o `ApexCharts`.
+  * [ ] Mostrar tiempo promedio y porcentaje de entregas a tiempo.
+  * [ ] Filtro por fechas o conductores.
+* [ ] **Exportación de datos:**
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+  * [ ] Botón para descargar en PDF/CSV (con `jspdf`, `xlsx`).
+
+---
+
+### **3. Integración con Google Maps**
+
+* [ ] **Autocompletado de direcciones:**
+
+  * [ ] Implementar `usePlacesAutocomplete` en campos de direcciones.
+* [ ] **Cálculo de rutas:**
+
+  * [ ] Usar Directions API de Google Maps.
+  * [ ] Mostrar ruta con `DirectionsRenderer` + detalles (distancia, duración).
+* [ ] **Clave de API:**
+
+  * [ ] Guardar API Key en `.env` y no exponerla en código fuente.
+
+---
+
+### **4. Requisitos técnicos adicionales**
+
+#### a. Navegación
+
+* [ ] Usar `React Router v6` para rutas públicas y privadas.
+* [ ] Crear layout base con menú lateral (envíos, rutas, reportes).
+
+#### b. Estado de la aplicación
+
+* [ ] Manejar estado con `Context API` o `Redux`.
+* [ ] Simular datos con `axios-mock-adapter` si backend no está disponible.
+
+#### c. Seguridad básica
+
+* [ ] Enviar token en headers al backend.
+* [ ] Implementar logout que elimine token y redirija al login.
+
+#### d. Organización del código
+
+* [ ] Estructurar carpetas del proyecto:
+
+  * [ ] `/components`: Componentes reutilizables.
+  * [ ] `/pages`: Vistas principales.
+  * [ ] `/services`: Servicios de API.
+  * [ ] `/utils`: Utilidades (fechas, errores, etc.).
+
+---
