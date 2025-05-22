@@ -1,0 +1,71 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Archivos de compilación
+dist/
+build/
+*.tsbuildinfo
+
+# Archivos de entorno
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+
+# IDEs y editores
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Sistema operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Archivos de base de datos
+*.sqlite
+*.sqlite3
+
+# Archivos de respaldo
+*.bak
+*.backup
+*~
+
+# Archivos de cobertura de pruebas
+coverage/
+.nyc_output/
+
+# Otros
+.git
+.cache
+tmp/
+temp/

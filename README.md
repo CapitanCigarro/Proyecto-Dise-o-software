@@ -1,1 +1,12 @@
-# Proyecto-Dise-o-software
+**Distribución de trabajo**  
+---
+
+| Integrante | Rol                  | Tareas Clave                                                                                                                                                                                                 | Coordinación                                                                              |  
+|------------|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|  
+| **Jorge Slimming**      | **App Móvil**        | - Desarrollo de la app móvil (login, pantallas cliente/conductor). <br>- Integración con endpoints del backend. <br>- Notificaciones push (Firebase o alerts).                                               | Coordinar con **Integrante 2 y 3** para definir formatos de datos y endpoints.            |  
+| **2**      | **Backend (Auth + Paquetes)** | - Implementar autenticación (`/login`), gestión de paquetes (`/paquetes`). <br>- Validación de datos y conexión con PostgreSQL.                                                                          | Trabajar con **Integrante 5** en seguridad básica (roles, protección de rutas).           |  
+| **3**      | **Backend (Rutas + Maps)** | - Desarrollo del endpoint `/rutas` (integración con Google Maps API). <br>- Lógica de optimización de rutas. <br>- Endpoint `/estados` para actualización de paquetes.                                   | Colaborar con **Integrante 5** en la integración inicial de la API de mapas.              |  
+| **4**      | **Web Admin**         | - Dashboard React: Login, lista de paquetes, asignación de rutas. <br>- Integración con endpoints. <br>- Gráficos de desempeño con Chart.js.                                                              | Coordinar con **Integrante 5** en la implementación de vistas protegidas por roles.       |  
+| **5**      | **Backend/Web Secundario** | <br>- Implementar seguridad básica: distinción de roles y protección de rutas (colaboración con Integrante 2). <br>- Ayudar en la integración de la API de Google Maps (con Integrante 3). <br>- Desarrollar componentes secundarios del Dashboard Web (ej: formularios de asignación de rutas). | Coordinar con **integrantes 2,3,4** para validar autenticación de usuarios.                  |  
+
+---
