@@ -1,3 +1,10 @@
+### Por hacer:
+- Separar styles de cada pagina
+- refacotrizar codigo
+- limitarce a lo que se pide en la entrega 2
+- poner mensajes de alertas para las funciones que no se pueden implementar aun
+- adapartar la interfaz
+
 ## Implementación entrega 2 
 
 ---
