@@ -25,11 +25,15 @@ const Login = () => {
     const user = MOCK_USERS.find(u => u.email === email && u.password === password);
 
     if (user) {
+    if (user.role === 'admin') {
       login(user);  // Guarda token y rol en contexto + localStorage
       navigate('/dashboard');
     } else {
-      setError('Correo o contraseña incorrectos');
+      setError('Acceso denegado: solo administradores pueden ingresar');
     }
+  } else {
+    setError('Correo o contraseña incorrectos');
+  }
   };
 
   return (
