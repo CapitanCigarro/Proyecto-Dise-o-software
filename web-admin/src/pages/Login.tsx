@@ -1,19 +1,35 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext'; // Ajusta la ruta según donde tengas el AuthContext
 
+const MOCK_USERS = [
+  { email: 'cliente@example.com', password: 'password123', role: 'cliente', token: 'token-cliente' },
+  { email: 'conductor@example.com', password: 'password123', role: 'conductor', token: 'token-conductor' },
+  { email: 'admin@example.com', password: 'adminpass', role: 'admin', token: 'token-admin' },
+];
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [buttonHover, setButtonHover] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [error, setError] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica real de autenticación
-    navigate('/dashboard');
+
+    const user = MOCK_USERS.find(u => u.email === email && u.password === password);
+
+    if (user) {
+      login(user);  // Guarda token y rol en contexto + localStorage
+      navigate('/dashboard');
+    } else {
+      setError('Correo o contraseña incorrectos');
+    }
   };
 
   return (
@@ -55,6 +71,9 @@ const Login = () => {
             autoComplete="current-password"
           />
         </div>
+
+        {error && <p style={{ color: 'red', marginBottom: 12 }}>{error}</p>}
+
         <button
           type="submit"
           style={{
