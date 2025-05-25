@@ -7,7 +7,6 @@ import {
   TouchableOpacity, 
   Image,
   Share,
-  Linking,
   Dimensions
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -86,10 +85,6 @@ const PackageDetail = () => {
     } catch (error) {
       console.log(error);
     }
-  };
-  
-  const callSupport = () => {
-    Linking.openURL('tel:0800-123-4567');
   };
 
   return (
@@ -272,15 +267,6 @@ const PackageDetail = () => {
               </View>
             </View>
           )}
-          
-          {/* Support Section */}
-          <View style={styles.supportSection}>
-            <Text style={styles.supportText}>¿Tienes alguna pregunta sobre tu envío?</Text>
-            <TouchableOpacity style={styles.supportButton} onPress={callSupport}>
-              <Ionicons name="call-outline" size={18} color="#fff" />
-              <Text style={styles.supportButtonText}>Contactar a Soporte</Text>
-            </TouchableOpacity>
-          </View>
         </ScrollView>
       </View>
     </SafeAreaWrapper>
@@ -552,43 +538,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+    marginBottom: 15,
   },
   description: {
     fontSize: 15,
     color: '#333',
     lineHeight: 22,
-  },
-  supportSection: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 15,
-    marginVertical: 15,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  supportText: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 15,
-  },
-  supportButton: {
-    backgroundColor: '#007AFF',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 25,
-  },
-  supportButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-    marginLeft: 8,
   },
 });
 

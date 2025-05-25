@@ -8,7 +8,6 @@ interface Notification {
   id: string;
   message: string;
   date: string;
-  isRead: boolean;
 }
 
 interface Package {
@@ -43,10 +42,10 @@ const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
           setUserName(userData.name || '');
         }
         
-        // Mock notifications
+        // Mock notifications - removed isRead property
         const mockNotifications = [
-          { id: '1', message: 'Tu paquete #1234 ha sido recogido', date: '2023-05-23 10:30', isRead: false },
-          { id: '2', message: 'Tu paquete #5678 ha sido entregado', date: '2023-05-22 14:15', isRead: true },
+          { id: '1', message: 'Tu paquete #1234 ha sido recogido', date: '2023-05-23 10:30' },
+          { id: '2', message: 'Tu paquete #5678 ha sido entregado', date: '2023-05-22 14:15' },
         ];
         
         // Mock recent packages
@@ -86,20 +85,10 @@ const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
     }
   };
   
-  const markNotificationAsRead = (id: string) => {
-    setNotifications(
-      notifications.map(notification => 
-        notification.id === id 
-          ? { ...notification, isRead: true } 
-          : notification
-      )
-    );
-  };
-  
   return (
     <SafeAreaWrapper>
       <ScrollView style={styles.container}>
-        {/* Header with welcome message */}
+        {/* Header with welcome message and New Package button */}
         <View style={styles.welcomeHeader}>
           <View>
             <Text style={styles.welcomeText}>
@@ -107,7 +96,13 @@ const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
             </Text>
             <Text style={styles.subtitle}>Panel de seguimiento</Text>
           </View>
-          <Ionicons name="person-circle-outline" size={40} color="#007AFF" />
+          <TouchableOpacity 
+            style={styles.newPackageButton}
+            onPress={() => navigation.navigate('PackageRegistration')}
+          >
+            <Ionicons name="add-circle" size={18} color="#fff" />
+            <Text style={styles.newPackageButtonText}>Nuevo Paquete</Text>
+          </TouchableOpacity>
         </View>
         
         {/* Stats Summary */}
@@ -131,47 +126,26 @@ const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
           </View>
         </View>
         
-        {/* Notifications section - Moved to top for importance */}
+        {/* Notifications section - simplified */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleContainer}>
               <Ionicons name="notifications-outline" size={20} color="#333" style={{marginRight: 6}} />
               <Text style={styles.sectionTitle}>Notificaciones</Text>
             </View>
-            {notifications.length > 0 && (
-              <TouchableOpacity>
-                <Text style={styles.seeAllText}>Marcar todo leído</Text>
-              </TouchableOpacity>
-            )}
           </View>
           
           {notifications.length > 0 ? (
             <FlatList
               data={notifications}
               renderItem={({ item }) => (
-                <TouchableOpacity 
-                  style={[styles.notificationItem, 
-                    item.isRead ? styles.notificationRead : styles.notificationUnread]}
-                  onPress={() => markNotificationAsRead(item.id)}
-                >
-                  <View style={styles.notificationIconContainer}>
-                    <Ionicons 
-                      name={item.isRead ? "mail-open-outline" : "mail-outline"} 
-                      size={22} 
-                      color={item.isRead ? "#999" : "#007AFF"} 
-                    />
-                  </View>
+                <View style={styles.notificationItem}>
+                  <View style={styles.notificationDot} />
                   <View style={styles.notificationContent}>
-                    <Text style={[
-                      styles.notificationMessage, 
-                      item.isRead ? styles.notificationTextRead : styles.notificationTextUnread
-                    ]}>
-                      {item.message}
-                    </Text>
+                    <Text style={styles.notificationMessage}>{item.message}</Text>
                     <Text style={styles.notificationDate}>{item.date}</Text>
                   </View>
-                  {!item.isRead && <View style={styles.unreadDot} />}
-                </TouchableOpacity>
+                </View>
               )}
               keyExtractor={item => item.id}
               scrollEnabled={false}
@@ -238,17 +212,6 @@ const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
               <Text style={styles.emptyText}>No hay paquetes recientes</Text>
             </View>
           )}
-        </View>
-        
-        {/* Quick Actions */}
-        <View style={styles.quickActionsContainer}>
-          <TouchableOpacity 
-            style={styles.quickActionButton}
-            onPress={() => navigation.navigate('PackageRegistration')}
-          >
-            <Ionicons name="add-circle" size={22} color="#fff" />
-            <Text style={styles.quickActionText}>Nuevo Paquete</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaWrapper>
@@ -398,20 +361,12 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f0f0f0',
     alignItems: 'center',
   },
-  notificationIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#f0f8ff',
-    justifyContent: 'center',
-    alignItems: 'center',
+  notificationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#007AFF',
     marginRight: 12,
-  },
-  notificationUnread: {
-    backgroundColor: '#f0f8ff',
-  },
-  notificationRead: {
-    backgroundColor: '#fff',
   },
   notificationContent: {
     flex: 1,
@@ -420,24 +375,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
-  notificationTextUnread: {
-    fontWeight: '600',
-  },
-  notificationTextRead: {
-    fontWeight: 'normal',
-  },
   notificationDate: {
     fontSize: 12,
     color: '#999',
     marginTop: 2,
   },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#007AFF',
-    marginLeft: 8,
-  },
+  
   emptyContainer: {
     padding: 20,
     alignItems: 'center',
@@ -447,22 +390,19 @@ const styles = StyleSheet.create({
     color: '#999',
     marginTop: 8,
   },
-  quickActionsContainer: {
-    padding: 15,
-    alignItems: 'flex-end',
-  },
-  quickActionButton: {
+  newPackageButton: {
     flexDirection: 'row',
     backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
     alignItems: 'center',
   },
-  quickActionText: {
+  newPackageButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    marginLeft: 6,
+    marginLeft: 4,
+    fontSize: 12,
   }
 });
 

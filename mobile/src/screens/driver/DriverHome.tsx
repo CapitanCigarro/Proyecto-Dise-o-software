@@ -9,10 +9,10 @@ import {
   Modal,
   Alert,
   RefreshControl,
-  TextInput,
   Animated,
   Image,
-  Dimensions
+  Dimensions,
+  ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -39,16 +39,8 @@ const DriverHome: React.FC<DriverHomeProps> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [statusModalVisible, setStatusModalVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showSearch, setShowSearch] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
-  const [menuVisible, setMenuVisible] = useState(false);
   const { logout } = useAuth();
-  const searchInputRef = useRef<TextInput>(null);
-  
-  // Animation values
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const translateAnim = useRef(new Animated.Value(50)).current;
   
   // Screen dimensions
   const { width } = Dimensions.get('window');
@@ -61,41 +53,26 @@ const DriverHome: React.FC<DriverHomeProps> = ({ navigation }) => {
     total: 0
   });
 
+  // Route statistics
+  const [routeStats, setRouteStats] = useState({
+    totalDistance: 8.0,
+    totalTime: 47,
+    estimatedCompletion: '11:30 AM',
+    destinations: 3
+  });
+
   useEffect(() => {
     loadPackages();
-    
-    // Start intro animation
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true
-      }),
-      Animated.timing(translateAnim, {
-        toValue: 0,
-        duration: 800,
-        useNativeDriver: true
-      })
-    ]).start();
   }, []);
   
-  // Apply search/filter when packages or search terms change
+  // Apply filter when packages or filter status changes
   useEffect(() => {
     filterPackages();
-  }, [packages, searchQuery, filterStatus]);
+  }, [packages, filterStatus]);
   
-  // Filter packages based on search and status filter
+  // Filter packages based on status filter
   const filterPackages = () => {
     let filtered = [...packages];
-    
-    // Apply search filter if there's a search query
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(pkg => 
-        pkg.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        pkg.recipient.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        pkg.address.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
     
     // Apply status filter if not showing all
     if (filterStatus !== 'all') {
@@ -105,80 +82,71 @@ const DriverHome: React.FC<DriverHomeProps> = ({ navigation }) => {
     setFilteredPackages(filtered);
   };
 
+  // Update the loadPackages function to always use initial data
   const loadPackages = async () => {
     setLoading(true);
     try {
-      // In a real app, this would be an API call
-      const packagesJson = await AsyncStorage.getItem('packages');
-      let packagesData = [];
+      // Always use initial mock data on app start instead of loading from storage
+      const mockData = [
+        { 
+          id: '1234', 
+          status: 'Pendiente',
+          recipient: 'María García', 
+          address: 'Calle Principal 123', 
+          date: '2023-05-20',
+          description: 'Caja mediana'
+        },
+        { 
+          id: '5678', 
+          status: 'En tránsito',
+          recipient: 'Carlos Rodríguez', 
+          address: 'Avenida Central 456', 
+          date: '2023-05-18',
+          description: 'Sobre pequeño'
+        },
+        { 
+          id: '9012', 
+          status: 'Entregado',
+          recipient: 'Ana López', 
+          address: 'Plaza Mayor 789', 
+          date: '2023-05-15',
+          description: 'Paquete frágil'
+        },
+        { 
+          id: '3456', 
+          status: 'Pendiente',
+          recipient: 'Roberto Méndez', 
+          address: 'Avenida Libertad 234', 
+          date: '2023-05-19',
+          description: 'Documentos importantes'
+        },
+        { 
+          id: '7890', 
+          status: 'Pendiente',
+          recipient: 'Laura Torres', 
+          address: 'Calle Norte 567', 
+          date: '2023-05-21',
+          description: 'Electrónica'
+        },
+      ];
       
-      if (packagesJson) {
-        packagesData = JSON.parse(packagesJson);
-      } else {
-        // Mock data if no saved packages
-        packagesData = [
-          { 
-            id: '1234', 
-            status: 'Pendiente',
-            recipient: 'María García', 
-            address: 'Calle Principal 123', 
-            date: '2023-05-20',
-            description: 'Caja mediana'
-          },
-          { 
-            id: '5678', 
-            status: 'En tránsito',
-            recipient: 'Carlos Rodríguez', 
-            address: 'Avenida Central 456', 
-            date: '2023-05-18',
-            description: 'Sobre pequeño'
-          },
-          { 
-            id: '9012', 
-            status: 'Entregado',
-            recipient: 'Ana López', 
-            address: 'Plaza Mayor 789', 
-            date: '2023-05-15',
-            description: 'Paquete frágil'
-          },
-          { 
-            id: '3456', 
-            status: 'Pendiente',
-            recipient: 'Roberto Méndez', 
-            address: 'Avenida Libertad 234', 
-            date: '2023-05-19',
-            description: 'Documentos importantes'
-          },
-          { 
-            id: '7890', 
-            status: 'En tránsito',
-            recipient: 'Laura Torres', 
-            address: 'Calle Norte 567', 
-            date: '2023-05-21',
-            description: 'Electrónica'
-          },
-        ];
-        
-        // Save mock data
-        await AsyncStorage.setItem('packages', JSON.stringify(packagesData));
-      }
+      // Save mock data to AsyncStorage
+      await AsyncStorage.setItem('packages', JSON.stringify(mockData));
       
-      // Sort by date (newest first)
-      packagesData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      
-      setPackages(packagesData);
-      setFilteredPackages(packagesData);
+      // Update state with initial data
+      setPackages(mockData);
+      setFilteredPackages(mockData);
       
       // Calculate stats
-      const pending = packagesData.filter(p => p.status === 'Pendiente').length;
-      const inTransit = packagesData.filter(p => p.status === 'En tránsito').length;
-      const delivered = packagesData.filter(p => p.status === 'Entregado').length;
+      const pending = mockData.filter(p => p.status === 'Pendiente').length;
+      const inTransit = mockData.filter(p => p.status === 'En tránsito').length;
+      const delivered = mockData.filter(p => p.status === 'Entregado').length;
       
       setStats({
         pending,
         inTransit,
         delivered,
-        total: packagesData.length
+        total: mockData.length
       });
       
     } catch (error) {
@@ -256,7 +224,7 @@ const DriverHome: React.FC<DriverHomeProps> = ({ navigation }) => {
   
   const handleClientNotification = (packageId: string, status: string) => {
     // In a real app, this would send a push notification to the client
-    // For now, just show a confirmation
+    // Just show a toast or small notification that doesn't need confirmation
     Alert.alert(
       'Notificación Enviada',
       `Se ha notificado al cliente sobre la actualización del paquete #${packageId}`
@@ -286,15 +254,6 @@ const DriverHome: React.FC<DriverHomeProps> = ({ navigation }) => {
     }
   };
   
-  const navigateToRoute = () => {
-    navigation.navigate('RouteVisualization');
-  };
-  
-  const navigateToProfile = () => {
-    navigation.navigate('DriverProfile');
-    setMenuVisible(false);
-  };
-
   const handleLogout = async () => {
     try {
       Alert.alert(
@@ -308,21 +267,6 @@ const DriverHome: React.FC<DriverHomeProps> = ({ navigation }) => {
     } catch (error) {
       console.error('Error during logout:', error);
     }
-  };
-  
-  const toggleSearch = () => {
-    setShowSearch(!showSearch);
-    if (!showSearch) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 100);
-    } else {
-      setSearchQuery('');
-    }
-  };
-  
-  const toggleMenu = () => {
-    setMenuVisible(!menuVisible);
   };
   
   const applyStatusFilter = (status: string) => {
@@ -413,158 +357,289 @@ const DriverHome: React.FC<DriverHomeProps> = ({ navigation }) => {
         No hay paquetes {filterStatus !== 'all' ? `con estado "${filterStatus}"` : ''}
       </Text>
       <Text style={styles.emptyText}>
-        {searchQuery ? 'Prueba con otra búsqueda o filtro' : 'Todos tus paquetes asignados aparecerán aquí'}
+        Todos tus paquetes asignados aparecerán aquí
       </Text>
     </View>
   );
 
+  // Navigate to Route Visualization screen
+  const navigateToRoute = () => {
+    navigation.navigate('RouteVisualization');
+  };
+
+  // Calculate completion percentage for the route
+  const calculateCompletionPercentage = () => {
+    const delivered = packages.filter(pkg => pkg.status === 'Entregado').length;
+    return packages.length > 0 ? Math.round((delivered / packages.length) * 100) : 0;
+  };
+
+  const handleMarkAsDelivered = async (pkg: Package) => {
+    try {
+      setLoading(true);
+      
+      // Update package status to Entregado
+      const updatedPackages = packages.map(p => {
+        if (p.id === pkg.id) {
+          return { ...p, status: 'Entregado' };
+        }
+        return p;
+      });
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Save to AsyncStorage
+      await AsyncStorage.setItem('packages', JSON.stringify(updatedPackages));
+      
+      // Update state
+      setPackages(updatedPackages);
+      
+      // Recalculate stats
+      const pending = updatedPackages.filter(p => p.status === 'Pendiente').length;
+      const inTransit = updatedPackages.filter(p => p.status === 'En tránsito').length;
+      const delivered = updatedPackages.filter(p => p.status === 'Entregado').length;
+      
+      setStats({
+        pending,
+        inTransit,
+        delivered,
+        total: updatedPackages.length
+      });
+      
+      // Show a single combined success message instead of two separate ones
+      Alert.alert(
+        'Entrega Completada', 
+        `El paquete #${pkg.id} ha sido marcado como entregado.\n\nSe ha notificado al cliente sobre la entrega.`
+      );
+      
+    } catch (error) {
+      console.error('Error updating package status:', error);
+      Alert.alert('Error', 'No se pudo actualizar el estado del paquete');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStartDelivery = (pkg) => {
+    // Use the existing handleStatusUpdate function for status change
+    setSelectedPackage(pkg);
+    
+    // First update status to "En tránsito"
+    const updatedPackages = packages.map(p => {
+      if (p.id === pkg.id) {
+        return { ...p, status: 'En tránsito' };
+      }
+      return p;
+    });
+    
+    // Update local state
+    setPackages(updatedPackages);
+    
+    // Save to AsyncStorage
+    AsyncStorage.setItem('packages', JSON.stringify(updatedPackages)).then(() => {
+      // Navigate to RouteVisualization
+      navigation.navigate('RouteVisualization', { packageId: pkg.id });
+    }).catch(error => {
+      console.error('Error updating package status:', error);
+      Alert.alert('Error', 'No se pudo iniciar la entrega');
+    });
+  };
+
   return (
     <SafeAreaWrapper>
       <View style={styles.container}>
-        {/* Header */}
+        {/* Header without Route Button */}
         <View style={styles.header}>
           <View>
             <Text style={styles.title}>Panel de Conductor</Text>
             <Text style={styles.subtitle}>Gestiona tus entregas</Text>
           </View>
-          <View style={styles.headerActions}>
-            <TouchableOpacity 
-              style={styles.headerButton}
-              onPress={toggleSearch}
-            >
-              <Ionicons name={showSearch ? "close-outline" : "search-outline"} size={24} color="#333" />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.headerButton}
-              onPress={toggleMenu}
-            >
-              <Ionicons name="menu-outline" size={24} color="#333" />
-            </TouchableOpacity>
-          </View>
         </View>
         
-        {/* Search bar */}
-        {showSearch && (
-          <View style={styles.searchContainer}>
-            <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
-            <TextInput
-              ref={searchInputRef}
-              style={styles.searchInput}
-              placeholder="Buscar por ID, destinatario o dirección"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              returnKeyType="search"
-            />
-            {searchQuery ? (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={18} color="#999" />
+        <ScrollView 
+          showsVerticalScrollIndicator={true}
+          contentContainerStyle={{ paddingBottom: 30 }}
+        >
+          {/* Route Summary Card */}
+          <View style={styles.routeSummaryCard}>
+            <View style={styles.summaryHeader}>
+              <View>
+                <Text style={styles.summaryTitle}>Resumen de Ruta</Text>
+                <Text style={styles.summarySubtitle}>
+                  {routeStats.destinations} paradas · {routeStats.totalDistance} km
+                </Text>
+              </View>
+              <View style={styles.summaryStatus}>
+                <View style={styles.progressContainer}>
+                  <View 
+                    style={[
+                      styles.progressBar, 
+                      { width: `${calculateCompletionPercentage()}%` }
+                    ]} 
+                  />
+                </View>
+                <Text style={styles.progressText}>{calculateCompletionPercentage()}% completado</Text>
+              </View>
+            </View>
+            
+            <View style={styles.summaryDetails}>
+              <View style={styles.summaryItem}>
+                <Ionicons name="time-outline" size={20} color="#007AFF" />
+                <View style={styles.summaryItemText}>
+                  <Text style={styles.summaryItemLabel}>Tiempo total</Text>
+                  <Text style={styles.summaryItemValue}>{routeStats.totalTime} min</Text>
+                </View>
+              </View>
+              
+              <View style={styles.summaryItem}>
+                <Ionicons name="flag-outline" size={20} color="#007AFF" />
+                <View style={styles.summaryItemText}>
+                  <Text style={styles.summaryItemLabel}>Final estimado</Text>
+                  <Text style={styles.summaryItemValue}>{routeStats.estimatedCompletion}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+          
+          {/* Stats Cards */}
+          <View style={styles.statsContainer}>
+            <View style={styles.statsCard}>
+              <View style={[styles.statsIconContainer, { backgroundColor: '#d9534f20' }]}>
+                <Ionicons name="hourglass-outline" size={20} color="#d9534f" />
+              </View>
+              <Text style={styles.statsNumber}>{stats.pending}</Text>
+              <Text style={styles.statsLabel}>Pendientes</Text>
+            </View>
+            
+            <View style={styles.statsCard}>
+              <View style={[styles.statsIconContainer, { backgroundColor: '#f0ad4e20' }]}>
+                <Ionicons name="car-outline" size={20} color="#f0ad4e" />
+              </View>
+              <Text style={styles.statsNumber}>{stats.inTransit}</Text>
+              <Text style={styles.statsLabel}>En tránsito</Text>
+            </View>
+            
+            <View style={styles.statsCard}>
+              <View style={[styles.statsIconContainer, { backgroundColor: '#5cb85c20' }]}>
+                <Ionicons name="checkmark-circle-outline" size={20} color="#5cb85c" />
+              </View>
+              <Text style={styles.statsNumber}>{stats.delivered}</Text>
+              <Text style={styles.statsLabel}>Entregados</Text>
+            </View>
+          </View>
+          
+          {/* Next Delivery */}
+          <View style={styles.listContainer}>
+            <View style={styles.listHeader}>
+              <Text style={styles.listTitle}>Próximo destino</Text>
+              <TouchableOpacity 
+                style={styles.viewAllButton}
+                onPress={navigateToRoute}
+              >
+                <Text style={styles.viewAllButtonText}>Ver todas</Text>
+                <Ionicons name="chevron-forward" size={16} color="#007AFF" />
               </TouchableOpacity>
-            ) : null}
+            </View>
+            
+            {loading ? (
+              <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color="#007AFF" />
+                <Text style={styles.loaderText}>Cargando información...</Text>
+              </View>
+            ) : (
+              <>
+                {/* Next Delivery Card */}
+                {packages.filter(pkg => pkg.status !== 'Entregado').length > 0 ? (
+                  <View style={styles.nextDeliveryContainer}>
+                    {(() => {
+                      // First look for packages in transit, then pending if none are in transit
+                      const inTransitPackages = packages.filter(pkg => pkg.status === 'En tránsito');
+                      const nextPackage = inTransitPackages.length > 0 
+                        ? inTransitPackages[0] 
+                        : packages.filter(pkg => pkg.status !== 'Entregado')[0];
+                      
+                      if (!nextPackage) return null;
+                      
+                      return (
+                        <View style={styles.nextDeliveryCard}>
+                          <View style={styles.nextDeliveryContent}>
+                            <View style={styles.nextDeliveryTitleRow}>
+                              <Text style={styles.nextDeliveryTitle}>Paquete #{nextPackage.id}</Text>
+                              <View style={[
+                                styles.statusBadge, 
+                                { 
+                                  backgroundColor: getStatusColor(nextPackage.status) + '22', 
+                                  borderColor: getStatusColor(nextPackage.status) 
+                                }
+                              ]}>
+                                <Ionicons 
+                                  name={getStatusIcon(nextPackage.status)} 
+                                  size={14} 
+                                  color={getStatusColor(nextPackage.status)} 
+                                  style={{marginRight: 4}} 
+                                />
+                                <Text 
+                                  style={[styles.statusText, { color: getStatusColor(nextPackage.status) }]}
+                                >
+                                  {nextPackage.status}
+                                </Text>
+                              </View>
+                            </View>
+                            
+                            <View style={styles.detailRow}>
+                              <Ionicons name="person-outline" size={18} color="#666" style={styles.detailIcon} />
+                              <Text style={styles.recipientText}>{nextPackage.recipient}</Text>
+                            </View>
+                            
+                            <View style={styles.detailRow}>
+                              <Ionicons name="location-outline" size={18} color="#666" style={styles.detailIcon} />
+                              <Text style={styles.addressText}>{nextPackage.address}</Text>
+                            </View>
+                            
+                            {nextPackage.description && (
+                              <View style={styles.detailRow}>
+                                <Ionicons name="information-circle-outline" size={18} color="#666" style={styles.detailIcon} />
+                                <Text style={styles.descriptionText}>{nextPackage.description}</Text>
+                              </View>
+                            )}
+                          </View>
+                          
+                          <View style={styles.nextDeliveryActions}>
+                            {nextPackage.status === 'En tránsito' && (
+                              <TouchableOpacity 
+                                style={styles.secondaryButton}
+                                onPress={() => handleMarkAsDelivered(nextPackage)}
+                              >
+                                <Ionicons name="checkmark-circle-outline" size={20} color="#007AFF" />
+                                <Text style={styles.secondaryButtonText}>Marcar Entregado</Text>
+                              </TouchableOpacity>
+                            )}
+                            
+                            {nextPackage.status === 'Pendiente' && (
+                              <TouchableOpacity 
+                                style={styles.primaryButton}
+                                onPress={() => handleStartDelivery(nextPackage)}
+                              >
+                                <Ionicons name="navigate" size={20} color="#FFF" />
+                                <Text style={styles.primaryButtonText}>Comenzar Entrega</Text>
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                        </View>
+                      );
+                    })()}
+                  </View>
+                ) : (
+                  <View style={styles.timelineEmptyState}>
+                    <Ionicons name="checkmark-circle" size={50} color="#5cb85c" />
+                    <Text style={styles.timelineEmptyText}>¡No hay entregas pendientes!</Text>
+                    <Text style={styles.timelineEmptySubtext}>Has completado todas las entregas programadas.</Text>
+                  </View>
+                )}
+              </>
+            )}
           </View>
-        )}
-        
-        {/* Stats Cards */}
-        <Animated.View 
-          style={[
-            styles.statsContainer,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: translateAnim }]
-            }
-          ]}
-        >
-          <TouchableOpacity 
-            style={[
-              styles.statsCard, 
-              filterStatus === 'Pendiente' && styles.statsCardActive
-            ]}
-            onPress={() => applyStatusFilter(filterStatus === 'Pendiente' ? 'all' : 'Pendiente')}
-          >
-            <View style={[styles.statsIconContainer, { backgroundColor: '#d9534f20' }]}>
-              <Ionicons name="hourglass-outline" size={24} color="#d9534f" />
-            </View>
-            <Text style={styles.statsNumber}>{stats.pending}</Text>
-            <Text style={styles.statsLabel}>Pendientes</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[
-              styles.statsCard,
-              filterStatus === 'En tránsito' && styles.statsCardActive
-            ]}
-            onPress={() => applyStatusFilter(filterStatus === 'En tránsito' ? 'all' : 'En tránsito')}
-          >
-            <View style={[styles.statsIconContainer, { backgroundColor: '#f0ad4e20' }]}>
-              <Ionicons name="car-outline" size={24} color="#f0ad4e" />
-            </View>
-            <Text style={styles.statsNumber}>{stats.inTransit}</Text>
-            <Text style={styles.statsLabel}>En tránsito</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[
-              styles.statsCard,
-              filterStatus === 'Entregado' && styles.statsCardActive
-            ]}
-            onPress={() => applyStatusFilter(filterStatus === 'Entregado' ? 'all' : 'Entregado')}
-          >
-            <View style={[styles.statsIconContainer, { backgroundColor: '#5cb85c20' }]}>
-              <Ionicons name="checkmark-circle-outline" size={24} color="#5cb85c" />
-            </View>
-            <Text style={styles.statsNumber}>{stats.delivered}</Text>
-            <Text style={styles.statsLabel}>Entregados</Text>
-          </TouchableOpacity>
-        </Animated.View>
-        
-        {/* Route Action Button */}
-        <TouchableOpacity 
-          style={styles.routeButton}
-          onPress={navigateToRoute}
-        >
-          <View style={styles.routeButtonIcon}>
-            <Ionicons name="map-outline" size={22} color="white" />
-          </View>
-          <Text style={styles.routeButtonText}>Ver todas mis rutas de entrega</Text>
-          <Ionicons name="chevron-forward" size={20} color="white" style={styles.routeButtonArrow} />
-        </TouchableOpacity>
-        
-        {/* Package List */}
-        <View style={styles.listContainer}>
-          <View style={styles.listHeader}>
-            <Text style={styles.listTitle}>
-              {filterStatus !== 'all' 
-                ? `Paquetes ${filterStatus}s` 
-                : 'Todos los Paquetes'
-              }
-            </Text>
-            <Text style={styles.listSubtitle}>
-              Total: {filteredPackages.length}
-            </Text>
-          </View>
-          
-          {loading ? (
-            <View style={styles.loaderContainer}>
-              <ActivityIndicator size="large" color="#007AFF" />
-              <Text style={styles.loaderText}>Cargando paquetes...</Text>
-            </View>
-          ) : (
-            <FlatList
-              data={filteredPackages}
-              renderItem={renderPackageItem}
-              keyExtractor={item => item.id}
-              contentContainerStyle={styles.packagesList}
-              ListEmptyComponent={renderEmptyList}
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-                  colors={["#007AFF"]}
-                  tintColor="#007AFF"
-                />
-              }
-            />
-          )}
-        </View>
+        </ScrollView>
         
         {/* Status Update Modal */}
         <Modal
@@ -642,68 +717,6 @@ const DriverHome: React.FC<DriverHomeProps> = ({ navigation }) => {
             </View>
           </View>
         </Modal>
-        
-        {/* Menu Modal */}
-        {menuVisible && (
-          <View style={styles.menuOverlay}>
-            <TouchableOpacity 
-              style={styles.menuCloseArea}
-              onPress={() => setMenuVisible(false)}
-            />
-            <View style={styles.menuContainer}>
-              <TouchableOpacity 
-                style={styles.menuItem}
-                onPress={navigateToProfile}
-              >
-                <Ionicons name="person-outline" size={24} color="#333" />
-                <Text style={styles.menuItemText}>Mi Perfil</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={styles.menuItem}
-                onPress={navigateToRoute}
-              >
-                <Ionicons name="map-outline" size={24} color="#333" />
-                <Text style={styles.menuItemText}>Mis Rutas</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={styles.menuItem}
-                onPress={() => {
-                  setMenuVisible(false);
-                  Alert.alert('Notificaciones', 'Aquí podrás gestionar tus notificaciones');
-                }}
-              >
-                <Ionicons name="notifications-outline" size={24} color="#333" />
-                <Text style={styles.menuItemText}>Notificaciones</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={styles.menuItem}
-                onPress={() => {
-                  setMenuVisible(false);
-                  Alert.alert('Ayuda', 'Contacte a soporte técnico: soporte@example.com');
-                }}
-              >
-                <Ionicons name="help-circle-outline" size={24} color="#333" />
-                <Text style={styles.menuItemText}>Ayuda</Text>
-              </TouchableOpacity>
-              
-              <View style={styles.menuDivider} />
-              
-              <TouchableOpacity 
-                style={[styles.menuItem, styles.logoutMenuItem]}
-                onPress={() => {
-                  setMenuVisible(false);
-                  handleLogout();
-                }}
-              >
-                <Ionicons name="log-out-outline" size={24} color="#d9534f" />
-                <Text style={[styles.menuItemText, styles.logoutText]}>Cerrar Sesión</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
       </View>
     </SafeAreaWrapper>
   );
@@ -721,18 +734,6 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 15,
   },
-  headerActions: {
-    flexDirection: 'row',
-  },
-  headerButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 8,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -743,25 +744,6 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 5,
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    marginHorizontal: 15,
-    marginBottom: 10,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 12,
-    fontSize: 16,
-  },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -770,8 +752,8 @@ const styles = StyleSheet.create({
   },
   statsCard: {
     backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 15,
+    borderRadius: 10,
+    padding: 10,
     alignItems: 'center',
     width: '30%',
     shadowColor: '#000',
@@ -780,72 +762,109 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  statsCardActive: {
-    borderWidth: 2,
-    borderColor: '#007AFF',
-  },
   statsIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 6,
   },
   statsNumber: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginVertical: 5,
+    marginVertical: 3,
     color: '#333',
   },
   statsLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#666',
     textAlign: 'center',
   },
-  routeButton: {
-    flexDirection: 'row',
-    backgroundColor: '#007AFF',
+  routeSummaryCard: {
+    backgroundColor: 'white',
+    margin: 15,
+    marginBottom: 20,
     borderRadius: 12,
-    marginHorizontal: 15,
-    marginBottom: 15,
-    padding: 16,
-    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowRadius: 4,
     elevation: 2,
+    overflow: 'hidden',
   },
-  routeButtonIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
+  summaryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginRight: 12,
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
-  routeButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+  summaryTitle: {
     fontSize: 16,
-    flex: 1,
+    fontWeight: 'bold',
+    color: '#333',
   },
-  routeButtonArrow: {
-    marginLeft: 8,
+  summarySubtitle: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 2,
+  },
+  summaryStatus: {
+    alignItems: 'flex-end',
+  },
+  progressContainer: {
+    width: 100,
+    height: 6,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#5cb85c',
+    borderRadius: 3,
+  },
+  progressText: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+  },
+  summaryDetails: {
+    flexDirection: 'row',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  summaryItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  summaryItemText: {
+    marginLeft: 10,
+  },
+  summaryItemLabel: {
+    fontSize: 12,
+    color: '#666',
+  },
+  summaryItemValue: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#333',
   },
   listContainer: {
     flex: 1,
     backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderRadius: 20,
     paddingTop: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
     elevation: 3,
+    marginHorizontal: 20,
   },
   listHeader: {
     flexDirection: 'row',
@@ -1053,14 +1072,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
-  cancelButton: {
-    padding: 15,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    color: '#999',
-    fontSize: 16,
-  },
   loaderContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -1095,59 +1106,91 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
-  menuOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 1000,
+  timelineEmptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
   },
-  menuCloseArea: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+  timelineEmptyText: {
+    fontSize: 15,
+    color: '#666',
+    marginTop: 10,
+    textAlign: 'center',
   },
-  menuContainer: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: 270,
-    backgroundColor: 'white',
-    height: '100%',
-    paddingTop: 50,
-    paddingHorizontal: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: -2, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
+  timelineEmptySubtext: {
+    fontSize: 14,
+    color: '#888',
+    marginTop: 5,
+    textAlign: 'center',
   },
-  menuItem: {
+  viewAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    borderRadius: 8,
   },
-  menuItemText: {
+  viewAllButtonText: {
+    fontSize: 14,
+    color: '#007AFF',
+    marginRight: 4,
+  },
+  nextDeliveryContainer: {
+    marginBottom: 20,
+  },
+  nextDeliveryContent: {
+    padding: 15,
+  },
+  nextDeliveryTitle: {
     fontSize: 16,
-    marginLeft: 12,
+    fontWeight: 'bold',
     color: '#333',
+    marginBottom: 8,
   },
-  menuDivider: {
-    height: 1,
-    backgroundColor: '#eee',
-    marginVertical: 15,
+  nextDeliveryTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  logoutMenuItem: {
-    marginTop: 10,
+  nextDeliveryActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
-  logoutText: {
-    color: '#d9534f',
+  primaryButton: {
+    flex: 1,
+    backgroundColor: '#007AFF',
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    marginHorizontal: 20,  
+  },
+  primaryButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
+    marginLeft: 8,
+  },
+  secondaryButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#007AFF',
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginHorizontal: 20, 
+  },
+  secondaryButtonText: {
+    color: '#007AFF',
+    fontWeight: '500',
+    fontSize: 14,
+    marginLeft: 8,
   },
 });
 

@@ -621,14 +621,8 @@ const PackageRegistration = ({ navigation }) => {
         style={{ flex: 1 }}
       >
         <View style={styles.container}>
-          {/* Header */}
+          {/* Header - removed back arrow */}
           <View style={styles.header}>
-            <TouchableOpacity 
-              style={styles.backButton}
-              onPress={goToPreviousStep}
-            >
-              <Ionicons name="arrow-back" size={24} color="#333" />
-            </TouchableOpacity>
             <Text style={styles.title}>Registro de Paquete</Text>
           </View>
           
@@ -736,20 +730,19 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center', // Center the title
     padding: 15,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  backButton: {
-    padding: 5,
-    marginRight: 10,
-  },
+  
   title: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
   },
+  
   progressContainer: {
     backgroundColor: '#fff',
     paddingBottom: 15,

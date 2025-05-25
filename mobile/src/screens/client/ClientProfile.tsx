@@ -7,7 +7,8 @@ import {
   ScrollView, 
   Switch,
   Alert,
-  Image
+  TextInput,
+  Modal
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
@@ -15,7 +16,7 @@ import SafeAreaWrapper from '../../components/SafeAreaWrapper';
 
 const ClientProfile = () => {
   // Mock user data - in a real app, you would get this from your auth context or state
-  const userData = {
+  const [userData, setUserData] = useState({
     name: 'Juan Pérez',
     email: 'cliente@example.com',
     phone: '123-456-7890',
@@ -23,16 +24,18 @@ const ClientProfile = () => {
     address: 'Av. Principal 123',
     memberSince: 'Enero 2023',
     shippingCompleted: 18,
-    shippingInProgress: 2,
-    preferredPayment: 'Tarjeta de crédito'
-  };
+    shippingInProgress: 2
+  });
 
   // Get logout function from auth context
   const { logout } = useAuth();
   
   // State for settings switches
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [locationEnabled, setLocationEnabled] = useState(true);
+  
+  // State for edit profile modal
+  const [isEditing, setIsEditing] = useState(false);
+  const [editFormData, setEditFormData] = useState({...userData});
 
   const handleLogout = async () => {
     try {
@@ -58,31 +61,30 @@ const ClientProfile = () => {
   };
   
   const handleEditProfile = () => {
-    Alert.alert(
-      'Editar Perfil',
-      'Esta funcionalidad estará disponible próximamente.'
-    );
+    setEditFormData({...userData});
+    setIsEditing(true);
   };
   
-  const handleOpenHelp = () => {
-    Alert.alert(
-      'Ayuda',
-      'Para asistencia, contacte a soporte@example.com o llame al 0800-123-4567.'
-    );
+  const handleSaveProfile = () => {
+    // Validate fields
+    if (!editFormData.name || !editFormData.email || !editFormData.phone || !editFormData.address) {
+      Alert.alert('Campos requeridos', 'Por favor completa todos los campos');
+      return;
+    }
+    
+    // Update user data
+    setUserData({...userData, ...editFormData});
+    setIsEditing(false);
+    
+    // Show success message
+    Alert.alert('Perfil actualizado', 'Tus datos han sido actualizados correctamente');
   };
 
   return (
     <SafeAreaWrapper>
       <ScrollView style={styles.container}>
-        {/* Header with gradient background */}
+        {/* Header with profile info */}
         <View style={styles.header}>
-          <TouchableOpacity 
-            style={styles.editProfileButton} 
-            onPress={handleEditProfile}
-          >
-            <Ionicons name="pencil" size={18} color="white" />
-          </TouchableOpacity>
-          
           <View style={styles.avatarContainer}>
             <Ionicons name="person-circle" size={100} color="white" />
           </View>
@@ -103,6 +105,14 @@ const ClientProfile = () => {
               <Text style={styles.statLabel}>En progreso</Text>
             </View>
           </View>
+          
+          <TouchableOpacity 
+            style={styles.editProfileButton} 
+            onPress={handleEditProfile}
+          >
+            <Ionicons name="create-outline" size={18} color="white" />
+            <Text style={styles.editButtonText}>Editar Perfil</Text>
+          </TouchableOpacity>
         </View>
         
         {/* Personal Information */}
@@ -144,9 +154,9 @@ const ClientProfile = () => {
           </View>
         </View>
         
-        {/* Preferences */}
+        {/* Notifications Preference */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Preferencias</Text>
+          <Text style={styles.sectionTitle}>Notificaciones</Text>
           
           <View style={styles.card}>
             <View style={styles.preferenceRow}>
@@ -162,56 +172,6 @@ const ClientProfile = () => {
                 thumbColor={notificationsEnabled ? "#007AFF" : "#f4f3f4"}
               />
             </View>
-            
-            <View style={styles.preferenceRow}>
-              <Ionicons name="location-outline" size={22} color="#007AFF" style={styles.icon} />
-              <View style={styles.preferenceTextContainer}>
-                <Text style={styles.preferenceLabel}>Ubicación</Text>
-                <Text style={styles.preferenceDescription}>Usar ubicación para mejores resultados</Text>
-              </View>
-              <Switch
-                value={locationEnabled}
-                onValueChange={setLocationEnabled}
-                trackColor={{ false: "#d8d8d8", true: "#a3d2ff" }}
-                thumbColor={locationEnabled ? "#007AFF" : "#f4f3f4"}
-              />
-            </View>
-            
-            <View style={styles.preferenceRow}>
-              <Ionicons name="card-outline" size={22} color="#007AFF" style={styles.icon} />
-              <View style={styles.preferenceTextContainer}>
-                <Text style={styles.preferenceLabel}>Método de Pago</Text>
-                <Text style={styles.preferenceDescription}>{userData.preferredPayment}</Text>
-              </View>
-              <TouchableOpacity>
-                <Text style={styles.changeText}>Cambiar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-        
-        {/* Support & Account Actions */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Soporte y Cuenta</Text>
-          
-          <View style={styles.card}>
-            <TouchableOpacity style={styles.actionRow} onPress={handleOpenHelp}>
-              <Ionicons name="help-circle-outline" size={22} color="#007AFF" style={styles.icon} />
-              <Text style={styles.actionText}>Centro de Ayuda</Text>
-              <Ionicons name="chevron-forward" size={18} color="#ccc" style={styles.iconRight} />
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.actionRow}>
-              <Ionicons name="shield-checkmark-outline" size={22} color="#007AFF" style={styles.icon} />
-              <Text style={styles.actionText}>Política de Privacidad</Text>
-              <Ionicons name="chevron-forward" size={18} color="#ccc" style={styles.iconRight} />
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.actionRow}>
-              <Ionicons name="document-text-outline" size={22} color="#007AFF" style={styles.icon} />
-              <Text style={styles.actionText}>Términos y Condiciones</Text>
-              <Ionicons name="chevron-forward" size={18} color="#ccc" style={styles.iconRight} />
-            </TouchableOpacity>
           </View>
         </View>
         
@@ -224,6 +184,64 @@ const ClientProfile = () => {
         {/* App version */}
         <Text style={styles.versionText}>Versión 1.0.0</Text>
       </ScrollView>
+      
+      {/* Edit Profile Modal */}
+      <Modal
+        visible={isEditing}
+        animationType="slide"
+        transparent={true}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Editar Perfil</Text>
+              <TouchableOpacity onPress={() => setIsEditing(false)}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.formContainer}>
+              <Text style={styles.inputLabel}>Nombre</Text>
+              <TextInput
+                style={styles.input}
+                value={editFormData.name}
+                onChangeText={(text) => setEditFormData({...editFormData, name: text})}
+                placeholder="Nombre completo"
+              />
+              
+              <Text style={styles.inputLabel}>Correo electrónico</Text>
+              <TextInput
+                style={styles.input}
+                value={editFormData.email}
+                onChangeText={(text) => setEditFormData({...editFormData, email: text})}
+                placeholder="Correo electrónico"
+                keyboardType="email-address"
+              />
+              
+              <Text style={styles.inputLabel}>Teléfono</Text>
+              <TextInput
+                style={styles.input}
+                value={editFormData.phone}
+                onChangeText={(text) => setEditFormData({...editFormData, phone: text})}
+                placeholder="Número de teléfono"
+                keyboardType="phone-pad"
+              />
+              
+              <Text style={styles.inputLabel}>Dirección</Text>
+              <TextInput
+                style={styles.input}
+                value={editFormData.address}
+                onChangeText={(text) => setEditFormData({...editFormData, address: text})}
+                placeholder="Dirección de envío"
+              />
+            </ScrollView>
+            
+            <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
+              <Text style={styles.saveButtonText}>Guardar Cambios</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaWrapper>
   );
 };
@@ -241,17 +259,6 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
     position: 'relative',
-  },
-  editProfileButton: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   avatarContainer: {
     width: 104,
@@ -282,6 +289,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     width: '80%',
     justifyContent: 'center',
+    marginBottom: 15,
   },
   statItem: {
     alignItems: 'center',
@@ -301,6 +309,21 @@ const styles = StyleSheet.create({
     width: 1,
     height: '100%',
     backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  editProfileButton: {
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  editButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    marginLeft: 5,
+    fontSize: 14,
   },
   sectionContainer: {
     marginHorizontal: 20,
@@ -336,9 +359,6 @@ const styles = StyleSheet.create({
     width: 25,
     textAlign: 'center',
   },
-  iconRight: {
-    marginLeft: 'auto',
-  },
   infoTextContainer: {
     flex: 1,
   },
@@ -356,8 +376,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 14,
     paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
   },
   preferenceTextContainer: {
     flex: 1,
@@ -370,23 +388,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#999',
     marginTop: 2,
-  },
-  changeText: {
-    color: '#007AFF',
-    fontSize: 14,
-  },
-  actionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
-  },
-  actionText: {
-    fontSize: 16,
-    color: '#333',
-    flex: 1,
   },
   logoutButton: {
     backgroundColor: '#ff3b30',
@@ -413,6 +414,70 @@ const styles = StyleSheet.create({
     color: '#999',
     fontSize: 12,
     marginBottom: 30,
+  },
+  
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    width: '90%',
+    maxHeight: '80%',
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  formContainer: {
+    maxHeight: '70%',
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 6,
+    marginLeft: 2,
+  },
+  input: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 15,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  saveButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   }
 });
 

@@ -12,7 +12,7 @@ const SafeAreaWrapper: React.FC<SafeAreaWrapperProps> = ({ children, style }) =>
     return <SafeAreaView style={[styles.container, style]}>{children}</SafeAreaView>;
   } else {
     return (
-      <View style={[styles.container, { paddingTop: StatusBar.currentHeight || 0 }, style]}>
+      <View style={[styles.container, { paddingTop: "0.5%" }, style]}>
         {children}
       </View>
     );
@@ -22,7 +22,7 @@ const SafeAreaWrapper: React.FC<SafeAreaWrapperProps> = ({ children, style }) =>
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'transparent',
   },
 });
 
