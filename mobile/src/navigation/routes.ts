@@ -1,7 +1,11 @@
+// Route constants for navigation throughout the application
 export const ROUTES = {
+  // Authentication related routes
   AUTH: {
     LOGIN: 'Login',
   },
+  
+  // Client user interface routes and navigation paths
   CLIENT: {
     TABS: 'ClientTabs',
     HOME: 'ClientHome',
@@ -12,6 +16,8 @@ export const ROUTES = {
     PACKAGE_DETAIL: 'PackageDetail',
     PROFILE: 'ClientProfile',
   },
+  
+  // Driver user interface routes and navigation paths
   DRIVER: {
     TABS: 'DriverTabs',
     HOME: 'DriverHome',

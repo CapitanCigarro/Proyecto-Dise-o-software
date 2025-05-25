@@ -2,21 +2,22 @@ import React, { useState } from 'react';
 import { 
   View, 
   Text, 
-  StyleSheet, 
   TouchableOpacity, 
   ScrollView, 
   Alert,
   ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../context/AuthContext';
-import SafeAreaWrapper from '../../components/SafeAreaWrapper';
+import { useAuth } from '../../../context/AuthContext';
+import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
+import styles from './DriverProfile.styles';
 
+// Driver profile screen component displaying driver information and settings
 const DriverProfile = () => {
-  // State
+  // State for handling loading indicators
   const [loading, setLoading] = useState(false);
   
-  // Mock user data
+  // Mock user data for driver profile information
   const userData = {
     name: 'Carlos Rodríguez',
     email: 'conductor@example.com',
@@ -31,6 +32,7 @@ const DriverProfile = () => {
   // Get logout function from auth context
   const { logout } = useAuth();
 
+  // Handle logout with confirmation dialog
   const handleLogout = async () => {
     Alert.alert(
       "Cerrar Sesión",
@@ -56,8 +58,8 @@ const DriverProfile = () => {
     );
   };
   
+  // Navigate to performance metrics screen
   const handleViewPerformance = () => {
-    // Navigate to performance metrics screen
     Alert.alert("Rendimiento", "Aquí podrás ver métricas detalladas de tus entregas");
   };
 
@@ -81,7 +83,7 @@ const DriverProfile = () => {
               <Text style={styles.deliveriesText}>{userData.totalDeliveries} entregas realizadas</Text>
             </View>
             
-            {/* Performance button moved here */}
+            {/* Performance statistics button */}
             <TouchableOpacity 
               style={styles.performanceButton}
               onPress={handleViewPerformance}
@@ -91,7 +93,7 @@ const DriverProfile = () => {
             </TouchableOpacity>
           </View>
           
-          {/* Vehicle Info - now full width */}
+          {/* Vehicle information section */}
           <View style={styles.section}>
             <View style={styles.licensePlateCard}>
               <View style={styles.licensePlateIcon}>
@@ -105,7 +107,7 @@ const DriverProfile = () => {
             </View>
           </View>
           
-          {/* Personal Info Section */}
+          {/* Personal information section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Información Personal</Text>
             <View style={styles.infoCard}>
@@ -143,7 +145,7 @@ const DriverProfile = () => {
             </View>
           </View>
           
-          {/* Logout button - moved inside ScrollView */}
+          {/* Logout button with loading state */}
           <TouchableOpacity 
             style={styles.logoutButton} 
             onPress={handleLogout}
@@ -166,184 +168,5 @@ const DriverProfile = () => {
     </SafeAreaWrapper>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  headerNav: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  scrollContainer: {
-    flex: 1,
-  },
-  profileHeader: {
-    padding: 24,
-    backgroundColor: '#fff',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    alignItems: 'center',
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  deliveriesContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f7ff',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 20,
-    marginBottom: 16,
-  },
-  deliveriesText: {
-    fontSize: 15,
-    color: '#007AFF',
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  performanceButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#007AFF',
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  performanceButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginLeft: 6,
-  },
-  section: {
-    marginBottom: 20,
-    paddingHorizontal: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-  },
-  // Updated vehicle card to be full width
-  licensePlateCard: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  licensePlateIcon: {
-    width: 60,
-    height: 60,
-    backgroundColor: '#f0f7ff',
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  vehicleInfo: {
-    flex: 1,
-  },
-  licensePlateLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-  },
-  licensePlate: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  vehicleType: {
-    fontSize: 14,
-    color: '#666',
-  },
-  infoCard: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    overflow: 'hidden',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  icon: {
-    marginRight: 15,
-  },
-  infoTextContainer: {
-    flex: 1,
-  },
-  infoLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 2,
-  },
-  infoText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  logoutButton: {
-    backgroundColor: '#ff3b30',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 15,
-    borderRadius: 12,
-    margin: 20,
-  },
-  buttonIcon: {
-    marginRight: 8,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  bottomSpace: {
-    height: 20,
-  }
-});
 
 export default DriverProfile;

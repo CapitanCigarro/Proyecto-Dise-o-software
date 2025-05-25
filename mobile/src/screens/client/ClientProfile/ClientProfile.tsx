@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { 
   View, 
   Text, 
-  StyleSheet, 
   TouchableOpacity, 
   ScrollView, 
   Switch,
@@ -11,11 +10,13 @@ import {
   Modal
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../context/AuthContext';
-import SafeAreaWrapper from '../../components/SafeAreaWrapper';
+import { useAuth } from '../../../context/AuthContext';
+import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
+import styles from './ClientProfile.styles';
 
+// Client profile screen component displaying user information and settings
 const ClientProfile = () => {
-  // Mock user data - in a real app, you would get this from your auth context or state
+  // Mock user data state for profile information
   const [userData, setUserData] = useState({
     name: 'Juan Pérez',
     email: 'cliente@example.com',
@@ -27,16 +28,16 @@ const ClientProfile = () => {
     shippingInProgress: 2
   });
 
-  // Get logout function from auth context
   const { logout } = useAuth();
   
-  // State for settings switches
+  // State for managing notification preferences
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   
-  // State for edit profile modal
+  // State for managing profile editing mode
   const [isEditing, setIsEditing] = useState(false);
   const [editFormData, setEditFormData] = useState({...userData});
 
+  // Handle user logout with confirmation dialog
   const handleLogout = async () => {
     try {
       Alert.alert(
@@ -60,30 +61,29 @@ const ClientProfile = () => {
     }
   };
   
+  // Initialize edit form with current user data
   const handleEditProfile = () => {
     setEditFormData({...userData});
     setIsEditing(true);
   };
   
+  // Validate and save profile changes
   const handleSaveProfile = () => {
-    // Validate fields
     if (!editFormData.name || !editFormData.email || !editFormData.phone || !editFormData.address) {
       Alert.alert('Campos requeridos', 'Por favor completa todos los campos');
       return;
     }
     
-    // Update user data
     setUserData({...userData, ...editFormData});
     setIsEditing(false);
     
-    // Show success message
     Alert.alert('Perfil actualizado', 'Tus datos han sido actualizados correctamente');
   };
 
   return (
     <SafeAreaWrapper>
       <ScrollView style={styles.container}>
-        {/* Header with profile info */}
+        {/* Profile header with user avatar and stats */}
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
             <Ionicons name="person-circle" size={100} color="white" />
@@ -115,7 +115,7 @@ const ClientProfile = () => {
           </TouchableOpacity>
         </View>
         
-        {/* Personal Information */}
+        {/* Personal information section with contact details */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Información Personal</Text>
           
@@ -154,7 +154,7 @@ const ClientProfile = () => {
           </View>
         </View>
         
-        {/* Notifications Preference */}
+        {/* Notification preferences section */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Notificaciones</Text>
           
@@ -175,17 +175,16 @@ const ClientProfile = () => {
           </View>
         </View>
         
-        {/* Logout Button */}
+        {/* Logout button and app version */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={20} color="white" style={styles.buttonIcon} />
           <Text style={styles.buttonText}>Cerrar Sesión</Text>
         </TouchableOpacity>
         
-        {/* App version */}
         <Text style={styles.versionText}>Versión 1.0.0</Text>
       </ScrollView>
       
-      {/* Edit Profile Modal */}
+      {/* Modal for editing profile information */}
       <Modal
         visible={isEditing}
         animationType="slide"
@@ -245,240 +244,5 @@ const ClientProfile = () => {
     </SafeAreaWrapper>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    backgroundColor: '#007AFF',
-    alignItems: 'center',
-    paddingTop: 25,
-    paddingBottom: 35,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    position: 'relative',
-  },
-  avatarContainer: {
-    width: 104,
-    height: 104,
-    borderRadius: 52,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  name: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  role: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.8)',
-    marginTop: 5,
-    marginBottom: 15,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginTop: 5,
-    width: '80%',
-    justifyContent: 'center',
-    marginBottom: 15,
-  },
-  statItem: {
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  statNumber: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 12,
-    marginTop: 2,
-  },
-  statDivider: {
-    width: 1,
-    height: '100%',
-    backgroundColor: 'rgba(255,255,255,0.3)',
-  },
-  editProfileButton: {
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  editButtonText: {
-    color: 'white',
-    fontWeight: '600',
-    marginLeft: 5,
-    fontSize: 14,
-  },
-  sectionContainer: {
-    marginHorizontal: 20,
-    marginTop: 25,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 15,
-    marginLeft: 5,
-  },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
-  },
-  icon: {
-    marginRight: 15,
-    width: 25,
-    textAlign: 'center',
-  },
-  infoTextContainer: {
-    flex: 1,
-  },
-  infoLabel: {
-    fontSize: 12,
-    color: '#999',
-  },
-  infoText: {
-    fontSize: 16,
-    color: '#333',
-    marginTop: 2,
-  },
-  preferenceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 15,
-  },
-  preferenceTextContainer: {
-    flex: 1,
-  },
-  preferenceLabel: {
-    fontSize: 16,
-    color: '#333',
-  },
-  preferenceDescription: {
-    fontSize: 13,
-    color: '#999',
-    marginTop: 2,
-  },
-  logoutButton: {
-    backgroundColor: '#ff3b30',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    marginHorizontal: 20,
-    marginTop: 30,
-    marginBottom: 10,
-  },
-  buttonIcon: {
-    marginRight: 8,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  versionText: {
-    textAlign: 'center',
-    color: '#999',
-    fontSize: 12,
-    marginBottom: 30,
-  },
-  
-  // Modal styles
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 20,
-    width: '90%',
-    maxHeight: '80%',
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  formContainer: {
-    maxHeight: '70%',
-  },
-  inputLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 6,
-    marginLeft: 2,
-  },
-  input: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 15,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#eee',
-  },
-  saveButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  saveButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  }
-});
 
 export default ClientProfile;

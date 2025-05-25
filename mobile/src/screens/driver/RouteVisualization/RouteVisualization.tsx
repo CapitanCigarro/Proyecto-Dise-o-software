@@ -2,25 +2,26 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   View, 
   Text, 
-  StyleSheet, 
   TouchableOpacity, 
   ScrollView,
   Alert,
   ActivityIndicator,
-  Dimensions,
   Animated,
   Linking,
   Platform,
-  Image
+  Image,
+  Dimensions
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import SafeAreaWrapper from '../../components/SafeAreaWrapper';
+import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
+import styles from './RouteVisualization.styles';
 
+// Get screen dimensions for responsive layout
 const { width, height } = Dimensions.get('window');
 
-// Enhanced mock data for routes
+// Mock data structure for delivery routes with destination details
 const MOCK_ROUTES = {
   origin: { 
     name: 'Centro de Distribución',
@@ -63,11 +64,13 @@ const MOCK_ROUTES = {
   }
 };
 
+// Component props interface
 interface RouteVisualizationProps {
   route: any;
   navigation: any;
 }
 
+// Screen component for visualizing and managing delivery routes
 const RouteVisualization: React.FC<RouteVisualizationProps> = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [routeData, setRouteData] = useState(MOCK_ROUTES);
@@ -76,7 +79,7 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({ route, navigati
   const [activeTab, setActiveTab] = useState('list'); // 'list' or 'map'
   const [currentRoute, setCurrentRoute] = useState<number | null>(null);
 
-  // Animation values
+  // Animation values for interactive UI elements
   const scrollY = useRef(new Animated.Value(0)).current;
   const cardScale = useRef(new Animated.Value(1)).current;
   const detailsTranslateY = useRef(new Animated.Value(height)).current;
@@ -84,6 +87,7 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({ route, navigati
   // Get the package ID from navigation params (if provided)
   const packageId = route.params?.packageId;
 
+  // Load packages and initialize data on component mount
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -139,10 +143,12 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({ route, navigati
     loadData();
   }, [packageId]);
 
+  // Find package details by ID from the packages array
   const getPackageDetails = (id: string) => {
     return packages.find(pkg => pkg.id === id) || { recipient: 'Desconocido', status: 'Desconocido' };
   };
 
+  // Handle destination selection in map view
   const selectDestination = (destination: any) => {
     // Make this a no-op or just use it for viewing details in the map
     // We're no longer toggling selection in the list view
@@ -151,6 +157,7 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({ route, navigati
     }
   };
   
+  // Launch external map app for navigation to selected destination
   const startNavigation = (destination: any) => {
     const { coordinates } = destination;
     const packageDetails = getPackageDetails(destination.id);
@@ -196,6 +203,7 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({ route, navigati
     );
   };
   
+  // Update package status to delivered and manage route progression
   const markAsDelivered = async (destinationId: string) => {
     try {
       setLoading(true);
@@ -253,17 +261,19 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({ route, navigati
     }
   };
   
+  // Calculate percentage of route completion based on delivered packages
   const calculateCompletionPercentage = () => {
     const delivered = packages.filter(pkg => pkg.status === 'Entregado').length;
     return Math.round((delivered / packages.length) * 100);
   };
 
-  // Details panel animation
+  // Handle gesture events for interactive details panel
   const onGestureEvent = Animated.event(
     [{ nativeEvent: { translationY: detailsTranslateY } }],
     { useNativeDriver: true }
   );
 
+  // Manage panel state changes based on user gestures
   const onHandlerStateChange = event => {
     if (event.nativeEvent.oldState === State.ACTIVE) {
       const { translationY } = event.nativeEvent;
@@ -296,7 +306,7 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({ route, navigati
           <Text style={styles.title}>Mis Rutas</Text>
         </View>
         
-        {/* Tab navigation */}
+        {/* Tab navigation between list and map views */}
         <View style={styles.tabContainer}>
           <TouchableOpacity 
             style={[styles.tab, activeTab === 'list' && styles.activeTab]}
@@ -574,289 +584,5 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({ route, navigati
     </SafeAreaWrapper>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 15,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    paddingHorizontal: 15,
-    paddingBottom: 10,
-  },
-  tab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  activeTab: {
-    backgroundColor: '#007AFF20',
-  },
-  tabText: {
-    marginLeft: 5,
-    fontSize: 14,
-    color: '#666',
-  },
-  activeTabText: {
-    color: '#007AFF',
-    fontWeight: '600',
-  },
-  content: {
-    flex: 1,
-    padding: 15,
-    paddingTop: 5,
-  },
-  destinationCard: {
-    flexDirection: 'row',
-    marginBottom: 15,
-  },
-  stepIndicatorContainer: {
-    alignItems: 'center',
-    paddingRight: 15,
-    paddingTop: 20,
-  },
-  stepIndicator: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#999',
-    marginBottom: 5,
-  },
-  stepNumber: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  stepPending: {
-    backgroundColor: '#999',
-  },
-  stepCurrent: {
-    backgroundColor: '#f0ad4e',
-  },
-  stepCompleted: {
-    backgroundColor: '#5cb85c',
-  },
-  stepConnector: {
-    width: 2,
-    flex: 1,
-    backgroundColor: '#ddd',
-  },
-  stepConnectorCompleted: {
-    backgroundColor: '#5cb85c',
-  },
-  destinationCardContent: {
-    flex: 1,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    overflow: 'hidden',
-  },
-  destinationHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  destinationId: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  destinationAddress: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 3,
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 15,
-    borderWidth: 1,
-    alignSelf: 'flex-start',
-  },
-  statusIcon: {
-    marginRight: 4,
-  },
-  statusText: {
-    fontWeight: '600',
-    fontSize: 12,
-  },
-  destinationDetails: {
-    padding: 15,
-  },
-  detailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  detailIcon: {
-    width: 18,
-    marginRight: 8,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 5,
-  },
-  detailText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  loaderText: {
-    marginTop: 15,
-    color: '#666',
-    fontSize: 16,
-  },
-  // Map tab styles
-  mapContainer: {
-    flex: 1,
-  },
-  mapContent: {
-    flex: 1,
-    position: 'relative',
-  },
-  mapImage: {
-    width: '100%',
-    height: '100%',
-  },
-  mapOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  mapOverlayText: {
-    backgroundColor: 'rgba(255,255,255,0.8)',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
-  },
-  mapDestinationsContainer: {
-    position: 'absolute',
-    bottom: 20,
-    left: 0,
-    right: 0,
-    maxHeight: 160,
-  },
-  mapDestinationsContent: {
-    paddingHorizontal: 15,
-  },
-  mapDestinationCard: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 15,
-    marginRight: 15,
-    width: 200,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  mapDestinationIndicator: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  mapDestinationPending: {
-    backgroundColor: '#999',
-  },
-  mapDestinationCurrent: {
-    backgroundColor: '#f0ad4e',
-  },
-  mapDestinationCompleted: {
-    backgroundColor: '#5cb85c',
-  },
-  mapDestinationNumber: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  mapDestinationContent: {
-    flex: 1,
-  },
-  mapDestinationId: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#007AFF',
-  },
-  mapDestinationAddress: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
-  },
-  mapDestinationDetails: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  mapDestinationPerson: {
-    fontSize: 12,
-    color: '#666',
-    marginLeft: 5,
-    flex: 1,
-  },
-  mapDestinationFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 5,
-  },
-  mapDestinationMetric: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  mapDestinationMetricText: {
-    fontSize: 12,
-    color: '#666',
-    marginLeft: 3,
-  }
-});
 
 export default RouteVisualization;
