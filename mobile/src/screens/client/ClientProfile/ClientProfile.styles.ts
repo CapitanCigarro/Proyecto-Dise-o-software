@@ -1,15 +1,16 @@
 import { StyleSheet } from 'react-native';
+import { colors, typography, spacing, borderRadius, shadows } from '../../../theme/globalStyles';
 
 const styles = StyleSheet.create({
   // Main container for the entire profile screen
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background.main,
   },
   
   // Header section with user avatar and basic info
   header: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     alignItems: 'center',
     paddingTop: 25,
     paddingBottom: 35,
@@ -24,18 +25,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: spacing.xl,
   },
   name: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: 'white',
+    fontSize: typography.fontSize.title,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.light,
   },
   role: {
-    fontSize: 16,
+    fontSize: typography.fontSize.body,
     color: 'rgba(255,255,255,0.8)',
-    marginTop: 5,
-    marginBottom: 15,
+    marginTop: spacing.xs,
+    marginBottom: spacing.xl,
   },
   
   // User statistics display in header
@@ -43,26 +44,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginTop: 5,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    marginTop: spacing.xs,
     width: '80%',
     justifyContent: 'center',
-    marginBottom: 15,
+    marginBottom: spacing.xl,
   },
   statItem: {
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.xl,
   },
   statNumber: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
+    color: colors.text.light,
+    fontSize: typography.fontSize.title,
+    fontWeight: typography.fontWeight.bold,
   },
   statLabel: {
     color: 'rgba(255,255,255,0.8)',
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: typography.fontSize.tiny,
+    marginTop: spacing.xs/2,
   },
   statDivider: {
     width: 1,
@@ -73,56 +74,52 @@ const styles = StyleSheet.create({
   // Edit profile button in header
   editProfileButton: {
     backgroundColor: 'rgba(255,255,255,0.25)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
     borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: spacing.md,
   },
   editButtonText: {
-    color: 'white',
-    fontWeight: '600',
-    marginLeft: 5,
-    fontSize: 14,
+    color: colors.text.light,
+    fontWeight: typography.fontWeight.semiBold,
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.bodySmall,
   },
   
   // Section containers for profile information
   sectionContainer: {
-    marginHorizontal: 20,
+    marginHorizontal: spacing.xl,
     marginTop: 25,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 15,
-    marginLeft: 5,
+    fontSize: typography.fontSize.subheading,
+    fontWeight: typography.fontWeight.semiBold,
+    color: colors.text.primary,
+    marginBottom: spacing.xl,
+    marginLeft: spacing.xs,
   },
   
   // Card container for info groups
   card: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.large,
+    padding: spacing.xs,
+    ...shadows.small,
   },
   
   // Information row layout with icon and text
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 15,
+    paddingVertical: spacing.md + 2,
+    paddingHorizontal: spacing.xl - 5,
     borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
+    borderBottomColor: colors.background.main,
   },
   icon: {
-    marginRight: 15,
+    marginRight: spacing.xl,
     width: 25,
     textAlign: 'center',
   },
@@ -130,63 +127,63 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   infoLabel: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: typography.fontSize.tiny,
+    color: colors.text.tertiary,
   },
   infoText: {
-    fontSize: 16,
-    color: '#333',
-    marginTop: 2,
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
+    marginTop: spacing.xs/2,
   },
   
   // Preference row with label and toggle
   preferenceRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 15,
+    paddingVertical: spacing.md + 2,
+    paddingHorizontal: spacing.xl - 5,
   },
   preferenceTextContainer: {
     flex: 1,
   },
   preferenceLabel: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
   },
   preferenceDescription: {
-    fontSize: 13,
-    color: '#999',
-    marginTop: 2,
+    fontSize: typography.fontSize.caption,
+    color: colors.text.tertiary,
+    marginTop: spacing.xs/2,
   },
   
   // Logout button at bottom of screen
   logoutButton: {
-    backgroundColor: '#ff3b30',
+    backgroundColor: colors.palette.red,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    marginHorizontal: 20,
-    marginTop: 30,
-    marginBottom: 10,
+    paddingVertical: spacing.md + 2,
+    paddingHorizontal: spacing.xl,
+    borderRadius: borderRadius.medium,
+    marginHorizontal: spacing.xl,
+    marginTop: spacing.xxl + 6,
+    marginBottom: spacing.md - 2,
   },
   buttonIcon: {
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: colors.text.light,
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.bold,
   },
   
   // App version display
   versionText: {
     textAlign: 'center',
-    color: '#999',
-    fontSize: 12,
-    marginBottom: 30,
+    color: colors.text.tertiary,
+    fontSize: typography.fontSize.tiny,
+    marginBottom: spacing.xxl + 6,
   },
   
   // Modal for editing profile information
@@ -197,12 +194,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: colors.background.card,
     borderRadius: 20,
     width: '90%',
     maxHeight: '80%',
-    padding: 20,
-    shadowColor: '#000',
+    padding: spacing.xl,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 10,
@@ -214,15 +211,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 15,
+    marginBottom: spacing.xl,
+    paddingBottom: spacing.xl,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.border,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: typography.fontSize.subheading,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
   },
   
   // Form container and input fields
@@ -230,33 +227,33 @@ const styles = StyleSheet.create({
     maxHeight: '70%',
   },
   inputLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 6,
-    marginLeft: 2,
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.text.secondary,
+    marginBottom: spacing.xs + 2,
+    marginLeft: spacing.xs/2,
   },
   input: {
     backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 15,
-    fontSize: 16,
+    borderRadius: borderRadius.medium - 2,
+    padding: spacing.md,
+    marginBottom: spacing.xl,
+    fontSize: typography.fontSize.body,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: colors.border,
   },
   
   // Save button for form submission
   saveButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    paddingVertical: 14,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.medium,
+    paddingVertical: spacing.md + 2,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: spacing.md - 2,
   },
   saveButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: colors.text.light,
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.bold,
   }
 });
 

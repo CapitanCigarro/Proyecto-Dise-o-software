@@ -1,0 +1,234 @@
+{
+  "driverProfile": {
+    "name": "Carlos Rodríguez",
+    "email": "conductor@example.com",
+    "phone": "987-654-3210",
+    "vehicleType": "Camioneta de Reparto",
+    "licensePlate": "ABC-123",
+    "memberSince": "Marzo 2023",
+    "totalDeliveries": 342,
+    "availability": "Lun-Vie, 8:00-18:00"
+  },
+  "currentRoute": {
+    "origin": { 
+      "name": "Centro de Distribución",
+      "address": "Avenida Industrial 1050",
+      "coordinates": { "latitude": 19.4326, "longitude": -99.1332 }
+    },
+    "destinations": [
+      { 
+        "id": "PKT1234", 
+        "name": "Calle Sur 321", 
+        "coordinates": { "latitude": 19.4211, "longitude": -99.1367 },
+        "distance": 3.5, 
+        "time": 20,
+        "estimatedArrival": "09:00 AM",
+        "instructions": "Casa con reja negra.",
+        "status": "Entregado"
+      },
+      { 
+        "id": "PKT2345", 
+        "name": "Avenida Juárez 789", 
+        "coordinates": { "latitude": 19.4256, "longitude": -99.1382 },
+        "distance": 2.9, 
+        "time": 18,
+        "estimatedArrival": "09:30 AM",
+        "instructions": "Edificio de oficinas.",
+        "status": "Entregado"
+      },
+      { 
+        "id": "PKT3456", 
+        "name": "Calle Reforma 456", 
+        "coordinates": { "latitude": 19.4271, "longitude": -99.1399 },
+        "distance": 3.2, 
+        "time": 19,
+        "estimatedArrival": "10:00 AM",
+        "instructions": "Casa blanca.",
+        "status": "Entregado"
+      },
+      { 
+        "id": "PKT4321", 
+        "name": "Boulevard Central 987", 
+        "coordinates": { "latitude": 19.4292, "longitude": -99.1401 },
+        "distance": 2.8, 
+        "time": 17,
+        "estimatedArrival": "10:25 AM",
+        "instructions": "Tienda de electrónica.",
+        "status": "Entregado"
+      },
+      { 
+        "id": "PKT2023", 
+        "name": "Avenida Central 456", 
+        "coordinates": { "latitude": 19.4231, "longitude": -99.1387 },
+        "distance": 3.8, 
+        "time": 22,
+        "estimatedArrival": "10:45 AM",
+        "instructions": "Casa con puerta roja. Si no hay nadie, dejar con el vecino.",
+        "status": "En tránsito"
+      },
+      { 
+        "id": "PKT4567", 
+        "name": "Calle Girasoles 78", 
+        "coordinates": { "latitude": 19.4356, "longitude": -99.1414 },
+        "distance": 2.4, 
+        "time": 15,
+        "estimatedArrival": "11:15 AM",
+        "instructions": "Edificio de apartamentos, entregar en recepción.",
+        "status": "Pendiente"
+      },
+      { 
+        "id": "PKT5678", 
+        "name": "Boulevard Principal 234", 
+        "coordinates": { "latitude": 19.4288, "longitude": -99.1422 },
+        "distance": 4.1, 
+        "time": 26,
+        "estimatedArrival": "12:00 PM",
+        "instructions": "Oficina corporativa, piso 3.",
+        "status": "Pendiente"
+      },
+      { 
+        "id": "PKT6789", 
+        "name": "Avenida Libertad 567", 
+        "coordinates": { "latitude": 19.4402, "longitude": -99.1356 },
+        "distance": 5.2, 
+        "time": 32,
+        "estimatedArrival": "13:00 PM",
+        "instructions": "Centro comercial, local 45.",
+        "status": "Pendiente"
+      },
+      { 
+        "id": "PKT7890", 
+        "name": "Calle Norte 890", 
+        "coordinates": { "latitude": 19.4198, "longitude": -99.1344 },
+        "distance": 3.8, 
+        "time": 20,
+        "estimatedArrival": "13:45 PM",
+        "instructions": "Casa blanca con jardín. Timbre no funciona, tocar puerta.",
+        "status": "Pendiente"
+      },
+      { 
+        "id": "PKT8901", 
+        "name": "Plaza Mayor 123", 
+        "coordinates": { "latitude": 19.4312, "longitude": -99.1367 },
+        "distance": 2.8, 
+        "time": 18,
+        "estimatedArrival": "14:15 PM",
+        "instructions": "Restaurante en esquina, preguntar por gerente.",
+        "status": "Pendiente"
+      }
+    ],
+    "routeStats": {
+      "totalDistance": 34.5,
+      "totalTime": 207,
+      "estimatedCompletion": "14:30 PM",
+      "destinations": 10
+    }
+  },
+  "packages": [
+    { 
+      "id": "PKT1234", 
+      "status": "Entregado",
+      "recipient": "Ana López", 
+      "address": "Calle Sur 321", 
+      "date": "2023-05-22",
+      "deliveryDate": "2023-05-26",
+      "description": "Paquete pequeño"
+    },
+    { 
+      "id": "PKT2345", 
+      "status": "Entregado",
+      "recipient": "Roberto Méndez", 
+      "address": "Avenida Juárez 789", 
+      "date": "2023-05-23",
+      "deliveryDate": "2023-05-26",
+      "description": "Documentos importantes"
+    },
+    { 
+      "id": "PKT3456", 
+      "status": "Entregado",
+      "recipient": "Laura Torres", 
+      "address": "Calle Reforma 456", 
+      "date": "2023-05-24",
+      "deliveryDate": "2023-05-26",
+      "description": "Caja mediana"
+    },
+    { 
+      "id": "PKT4321", 
+      "status": "Entregado",
+      "recipient": "Jorge Ramírez", 
+      "address": "Boulevard Central 987", 
+      "date": "2023-05-26",
+      "deliveryDate": "2023-05-26",
+      "description": "Electrónica"
+    },
+    { 
+      "id": "PKT2023", 
+      "status": "En tránsito",
+      "recipient": "María García", 
+      "address": "Avenida Central 456", 
+      "date": "2023-05-26",
+      "estimatedDelivery": "2023-05-26",
+      "description": "Sobre pequeño"
+    },
+    { 
+      "id": "PKT4567", 
+      "status": "Pendiente",
+      "recipient": "Daniel Ortiz", 
+      "address": "Calle Girasoles 78", 
+      "date": "2023-05-26",
+      "estimatedDelivery": "2023-05-26",
+      "description": "Paquete mediano"
+    },
+    { 
+      "id": "PKT5678", 
+      "status": "Pendiente",
+      "recipient": "Carmen Sánchez", 
+      "address": "Boulevard Principal 234", 
+      "date": "2023-05-26",
+      "estimatedDelivery": "2023-05-26",
+      "description": "Caja grande"
+    },
+    { 
+      "id": "PKT6789", 
+      "status": "Pendiente",
+      "recipient": "Alejandro Morales", 
+      "address": "Avenida Libertad 567", 
+      "date": "2023-05-26",
+      "estimatedDelivery": "2023-05-26",
+      "description": "Paquete frágil"
+    },
+    { 
+      "id": "PKT7890", 
+      "status": "Pendiente",
+      "recipient": "Patricia Vega", 
+      "address": "Calle Norte 890", 
+      "date": "2023-05-26",
+      "estimatedDelivery": "2023-05-26",
+      "description": "Documentos urgentes"
+    },
+    { 
+      "id": "PKT8901", 
+      "status": "Pendiente",
+      "recipient": "Fernando Díaz", 
+      "address": "Plaza Mayor 123", 
+      "date": "2023-05-26",
+      "estimatedDelivery": "2023-05-26",
+      "description": "Medicamentos"
+    }
+  ],
+  "stats": {
+    "pending": 5,
+    "inTransit": 1,
+    "delivered": 4,
+    "total": 10,
+    "completionPercentage": 40,
+    "deliveriesThisWeek": 5,
+    "averageTimePerDelivery": 24,
+    "kilometersToday": 34.5,
+    "performance": {
+      "onTimeDeliveryRate": 98,
+      "customerSatisfaction": 4.8,
+      "avgDeliveriesPerDay": 8
+    }
+  }
+}

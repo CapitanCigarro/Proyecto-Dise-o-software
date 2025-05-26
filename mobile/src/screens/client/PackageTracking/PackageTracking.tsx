@@ -16,6 +16,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
 import styles from './PackageTracking.styles';
+// Import mockData
+import mockData from '../../../../assets/mockDataClient.json';
 
 // Data structure for package information
 interface Package {
@@ -26,6 +28,14 @@ interface Package {
   status: string;
   date: string;
   description?: string;
+  destination?: string;
+  origin?: string;
+  weight?: string;
+  dimensions?: string;
+  packageType?: string;
+  estimatedCost?: string;
+  notes?: string;
+  createdAt?: string;
 }
 
 // Screen component for viewing and tracking packages
@@ -51,70 +61,50 @@ const PackageTracking = ({ route, navigation }) => {
     loadPackages();
   }, [specificPackageId]);
   
-  // Fetch package data from storage or create mock data
+  // Fetch package data from storage or use mockData
   const loadPackages = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const packagesJson = await AsyncStorage.getItem('packages');
       let packagesData = [];
+      const storedUser = await AsyncStorage.getItem('user');
+      let currentUserId = '1'; // Default to first user if none stored
       
-      if (packagesJson) {
-        packagesData = JSON.parse(packagesJson);
-      } else {
-        // If no data, set mock data for demo
-        packagesData = [
-          { 
-            id: '1234', 
-            sender: 'Juan Pérez', 
-            recipient: 'María García', 
-            address: 'Calle Principal 123', 
-            status: 'En tránsito',
-            date: '2023-05-20',
-            description: 'Caja mediana'
-          },
-          { 
-            id: '5678', 
-            sender: 'Juan Pérez', 
-            recipient: 'Carlos Rodríguez', 
-            address: 'Avenida Central 456', 
-            status: 'Entregado',
-            date: '2023-05-18',
-            description: 'Sobre pequeño'
-          },
-          { 
-            id: '9012', 
-            sender: 'Juan Pérez', 
-            recipient: 'Ana López', 
-            address: 'Plaza Mayor 789', 
-            status: 'Pendiente',
-            date: '2023-05-23',
-            description: 'Paquete frágil'
-          },
-          { 
-            id: '3456', 
-            sender: 'Juan Pérez', 
-            recipient: 'Luis Torres', 
-            address: 'Boulevard Norte 234', 
-            status: 'Entregado',
-            date: '2023-05-15',
-            description: 'Documentos importantes'
-          },
-          { 
-            id: '7890', 
-            sender: 'Juan Pérez', 
-            recipient: 'Sandra Vega', 
-            address: 'Paseo del Río 567', 
-            status: 'En tránsito',
-            date: '2023-05-21',
-            description: 'Paquete electrónico'
-          },
-        ];
-        
-        await AsyncStorage.setItem('packages', JSON.stringify(packagesData));
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        if (userData.id) {
+          currentUserId = userData.id;
+        }
       }
       
+      // Get packages from mockData
+      packagesData = mockData.packages.filter(pkg => {
+        // Find packages where sender matches current user
+        const user = mockData.users.find(u => u.id === currentUserId);
+        return user && pkg.sender === user.name;
+      });
+      
+      // Ensure all packages have all the required fields
+      packagesData = packagesData.map(pkg => ({
+        id: pkg.id || '',
+        sender: pkg.sender || '',
+        recipient: pkg.recipient || '',
+        address: pkg.address || '',
+        status: pkg.status || '',
+        date: pkg.date || '',
+        description: pkg.description || '',
+        destination: pkg.destination || '',
+        origin: pkg.origin || '',
+        weight: pkg.weight || '',
+        dimensions: pkg.dimensions || '',
+        packageType: pkg.packageType || '',
+        estimatedCost: pkg.estimatedCost || '',
+        notes: pkg.notes || '',
+        createdAt: pkg.createdAt || ''
+      }));
+      
+      // Sort packages based on current sort order
       packagesData = sortPackages(packagesData, sortOrder);
       
       setPackages(packagesData);
@@ -296,7 +286,7 @@ const PackageTracking = ({ route, navigation }) => {
             styles.packageItem, 
             { backgroundColor: getStatusBackground(item.status) }
           ]}
-          onPress={() => navigation.navigate('PackageDetail', { package: item })}
+          onPress={() => navigation.navigate('PackageDetail', { packageId: item.id })}
           activeOpacity={0.8}
         >
           <View style={styles.packageHeader}>

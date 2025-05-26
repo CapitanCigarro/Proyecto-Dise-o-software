@@ -18,51 +18,11 @@ import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import styles from './RouteVisualization.styles';
 
+// Import mock data
+import mockDriverData from '../../../../assets/mockDataDriver.json';
+
 // Get screen dimensions for responsive layout
 const { width, height } = Dimensions.get('window');
-
-// Mock data structure for delivery routes with destination details
-const MOCK_ROUTES = {
-  origin: { 
-    name: 'Centro de Distribución',
-    address: 'Avenida Industrial 1050',
-    coordinates: { latitude: 19.4326, longitude: -99.1332 }
-  },
-  destinations: [
-    { 
-      id: '1234', 
-      name: 'Calle Principal 123', 
-      coordinates: { latitude: 19.4288, longitude: -99.1379 },
-      distance: 2.5, 
-      time: 15,
-      estimatedArrival: '10:15 AM',
-      instructions: 'Entregar en recepción. Edificio de apartamentos azul.'
-    },
-    { 
-      id: '5678', 
-      name: 'Avenida Central 456', 
-      coordinates: { latitude: 19.4231, longitude: -99.1387 },
-      distance: 3.8, 
-      time: 22,
-      estimatedArrival: '10:45 AM',
-      instructions: 'Casa con puerta roja. Si no hay nadie, dejar con el vecino.'
-    },
-    { 
-      id: '9012', 
-      name: 'Plaza Mayor 789', 
-      coordinates: { latitude: 19.4356, longitude: -99.1414 },
-      distance: 1.7, 
-      time: 10,
-      estimatedArrival: '11:15 AM',
-      instructions: 'Local comercial. Preguntar por María en la entrada.'
-    },
-  ],
-  routeStats: {
-    totalDistance: 8.0,
-    totalTime: 47,
-    estimatedCompletion: '11:30 AM'
-  }
-};
 
 // Component props interface
 interface RouteVisualizationProps {
@@ -73,7 +33,7 @@ interface RouteVisualizationProps {
 // Screen component for visualizing and managing delivery routes
 const RouteVisualization: React.FC<RouteVisualizationProps> = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
-  const [routeData, setRouteData] = useState(MOCK_ROUTES);
+  const [routeData, setRouteData] = useState(mockDriverData.currentRoute);
   const [selectedDestination, setSelectedDestination] = useState<any>(null);
   const [packages, setPackages] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('list'); // 'list' or 'map'
@@ -94,41 +54,16 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({ route, navigati
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Reset to initial mock data instead of loading from storage
-        const initialPackagesData = [
-          { 
-            id: '1234', 
-            status: 'Pendiente',
-            recipient: 'María García', 
-            address: 'Calle Principal 123', 
-            date: '2023-05-20',
-            description: 'Caja mediana'
-          },
-          { 
-            id: '5678', 
-            status: 'En tránsito',
-            recipient: 'Carlos Rodríguez', 
-            address: 'Avenida Central 456', 
-            date: '2023-05-18',
-            description: 'Sobre pequeño'
-          },
-          { 
-            id: '9012', 
-            status: 'Entregado',
-            recipient: 'Ana López', 
-            address: 'Plaza Mayor 789', 
-            date: '2023-05-15',
-            description: 'Paquete frágil'
-          }
-        ];
+        // Load packages from mock data
+        const packagesData = mockDriverData.packages;
         
         // Save to AsyncStorage for this session
-        await AsyncStorage.setItem('packages', JSON.stringify(initialPackagesData));
-        setPackages(initialPackagesData);
+        await AsyncStorage.setItem('packages', JSON.stringify(packagesData));
+        setPackages(packagesData);
         
         // If packageId is provided, select that destination
         if (packageId) {
-          const destination = MOCK_ROUTES.destinations.find(dest => dest.id === packageId);
+          const destination = mockDriverData.currentRoute.destinations.find(dest => dest.id === packageId);
           if (destination) {
             setSelectedDestination(destination);
           }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -12,22 +12,19 @@ import { useAuth } from '../../../context/AuthContext';
 import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
 import styles from './DriverProfile.styles';
 
+// Import mock data
+import mockDriverData from '../../../../assets/mockDataDriver.json';
+
 // Driver profile screen component displaying driver information and settings
 const DriverProfile = () => {
   // State for handling loading indicators
   const [loading, setLoading] = useState(false);
   
-  // Mock user data for driver profile information
-  const userData = {
-    name: 'Carlos Rodríguez',
-    email: 'conductor@example.com',
-    phone: '987-654-3210',
-    vehicleType: 'Camioneta de Reparto',
-    licensePlate: 'ABC-123',
-    memberSince: 'Marzo 2023',
-    totalDeliveries: 342,
-    availability: 'Lun-Vie, 8:00-18:00'
-  };
+  // Get driver profile data from mock data
+  const userData = mockDriverData.driverProfile;
+  
+  // Get performance stats from mock data
+  const performanceStats = mockDriverData.stats.performance;
 
   // Get logout function from auth context
   const { logout } = useAuth();
@@ -60,7 +57,10 @@ const DriverProfile = () => {
   
   // Navigate to performance metrics screen
   const handleViewPerformance = () => {
-    Alert.alert("Rendimiento", "Aquí podrás ver métricas detalladas de tus entregas");
+    Alert.alert(
+      "Estadísticas de Rendimiento", 
+      `Entregas a tiempo: ${performanceStats.onTimeDeliveryRate}%\nSatisfacción del cliente: ${performanceStats.customerSatisfaction}/5\nPromedio de entregas diarias: ${performanceStats.avgDeliveriesPerDay}`
+    );
   };
 
   return (

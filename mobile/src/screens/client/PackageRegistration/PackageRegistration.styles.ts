@@ -1,10 +1,11 @@
 import { StyleSheet } from 'react-native';
+import { colors, typography, spacing, borderRadius, shadows } from '../../../theme/globalStyles';
 
 const styles = StyleSheet.create({
   // Main container for the package registration screen
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background.main,
   },
   
   // Header bar with screen title
@@ -12,28 +13,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 15,
-    backgroundColor: '#fff',
+    padding: spacing.section,
+    backgroundColor: colors.background.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.border,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: typography.fontSize.subheading,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
   },
   
   // Progress indicator showing current step in registration flow
   progressContainer: {
-    backgroundColor: '#fff',
-    paddingBottom: 15,
-    marginBottom: 10,
+    backgroundColor: colors.background.card,
+    paddingBottom: spacing.section,
+    marginBottom: spacing.sm,
   },
   stepIndicatorContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingHorizontal: 15,
-    marginBottom: 10,
+    paddingHorizontal: spacing.section,
+    marginBottom: spacing.sm + 2,
   },
   stepIndicator: {
     alignItems: 'center',
@@ -44,31 +45,31 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: spacing.xs + 1,
   },
   stepCircleActive: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
   },
   stepCircleInactive: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: colors.text.tertiary + '40', // Usando color terciario con opacidad
   },
   stepText: {
-    fontSize: 12,
+    fontSize: typography.fontSize.tiny,
   },
   stepTextActive: {
-    color: '#333',
-    fontWeight: '600',
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.semiBold,
   },
   stepTextInactive: {
-    color: '#999',
+    color: colors.text.tertiary,
   },
   
   // Progress bar showing overall completion
   progressBarContainer: {
     height: 4,
-    backgroundColor: '#f0f0f0',
-    marginHorizontal: 20,
-    borderRadius: 2,
+    backgroundColor: colors.border,
+    marginHorizontal: spacing.xl,
+    borderRadius: borderRadius.small,
     overflow: 'hidden',
     position: 'relative',
   },
@@ -78,40 +79,40 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.border,
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#007AFF',
-    borderRadius: 2,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.small,
   },
   
   // Form container for input fields
   formContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.card,
   },
   stepContainer: {
-    padding: 20,
+    padding: spacing.xl,
   },
   
   // Input field styling and groups
   inputGroup: {
-    marginBottom: 15,
+    marginBottom: spacing.section,
   },
   label: {
-    fontSize: 14,
-    marginBottom: 5,
-    color: '#555',
-    fontWeight: '500',
+    fontSize: typography.fontSize.bodySmall,
+    marginBottom: spacing.xs + 1,
+    color: colors.text.secondary,
+    fontWeight: typography.fontWeight.medium,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#fafafa',
+    borderColor: colors.border,
+    borderRadius: borderRadius.medium,
+    padding: spacing.md,
+    fontSize: typography.fontSize.body,
+    backgroundColor: colors.background.main,
   },
   
   // Address input with clear button
@@ -123,18 +124,18 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     position: 'absolute',
-    right: 12,
-    top: 12,
+    right: spacing.md,
+    top: spacing.md,
   },
   
   // Error state for form validation
   inputError: {
-    borderColor: '#ff3b30',
+    borderColor: colors.palette.red,
   },
   errorText: {
-    color: '#ff3b30',
-    fontSize: 12,
-    marginTop: 5,
+    color: colors.palette.red,
+    fontSize: typography.fontSize.tiny,
+    marginTop: spacing.xs + 1,
   },
   
   // Multiline text area input
@@ -146,125 +147,125 @@ const styles = StyleSheet.create({
   // Navigation buttons for form steps
   navigationButtons: {
     flexDirection: 'row',
-    padding: 15,
-    backgroundColor: '#fff',
+    padding: spacing.section,
+    backgroundColor: colors.background.card,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: colors.border,
   },
   navigationButton: {
     flex: 1,
-    padding: 14,
-    borderRadius: 8,
+    padding: spacing.md + 2,
+    borderRadius: borderRadius.medium,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 5,
+    marginHorizontal: spacing.xs + 1,
   },
   backButton: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background.main,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.border,
   },
   nextButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
   },
   cancelButton: {
-    backgroundColor: '#ff3b3018',
+    backgroundColor: colors.palette.red + '18',
     borderWidth: 1,
-    borderColor: '#ff3b3050',
+    borderColor: colors.palette.red + '50',
   },
   submitButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: colors.palette.green,
   },
   navigationButtonText: {
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.light,
   },
   backButtonText: {
-    color: '#666',
+    color: colors.text.secondary,
   },
   cancelButtonText: {
-    color: '#ff3b30',
+    color: colors.palette.red,
   },
   
   // Address suggestions dropdown
   suggestionsContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.card,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginTop: 5,
+    borderColor: colors.border,
+    borderRadius: borderRadius.medium,
+    marginTop: spacing.xs + 1,
     maxHeight: 120,
     overflow: 'hidden',
   },
   suggestionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.border,
   },
   suggestionIcon: {
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   suggestionText: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.text.primary,
   },
   
   // Information box for additional guidance
   infoBox: {
     flexDirection: 'row',
-    backgroundColor: '#e6f2ff',
-    borderRadius: 8,
-    padding: 12,
-    marginVertical: 10,
+    backgroundColor: colors.primary + '15',
+    borderRadius: borderRadius.medium,
+    padding: spacing.md,
+    marginVertical: spacing.sm + 2,
     alignItems: 'flex-start',
   },
   infoIcon: {
-    marginRight: 10,
+    marginRight: spacing.sm + 2,
     marginTop: 2,
   },
   infoText: {
-    fontSize: 14,
-    color: '#444',
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.text.primary,
     flex: 1,
     lineHeight: 20,
   },
   
   // Package type selection options
   groupTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.bold,
+    marginBottom: spacing.sm + 2,
+    color: colors.text.primary,
   },
   packageTypeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
   packageTypeOption: {
     flex: 1,
-    marginHorizontal: 5,
-    padding: 12,
-    borderRadius: 8,
+    marginHorizontal: spacing.xs + 1,
+    padding: spacing.md,
+    borderRadius: borderRadius.medium,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fafafa',
+    borderColor: colors.border,
+    backgroundColor: colors.background.main,
   },
   packageTypeSelected: {
-    borderColor: '#007AFF',
-    backgroundColor: '#e6f2ff',
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '15',
   },
   packageTypeText: {
-    marginTop: 5,
-    color: '#666',
-    fontSize: 14,
+    marginTop: spacing.xs + 1,
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.bodySmall,
   },
   packageTypeTextSelected: {
-    color: '#007AFF',
-    fontWeight: '600',
+    color: colors.primary,
+    fontWeight: typography.fontWeight.semiBold,
   },
   
   // Package dimensions input row
@@ -275,66 +276,66 @@ const styles = StyleSheet.create({
   
   // Cost estimation display
   costEstimation: {
-    backgroundColor: '#f9f9f9',
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 20,
+    backgroundColor: colors.background.main,
+    padding: spacing.section,
+    borderRadius: borderRadius.medium,
+    marginTop: spacing.xl,
     borderLeftWidth: 4,
-    borderLeftColor: '#28a745',
+    borderLeftColor: colors.palette.green,
   },
   costEstimationText: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
   },
   costEstimationAmount: {
-    fontWeight: 'bold',
-    color: '#28a745',
+    fontWeight: typography.fontWeight.bold,
+    color: colors.palette.green,
   },
   costEstimationNote: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 5,
+    fontSize: typography.fontSize.tiny,
+    color: colors.text.secondary,
+    marginTop: spacing.xs + 1,
   },
   
   // Review form section for final confirmation
   reviewTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
+    fontSize: typography.fontSize.subheading,
+    fontWeight: typography.fontWeight.bold,
+    marginBottom: spacing.section,
+    color: colors.text.primary,
     textAlign: 'center',
   },
   reviewSection: {
-    marginBottom: 20,
-    backgroundColor: '#f9f9f9',
-    padding: 15,
-    borderRadius: 8,
+    marginBottom: spacing.xl,
+    backgroundColor: colors.background.main,
+    padding: spacing.section,
+    borderRadius: borderRadius.medium,
   },
   reviewSectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: '#333',
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.semiBold,
+    marginBottom: spacing.sm + 2,
+    color: colors.text.primary,
     flexDirection: 'row',
     alignItems: 'center',
   },
   reviewText: {
-    fontSize: 15,
-    color: '#444',
-    marginBottom: 5,
+    fontSize: typography.fontSize.body - 1,
+    color: colors.text.primary,
+    marginBottom: spacing.xs + 1,
   },
   reviewRow: {
     flexDirection: 'row',
-    marginBottom: 5,
+    marginBottom: spacing.xs + 1,
   },
   reviewLabel: {
-    fontSize: 15,
-    color: '#666',
+    fontSize: typography.fontSize.body - 1,
+    color: colors.text.secondary,
     width: 100,
   },
   reviewValue: {
-    fontSize: 15,
-    color: '#333',
+    fontSize: typography.fontSize.body - 1,
+    color: colors.text.primary,
     flex: 1,
   },
   
@@ -343,35 +344,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#28a745',
-    padding: 15,
-    borderRadius: 8,
-    marginVertical: 15,
+    backgroundColor: colors.palette.green,
+    padding: spacing.section,
+    borderRadius: borderRadius.medium,
+    marginVertical: spacing.section,
   },
   costSummaryLabel: {
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: '600',
+    fontSize: typography.fontSize.body,
+    color: colors.text.light,
+    fontWeight: typography.fontWeight.semiBold,
   },
   costSummaryValue: {
-    fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
+    fontSize: typography.fontSize.subheading,
+    color: colors.text.light,
+    fontWeight: typography.fontWeight.bold,
   },
   
   // Terms confirmation checkbox
   confirmationBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e6f2ff',
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 10,
+    backgroundColor: colors.primary + '15',
+    padding: spacing.section,
+    borderRadius: borderRadius.medium,
+    marginTop: spacing.sm + 2,
   },
   confirmationText: {
-    fontSize: 14,
-    color: '#444',
-    marginLeft: 10,
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.text.primary,
+    marginLeft: spacing.sm + 2,
     flex: 1,
   },
   
@@ -383,16 +384,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.card,
     padding: 25,
-    borderRadius: 12,
+    borderRadius: borderRadius.large,
     alignItems: 'center',
     minWidth: 200,
+    ...shadows.small,
   },
   loadingText: {
-    marginTop: 15,
-    fontSize: 16,
-    color: '#333',
+    marginTop: spacing.section,
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
   },
 });
 

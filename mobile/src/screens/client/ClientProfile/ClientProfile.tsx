@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -13,19 +13,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../context/AuthContext';
 import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
 import styles from './ClientProfile.styles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+// Import the mock data
+import mockData from '../../../../assets/mockDataClient.json';
 
 // Client profile screen component displaying user information and settings
 const ClientProfile = () => {
-  // Mock user data state for profile information
+  // User data state for profile information
   const [userData, setUserData] = useState({
-    name: 'Juan Pérez',
-    email: 'cliente@example.com',
-    phone: '123-456-7890',
-    role: 'Cliente',
-    address: 'Av. Principal 123',
-    memberSince: 'Enero 2023',
-    shippingCompleted: 18,
-    shippingInProgress: 2
+    name: '',
+    email: '',
+    phone: '',
+    role: '',
+    address: '',
+    memberSince: '',
+    shippingCompleted: 0,
+    shippingInProgress: 0
   });
 
   const { logout } = useAuth();
@@ -36,6 +39,56 @@ const ClientProfile = () => {
   // State for managing profile editing mode
   const [isEditing, setIsEditing] = useState(false);
   const [editFormData, setEditFormData] = useState({...userData});
+
+  // Load user data from mockData.json on component mount
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem('user');
+        let userId = '1'; // Default to first user if none stored
+        
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          if (parsedUser.id) {
+            userId = parsedUser.id;
+          }
+        }
+        
+        // Find the user in mockData
+        const user = mockData.users.find(u => u.id === userId);
+        
+        if (user) {
+          // Update user data state with data from mockData
+          setUserData({
+            name: user.name || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            role: user.role || '',
+            address: user.address || '',
+            memberSince: user.memberSince || '',
+            shippingCompleted: user.shippingCompleted || 0,
+            shippingInProgress: user.shippingInProgress || 0
+          });
+          
+          // Also update the edit form data
+          setEditFormData({
+            name: user.name || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            role: user.role || '',
+            address: user.address || '',
+            memberSince: user.memberSince || '',
+            shippingCompleted: user.shippingCompleted || 0,
+            shippingInProgress: user.shippingInProgress || 0
+          });
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    };
+    
+    loadUserData();
+  }, []);
 
   // Handle user logout with confirmation dialog
   const handleLogout = async () => {
@@ -68,7 +121,7 @@ const ClientProfile = () => {
   };
   
   // Validate and save profile changes
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     if (!editFormData.name || !editFormData.email || !editFormData.phone || !editFormData.address) {
       Alert.alert('Campos requeridos', 'Por favor completa todos los campos');
       return;
@@ -76,6 +129,24 @@ const ClientProfile = () => {
     
     setUserData({...userData, ...editFormData});
     setIsEditing(false);
+    
+    // Update the user in AsyncStorage
+    try {
+      const storedUser = await AsyncStorage.getItem('user');
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        const updatedUser = {
+          ...parsedUser,
+          name: editFormData.name,
+          email: editFormData.email,
+          phone: editFormData.phone,
+          address: editFormData.address
+        };
+        await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Error updating user data:', error);
+    }
     
     Alert.alert('Perfil actualizado', 'Tus datos han sido actualizados correctamente');
   };

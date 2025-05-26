@@ -1,210 +1,203 @@
 import { StyleSheet } from 'react-native';
+import { colors, typography, spacing, borderRadius, shadows } from '../../../theme/globalStyles';
 
 const styles = StyleSheet.create({
-  // Main container for the entire home screen
+  // Main container for the entire screen
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background.main,
   },
   
-  // Welcome header with user greeting
+  // Header section with user greeting
   welcomeHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    paddingBottom: 15,
+    padding: spacing.xl,
+    paddingBottom: spacing.md,
   },
   welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: typography.fontSize.heading,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 2,
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
   },
   
-  // Stats overview cards showing delivery metrics
+  // Delivery metrics cards row
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    marginBottom: 15,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
   },
   statCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.medium,
+    padding: spacing.lg,
     flex: 1,
-    marginHorizontal: 4,
+    marginHorizontal: spacing.xs,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    ...shadows.small,
   },
   statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
+    fontSize: typography.fontSize.heading,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   statLabel: {
-    fontSize: 13,
-    color: '#666',
+    fontSize: typography.fontSize.caption,
+    color: colors.text.secondary,
   },
   statIcon: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: spacing.sm,
+    right: spacing.sm,
     opacity: 0.7,
   },
   
-  // Content section cards for packages and notifications
+  // Content card sections (packages, notifications)
   section: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    margin: 15,
-    marginTop: 5,
-    marginBottom: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.medium,
+    margin: spacing.section,
+    marginTop: spacing.xs,
+    marginBottom: spacing.md,
+    padding: spacing.lg,
+    ...shadows.medium,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   sectionTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: typography.fontSize.title,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
   },
   seeAllText: {
-    fontSize: 14,
-    color: '#007AFF',
+    fontSize: typography.fontSize.body,
+    color: colors.primary,
   },
   
   // Packages list container
   packagesList: {
-    marginTop: 5,
+    marginTop: spacing.xs,
   },
   
-  // Individual package item in list
+  // Package item layout and styling
   packageItem: {
     flexDirection: 'row',
-    padding: 12,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.border,
     alignItems: 'center',
   },
   statusIndicator: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    marginRight: 12,
+    marginRight: spacing.sm,
   },
   packageInfo: {
     flex: 1,
   },
   packageId: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
   },
   packageDestination: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 2,
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
   },
   packageDate: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 2,
+    fontSize: typography.fontSize.caption,
+    color: colors.text.tertiary,
+    marginTop: spacing.xs,
   },
   
-  // Status badge for delivery status
+  // Status badge for delivery states
   statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
     borderRadius: 12,
   },
   statusBadgeText: {
-    fontSize: 12,
-    color: '#fff',
-    fontWeight: '600',
+    fontSize: typography.fontSize.caption,
+    color: colors.text.light,
+    fontWeight: typography.fontWeight.semiBold,
   },
   
-  // Notifications list container
+  // Notifications section
   notificationsList: {
-    marginTop: 5,
+    marginTop: spacing.xs,
   },
   
-  // Individual notification item
+  // Notification item layout
   notificationItem: {
     flexDirection: 'row',
-    padding: 12,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.border,
     alignItems: 'center',
   },
   notificationDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#007AFF',
-    marginRight: 12,
+    backgroundColor: colors.notification,
+    marginRight: spacing.sm,
   },
   notificationContent: {
     flex: 1,
   },
   notificationMessage: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
   },
   notificationDate: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 2,
+    fontSize: typography.fontSize.caption,
+    color: colors.text.tertiary,
+    marginTop: spacing.xs,
   },
   
-  // Empty state when no data is available
+  // Empty state display
   emptyContainer: {
-    padding: 20,
+    padding: spacing.lg,
     alignItems: 'center',
   },
   emptyText: {
     textAlign: 'center',
-    color: '#999',
-    marginTop: 8,
+    color: colors.text.tertiary,
+    marginTop: spacing.sm,
   },
   
-  // New package creation button
+  // Action button for creating new packages
   newPackageButton: {
     flexDirection: 'row',
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     borderRadius: 16,
     alignItems: 'center',
   },
   newPackageButtonText: {
     color: '#fff',
-    fontWeight: 'bold',
-    marginLeft: 4,
-    fontSize: 12,
+    fontWeight: typography.fontWeight.bold,
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.caption,
   }
 });
 

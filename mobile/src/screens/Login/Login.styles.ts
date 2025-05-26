@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { colors, typography, spacing, borderRadius, shadows } from '../../theme/globalStyles';
 
 // Get screen dimensions for responsive layouts
 const { width, height } = Dimensions.get('window');
@@ -18,29 +19,29 @@ const styles = StyleSheet.create({
     formWrapper: {
         flex: 1,
         justifyContent: 'center',
-        paddingHorizontal: 24,
+        paddingHorizontal: spacing.section + 9,
     },
     
     // Logo and title section styles
     logoContainer: {
         alignItems: 'center',
-        marginBottom: 36,
+        marginBottom: spacing.xxl + 12,
     },
     logo: {
         width: 80,
         height: 80,
-        marginBottom: 16,
+        marginBottom: spacing.lg,
     },
     title: {
-        fontSize: 26,
-        fontWeight: 'bold',
-        color: '#ffffff',
+        fontSize: typography.fontSize.heading + 2,
+        fontWeight: typography.fontWeight.bold,
+        color: colors.text.light,
         textAlign: 'center',
     },
     subtitle: {
-        fontSize: 16,
+        fontSize: typography.fontSize.body,
         color: 'rgba(255,255,255,0.8)',
-        marginTop: 8,
+        marginTop: spacing.sm,
         textAlign: 'center',
     },
     
@@ -48,52 +49,44 @@ const styles = StyleSheet.create({
     roleContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 30,
-        paddingHorizontal: 10,
+        marginBottom: spacing.xxl + 6,
+        paddingHorizontal: spacing.sm + 2,
     },
     roleButton: {
         flex: 1,
-        backgroundColor: '#f0f0f0',
-        borderRadius: 12,
-        paddingVertical: 12,
-        paddingHorizontal: 12,
+        backgroundColor: colors.border,
+        borderRadius: borderRadius.medium,
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.md,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginHorizontal: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 2,
+        marginHorizontal: spacing.sm,
+        ...shadows.small,
     },
     roleButtonActive: {
-        backgroundColor: '#E6F2FF',
+        backgroundColor: `#E6F2FF`,
         borderWidth: 1,
-        borderColor: '#007AFF',
+        borderColor: colors.primary,
     },
     roleText: {
-        fontSize: 15,
-        color: '#6c757d',
-        marginLeft: 8,
-        fontWeight: '500',
+        fontSize: typography.fontSize.bodySmall + 1,
+        color: colors.text.tertiary,
+        marginLeft: spacing.sm,
+        fontWeight: typography.fontWeight.medium,
     },
     roleTextActive: {
-        color: '#007AFF',
-        fontWeight: 'bold',
+        color: colors.primary,
+        fontWeight: typography.fontWeight.bold,
     },
     
     // Input field container and control styles
     inputContainer: {
         flexDirection: 'row',
-        backgroundColor: '#ffffff',
-        borderRadius: 12,
-        marginBottom: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
+        backgroundColor: colors.background.card,
+        borderRadius: borderRadius.medium,
+        marginBottom: spacing.lg,
+        ...shadows.small,
         overflow: 'hidden',
     },
     inputIconContainer: {
@@ -102,14 +95,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#f8f9fa',
         borderRightWidth: 1,
-        borderRightColor: '#f0f0f0',
+        borderRightColor: colors.border,
     },
     input: {
         flex: 1,
-        paddingVertical: 16,
-        paddingHorizontal: 12,
-        fontSize: 16,
-        color: '#343a40',
+        paddingVertical: spacing.lg,
+        paddingHorizontal: spacing.md,
+        fontSize: typography.fontSize.body,
+        color: colors.text.primary,
     },
     visibilityButton: {
         width: 50,
@@ -119,11 +112,11 @@ const styles = StyleSheet.create({
     
     // Error message styling
     errorText: {
-        fontSize: 14,
-        color: '#dc3545',
-        marginTop: -10,
-        marginBottom: 16,
-        marginLeft: 8,
+        fontSize: typography.fontSize.bodySmall,
+        color: colors.palette.red,
+        marginTop: -spacing.sm - 2,
+        marginBottom: spacing.lg,
+        marginLeft: spacing.sm,
     },
     
     // Additional form options row styles
@@ -131,8 +124,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 25,
-        paddingHorizontal: 8,
+        marginBottom: spacing.xl + 5,
+        paddingHorizontal: spacing.sm,
     },
     
     // Checkbox control styles
@@ -143,38 +136,38 @@ const styles = StyleSheet.create({
     checkbox: {
         width: 20,
         height: 20,
-        borderRadius: 4,
+        borderRadius: borderRadius.small - 2,
         borderWidth: 1,
         borderColor: '#ced4da',
-        backgroundColor: '#ffffff',
-        marginRight: 8,
+        backgroundColor: colors.background.card,
+        marginRight: spacing.sm,
         justifyContent: 'center',
         alignItems: 'center',
     },
     checkboxChecked: {
-        backgroundColor: '#007AFF',
-        borderColor: '#007AFF',
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
     },
     checkboxLabel: {
-        fontSize: 14,
-        color: '#495057',
+        fontSize: typography.fontSize.bodySmall,
+        color: colors.text.secondary,
     },
     
     // Password recovery link style
     forgotPasswordText: {
-        fontSize: 14,
-        color: '#007AFF',
-        fontWeight: '500',
+        fontSize: typography.fontSize.bodySmall,
+        color: colors.primary,
+        fontWeight: typography.fontWeight.medium,
     },
     
     // Login button styles with states
     loginButton: {
-        backgroundColor: '#007AFF',
-        borderRadius: 12,
+        backgroundColor: colors.primary,
+        borderRadius: borderRadius.medium,
         height: 54,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#007AFF',
+        shadowColor: colors.primary,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,
         shadowRadius: 8,
@@ -186,17 +179,17 @@ const styles = StyleSheet.create({
         elevation: 0,
     },
     loginButtonText: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: 'bold',
+        color: colors.text.light,
+        fontSize: typography.fontSize.body,
+        fontWeight: typography.fontWeight.bold,
     },
     
     // App version display style
     versionText: {
-        fontSize: 12,
-        color: '#6c757d',
+        fontSize: typography.fontSize.tiny,
+        color: colors.text.tertiary,
         textAlign: 'center',
-        marginTop: 40,
+        marginTop: spacing.xl + 20,
     },
 });
 

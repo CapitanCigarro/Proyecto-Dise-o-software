@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { colors, typography, spacing, borderRadius, shadows } from '../../../theme/globalStyles';
 
 // Get screen dimensions for responsive layouts
 const { width, height } = Dimensions.get('window');
@@ -7,7 +8,7 @@ const styles = StyleSheet.create({
   // Main container style
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background.main,
   },
   
   // Header bar with title
@@ -15,64 +16,64 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 15,
-    backgroundColor: 'white',
+    padding: spacing.section,
+    backgroundColor: colors.background.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.border,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: typography.fontSize.subheading,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
     textAlign: 'center',
   },
   
   // Tab navigation between list and map views
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: 'white',
-    paddingHorizontal: 15,
-    paddingBottom: 10,
+    backgroundColor: colors.background.card,
+    paddingHorizontal: spacing.section,
+    paddingBottom: spacing.sm + 2,
   },
   tab: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
     borderRadius: 20,
-    marginRight: 10,
+    marginRight: spacing.sm + 2,
   },
   activeTab: {
-    backgroundColor: '#007AFF20',
+    backgroundColor: `${colors.primary}20`,
   },
   tabText: {
-    marginLeft: 5,
-    fontSize: 14,
-    color: '#666',
+    marginLeft: spacing.xs + 1,
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.text.secondary,
   },
   activeTabText: {
-    color: '#007AFF',
-    fontWeight: '600',
+    color: colors.primary,
+    fontWeight: typography.fontWeight.semiBold,
   },
   
   // Main content container for list view
   content: {
     flex: 1,
-    padding: 15,
-    paddingTop: 5,
+    padding: spacing.section,
+    paddingTop: spacing.xs + 1,
   },
   
   // Destination card with step indicator
   destinationCard: {
     flexDirection: 'row',
-    marginBottom: 15,
+    marginBottom: spacing.section,
   },
   
   // Step indicator showing delivery progress
   stepIndicatorContainer: {
     alignItems: 'center',
-    paddingRight: 15,
-    paddingTop: 20,
+    paddingRight: spacing.section,
+    paddingTop: spacing.xl,
   },
   stepIndicator: {
     width: 28,
@@ -80,46 +81,42 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#999',
-    marginBottom: 5,
+    backgroundColor: colors.text.tertiary,
+    marginBottom: spacing.xs + 1,
   },
   stepNumber: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 14,
+    color: colors.text.light,
+    fontWeight: typography.fontWeight.bold,
+    fontSize: typography.fontSize.bodySmall,
   },
   
   // Step indicator status variants
   stepPending: {
-    backgroundColor: '#999',
+    backgroundColor: colors.text.tertiary,
   },
   stepCurrent: {
-    backgroundColor: '#f0ad4e',
+    backgroundColor: colors.palette.orange,
   },
   stepCompleted: {
-    backgroundColor: '#5cb85c',
+    backgroundColor: colors.palette.green,
   },
   
   // Vertical line connecting step indicators
   stepConnector: {
     width: 2,
     flex: 1,
-    backgroundColor: '#ddd',
+    backgroundColor: colors.border,
   },
   stepConnectorCompleted: {
-    backgroundColor: '#5cb85c',
+    backgroundColor: colors.palette.green,
   },
   
   // Card content area for destination details
   destinationCardContent: {
     flex: 1,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.medium,
+    ...shadows.small,
     overflow: 'hidden',
   },
   
@@ -127,62 +124,62 @@ const styles = StyleSheet.create({
   destinationHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 15,
+    padding: spacing.section,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.border,
   },
   destinationId: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
   },
   destinationAddress: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 3,
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.text.secondary,
+    marginTop: spacing.xs - 1,
   },
   
   // Status badge indicating delivery status
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
     borderRadius: 15,
     borderWidth: 1,
     alignSelf: 'flex-start',
   },
   statusIcon: {
-    marginRight: 4,
+    marginRight: spacing.xs,
   },
   statusText: {
-    fontWeight: '600',
-    fontSize: 12,
+    fontWeight: typography.fontWeight.semiBold,
+    fontSize: typography.fontSize.tiny,
   },
   
   // Content section of the destination card
   destinationDetails: {
-    padding: 15,
+    padding: spacing.section,
   },
   
   // Detail items with icons
   detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   detailIcon: {
     width: 18,
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 5,
+    marginTop: spacing.xs + 1,
   },
   detailText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.text.secondary,
   },
   
   // Loading indicator container
@@ -190,12 +187,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: spacing.xl,
   },
   loaderText: {
-    marginTop: 15,
-    color: '#666',
-    fontSize: 16,
+    marginTop: spacing.section,
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.body,
   },
   
   // Map view container
@@ -224,39 +221,35 @@ const styles = StyleSheet.create({
   },
   mapOverlayText: {
     backgroundColor: 'rgba(255,255,255,0.8)',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm + 2,
     borderRadius: 20,
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.medium,
   },
   
   // Horizontal scrolling destination cards on map view
   mapDestinationsContainer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: spacing.xl,
     left: 0,
     right: 0,
     maxHeight: 160,
   },
   mapDestinationsContent: {
-    paddingHorizontal: 15,
+    paddingHorizontal: spacing.section,
   },
   
   // Individual destination card in map view
   mapDestinationCard: {
     flexDirection: 'row',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 15,
-    marginRight: 15,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.medium,
+    padding: spacing.section,
+    marginRight: spacing.section,
     width: 200,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    ...shadows.medium,
   },
   
   // Map destination step indicator
@@ -266,23 +259,23 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: spacing.sm + 2,
   },
   
   // Status variants for map destination indicators
   mapDestinationPending: {
-    backgroundColor: '#999',
+    backgroundColor: colors.text.tertiary,
   },
   mapDestinationCurrent: {
-    backgroundColor: '#f0ad4e',
+    backgroundColor: colors.palette.orange,
   },
   mapDestinationCompleted: {
-    backgroundColor: '#5cb85c',
+    backgroundColor: colors.palette.green,
   },
   mapDestinationNumber: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 14,
+    color: colors.text.light,
+    fontWeight: typography.fontWeight.bold,
+    fontSize: typography.fontSize.bodySmall,
   },
   
   // Content area for map destination cards
@@ -290,27 +283,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   mapDestinationId: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#007AFF',
+    fontSize: typography.fontSize.tiny,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary,
   },
   mapDestinationAddress: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
+    fontSize: typography.fontSize.bodySmall,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing.xs + 1,
   },
   
   // Recipient details in map destination card
   mapDestinationDetails: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: spacing.xs + 1,
   },
   mapDestinationPerson: {
-    fontSize: 12,
-    color: '#666',
-    marginLeft: 5,
+    fontSize: typography.fontSize.tiny,
+    color: colors.text.secondary,
+    marginLeft: spacing.xs + 1,
     flex: 1,
   },
   
@@ -318,16 +311,16 @@ const styles = StyleSheet.create({
   mapDestinationFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 5,
+    marginTop: spacing.xs + 1,
   },
   mapDestinationMetric: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   mapDestinationMetricText: {
-    fontSize: 12,
-    color: '#666',
-    marginLeft: 3,
+    fontSize: typography.fontSize.tiny,
+    color: colors.text.secondary,
+    marginLeft: spacing.xs - 1,
   }
 });
 

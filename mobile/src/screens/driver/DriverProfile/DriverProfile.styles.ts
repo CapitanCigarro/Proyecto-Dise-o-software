@@ -1,10 +1,11 @@
 import { StyleSheet } from 'react-native';
+import { colors, typography, spacing, borderRadius, shadows } from '../../../theme/globalStyles';
 
 const styles = StyleSheet.create({
   // Main container and layout styles
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background.main,
   },
   
   // Header navigation bar with title
@@ -12,15 +13,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
+    padding: spacing.section,
+    backgroundColor: colors.background.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.border,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: typography.fontSize.title,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
   },
   scrollContainer: {
     flex: 1,
@@ -28,170 +29,158 @@ const styles = StyleSheet.create({
   
   // Profile header section with name and delivery stats
   profileHeader: {
-    padding: 24,
-    backgroundColor: '#fff',
+    padding: spacing.xxl,
+    backgroundColor: colors.background.card,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    marginBottom: spacing.section,
+    ...shadows.small,
     alignItems: 'center',
   },
   name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
+    fontSize: typography.fontSize.heading,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
   },
   deliveriesContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f0f7ff',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
+    backgroundColor: `${colors.primary}10`,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xl,
     borderRadius: 20,
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   deliveriesText: {
-    fontSize: 15,
-    color: '#007AFF',
-    fontWeight: '600',
-    marginLeft: 8,
+    fontSize: typography.fontSize.bodySmall + 1,
+    color: colors.primary,
+    fontWeight: typography.fontWeight.semiBold,
+    marginLeft: spacing.sm,
   },
   
   // Performance metrics button
   performanceButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    shadowColor: '#007AFF',
+    paddingVertical: spacing.md - 2,
+    paddingHorizontal: spacing.lg,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
     elevation: 3,
   },
   performanceButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginLeft: 6,
+    color: colors.text.light,
+    fontWeight: typography.fontWeight.bold,
+    fontSize: typography.fontSize.bodySmall,
+    marginLeft: spacing.xs + 2,
   },
   
   // Content section containers
   section: {
-    marginBottom: 20,
-    paddingHorizontal: 20,
+    marginBottom: spacing.section,
+    paddingHorizontal: spacing.section,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
+    fontSize: typography.fontSize.subheading,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
   },
   
   // Vehicle information card styles
   licensePlateCard: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 15,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.large - 1,
+    padding: spacing.xl - 5,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    ...shadows.small,
   },
   licensePlateIcon: {
     width: 60,
     height: 60,
-    backgroundColor: '#f0f7ff',
+    backgroundColor: `${colors.primary}10`,
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    marginRight: spacing.xl - 5,
   },
   vehicleInfo: {
     flex: 1,
   },
   licensePlateLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
+    fontSize: typography.fontSize.tiny,
+    color: colors.text.secondary,
+    marginBottom: spacing.xs,
   },
   licensePlate: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
+    fontSize: typography.fontSize.title,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   vehicleType: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.text.secondary,
   },
   
   // Personal information card styles
   infoCard: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.large - 1,
+    ...shadows.small,
     overflow: 'hidden',
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
+    padding: spacing.xl - 5,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.border,
   },
   icon: {
-    marginRight: 15,
+    marginRight: spacing.xl - 5,
   },
   infoTextContainer: {
     flex: 1,
   },
   infoLabel: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: typography.fontSize.tiny,
+    color: colors.text.secondary,
     marginBottom: 2,
   },
   infoText: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: typography.fontSize.body,
+    color: colors.text.primary,
   },
   
   // Logout button styles
   logoutButton: {
-    backgroundColor: '#ff3b30',
+    backgroundColor: colors.palette.red,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 15,
-    borderRadius: 12,
-    margin: 20,
+    paddingVertical: spacing.xl - 5,
+    borderRadius: borderRadius.medium,
+    margin: spacing.section,
   },
   buttonIcon: {
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: colors.text.light,
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.bold,
   },
   
   // Additional space at bottom for better scrolling
   bottomSpace: {
-    height: 20,
+    height: spacing.section,
   }
 });
 

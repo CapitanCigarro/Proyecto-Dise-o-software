@@ -19,6 +19,9 @@ import { useAuth } from '../../../context/AuthContext';
 import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
 import styles from './DriverHome.styles';
 
+// Import mock data
+import mockDriverData from '../../../../assets/mockDataDriver.json';
+
 // Data structure for package delivery information
 interface Package {
   id: string;
@@ -27,6 +30,8 @@ interface Package {
   address: string;
   date: string;
   description?: string;
+  estimatedDelivery?: string;
+  deliveryDate?: string;
 }
 
 // Props definition for the Driver Home screen
@@ -54,15 +59,19 @@ const DriverHome: React.FC<DriverHomeProps> = ({ navigation }) => {
     pending: 0,
     inTransit: 0,
     delivered: 0,
-    total: 0
+    total: 0,
+    completionPercentage: 0,
+    deliveriesThisWeek: 0,
+    averageTimePerDelivery: 0,
+    kilometersToday: 0
   });
 
   // Route statistics for current delivery route
   const [routeStats, setRouteStats] = useState({
-    totalDistance: 8.0,
-    totalTime: 47,
-    estimatedCompletion: '11:30 AM',
-    destinations: 3
+    totalDistance: 0,
+    totalTime: 0,
+    estimatedCompletion: '',
+    destinations: 0
   });
 
   // Load packages on component mount
@@ -87,72 +96,25 @@ const DriverHome: React.FC<DriverHomeProps> = ({ navigation }) => {
     setFilteredPackages(filtered);
   };
 
-  // Load mock package data for demonstration
+  // Load mock package data from JSON file
   const loadPackages = async () => {
     setLoading(true);
     try {
-      // Always use initial mock data on app start instead of loading from storage
-      const mockData = [
-        { 
-          id: '1234', 
-          status: 'Pendiente',
-          recipient: 'María García', 
-          address: 'Calle Principal 123', 
-          date: '2023-05-20',
-          description: 'Caja mediana'
-        },
-        { 
-          id: '5678', 
-          status: 'En tránsito',
-          recipient: 'Carlos Rodríguez', 
-          address: 'Avenida Central 456', 
-          date: '2023-05-18',
-          description: 'Sobre pequeño'
-        },
-        { 
-          id: '9012', 
-          status: 'Entregado',
-          recipient: 'Ana López', 
-          address: 'Plaza Mayor 789', 
-          date: '2023-05-15',
-          description: 'Paquete frágil'
-        },
-        { 
-          id: '3456', 
-          status: 'Pendiente',
-          recipient: 'Roberto Méndez', 
-          address: 'Avenida Libertad 234', 
-          date: '2023-05-19',
-          description: 'Documentos importantes'
-        },
-        { 
-          id: '7890', 
-          status: 'Pendiente',
-          recipient: 'Laura Torres', 
-          address: 'Calle Norte 567', 
-          date: '2023-05-21',
-          description: 'Electrónica'
-        },
-      ];
+      // Get packages from mock data
+      const packagesData = mockDriverData.packages;
       
       // Save mock data to AsyncStorage
-      await AsyncStorage.setItem('packages', JSON.stringify(mockData));
+      await AsyncStorage.setItem('packages', JSON.stringify(packagesData));
       
       // Update state with initial data
-      setPackages(mockData);
-      setFilteredPackages(mockData);
+      setPackages(packagesData);
+      setFilteredPackages(packagesData);
       
-      // Calculate stats
-      const pending = mockData.filter(p => p.status === 'Pendiente').length;
-      const inTransit = mockData.filter(p => p.status === 'En tránsito').length;
-      const delivered = mockData.filter(p => p.status === 'Entregado').length;
+      // Set stats directly from mock data
+      setStats(mockDriverData.stats);
       
-      setStats({
-        pending,
-        inTransit,
-        delivered,
-        total: mockData.length
-      });
+      // Set route stats from mock data
+      setRouteStats(mockDriverData.currentRoute.routeStats);
       
     } catch (error) {
       console.error('Error loading packages:', error);
@@ -201,10 +163,12 @@ const DriverHome: React.FC<DriverHomeProps> = ({ navigation }) => {
       const delivered = updatedPackages.filter(p => p.status === 'Entregado').length;
       
       setStats({
+        ...stats,
         pending,
         inTransit,
         delivered,
-        total: updatedPackages.length
+        total: updatedPackages.length,
+        completionPercentage: Math.round((delivered / updatedPackages.length) * 100)
       });
       
       // Show success message

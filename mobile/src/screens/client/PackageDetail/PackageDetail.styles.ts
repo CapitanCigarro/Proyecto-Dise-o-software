@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { colors, typography, spacing, borderRadius, shadows } from '../../../theme/globalStyles';
 
 // Get screen width for responsive layouts
 const { width } = Dimensions.get('window');
@@ -7,22 +8,22 @@ const styles = StyleSheet.create({
   // Main container for the entire screen
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background.main,
   },
   
   // Header section with navigation and package ID
   header: {
-    paddingTop: 10,
-    paddingBottom: 20,
-    paddingHorizontal: 15,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    paddingTop: spacing.sm + 2,
+    paddingBottom: spacing.xl,
+    paddingHorizontal: spacing.section,
+    borderBottomLeftRadius: borderRadius.large,
+    borderBottomRightRadius: borderRadius.large,
   },
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: spacing.section,
   },
   
   // Navigation buttons in header
@@ -52,64 +53,56 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background.card,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    marginRight: 15,
+    ...shadows.small,
+    marginRight: spacing.section,
   },
   packageInfo: {
     flex: 1,
   },
   packageId: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: typography.fontSize.title,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
   },
   
   // Status indicator with colored dot
   statusContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 6,
+    marginTop: spacing.xs + 2,
   },
   statusDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    marginRight: 6,
+    marginRight: spacing.xs + 2,
   },
   statusText: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.semiBold,
   },
   
   // Main content container
   content: {
     flex: 1,
-    padding: 15,
+    padding: spacing.section,
   },
   
   // Tracking timeline container
   trackingContainer: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.large,
+    padding: spacing.section,
+    marginBottom: spacing.section,
+    ...shadows.small,
   },
   trackingTimeline: {
     position: 'relative',
     paddingLeft: 30,
-    marginTop: 10,
+    marginTop: spacing.sm + 2,
   },
   timelineLine: {
     position: 'absolute',
@@ -117,7 +110,7 @@ const styles = StyleSheet.create({
     top: 15,
     bottom: 15,
     width: 2,
-    backgroundColor: '#ddd',
+    backgroundColor: colors.border,
     zIndex: 1,
   },
   
@@ -125,7 +118,7 @@ const styles = StyleSheet.create({
   trackingStep: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 25,
+    marginBottom: spacing.xl + 5,
     position: 'relative',
     zIndex: 2,
   },
@@ -135,169 +128,153 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    marginRight: spacing.section,
     marginLeft: -15,
   },
   stepCompleted: {
-    backgroundColor: '#5cb85c',
+    backgroundColor: colors.status.delivered,
   },
   stepPending: {
-    backgroundColor: '#ddd',
+    backgroundColor: colors.border,
   },
   stepContent: {
     flex: 1,
   },
   stepTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
   },
   stepDate: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 2,
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
   },
   
   // Delivery metrics display (time, distance, cost)
   deliveryInfoContainer: {
     flexDirection: 'row',
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.large,
+    padding: spacing.section,
+    marginBottom: spacing.section,
+    ...shadows.small,
   },
   deliveryInfoItem: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 5,
+    paddingHorizontal: spacing.xs + 1,
   },
   deliveryInfoText: {
-    marginLeft: 10,
+    marginLeft: spacing.sm + 2,
   },
   deliveryInfoLabel: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: typography.fontSize.tiny,
+    color: colors.text.secondary,
   },
   deliveryInfoValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginTop: 2,
+    fontSize: typography.fontSize.bodySmall,
+    fontWeight: typography.fontWeight.semiBold,
+    color: colors.text.primary,
+    marginTop: spacing.xs,
   },
   
   // Section containers with titles
   section: {
-    marginBottom: 15,
+    marginBottom: spacing.section,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
-    paddingHorizontal: 5,
+    fontSize: typography.fontSize.subheading,
+    fontWeight: typography.fontWeight.bold,
+    marginBottom: spacing.sm + 2,
+    color: colors.text.primary,
+    paddingHorizontal: spacing.xs + 1,
   },
   
   // Package details card with specifications
   detailCard: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.large,
+    padding: spacing.section,
+    ...shadows.small,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: spacing.sm + 2,
   },
   infoItem: {
     flex: 1,
   },
   infoLabel: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: typography.fontSize.tiny,
+    color: colors.text.secondary,
   },
   infoValue: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-    marginTop: 2,
+    fontSize: typography.fontSize.body,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    marginTop: spacing.xs,
   },
   
   // Origin and destination address card
   addressCard: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.large,
+    padding: spacing.section,
+    ...shadows.small,
   },
   addressRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 10,
+    paddingVertical: spacing.sm + 2,
   },
   addressDot: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#007AFF22',
+    backgroundColor: `${colors.primary}22`,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    marginRight: spacing.section,
   },
   addressDivider: {
     height: 1,
-    backgroundColor: '#f0f0f0',
-    marginVertical: 5,
+    backgroundColor: colors.border,
+    marginVertical: spacing.xs + 1,
     marginLeft: 45,
   },
   addressInfo: {
     flex: 1,
   },
   addressLabel: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: typography.fontSize.tiny,
+    color: colors.text.secondary,
   },
   addressText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#333',
-    marginTop: 2,
-    marginBottom: 2,
+    fontSize: typography.fontSize.body - 1,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
   },
   addressSecondary: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.fontSize.bodySmall,
+    color: colors.text.secondary,
   },
   
   // Package description card
   descriptionCard: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    marginBottom: 15,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.large,
+    padding: spacing.section,
+    ...shadows.small,
+    marginBottom: spacing.section,
   },
   description: {
-    fontSize: 15,
-    color: '#333',
+    fontSize: typography.fontSize.body - 1,
+    color: colors.text.primary,
     lineHeight: 22,
   },
 });

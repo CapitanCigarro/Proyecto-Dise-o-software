@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text,
@@ -6,13 +6,16 @@ import {
   TouchableOpacity, 
   Image,
   Share,
-  Dimensions
+  Dimensions,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { PackageDetailScreenRouteProp, PackageDetailScreenNavigationProp } from '../../../navigation/types';
 import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
 import styles from './PackageDetail.styles';
+// Import mockData
+import mockData from '../../../../assets/mockDataClient.json';
 
 const { width } = Dimensions.get('window');
 
@@ -20,10 +23,28 @@ const { width } = Dimensions.get('window');
 const PackageDetail = () => {
   const navigation = useNavigation<PackageDetailScreenNavigationProp>();
   const route = useRoute<PackageDetailScreenRouteProp>();
-  const { package: packageData } = route.params;
+  const { packageId } = route.params;
   
-  // Track the current step in delivery process
-  const [currentStep, setCurrentStep] = useState(getStatusStep(packageData.status));
+  // State to hold the package data
+  const [packageData, setPackageData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  // Load package data from mockData.json on component mount
+  useEffect(() => {
+    // Find the package with the matching ID in mockData
+    const foundPackage = mockData.packages.find(pkg => pkg.id === packageId);
+    
+    if (foundPackage) {
+      setPackageData(foundPackage);
+      setCurrentStep(getStatusStep(foundPackage.status));
+    } else {
+      // Handle case where package is not found
+      console.error(`Package with ID ${packageId} not found in mockData`);
+    }
+    
+    setLoading(false);
+  }, [packageId]);
 
   // Determine color based on package delivery status
   const getStatusColor = (status: string) => {
@@ -47,6 +68,8 @@ const PackageDetail = () => {
   
   // Calculate delivery dates based on current status
   const getDeliveryInfo = () => {
+    if (!packageData) return { estimatedPickup: 'Cargando...', estimatedDelivery: 'Cargando...' };
+    
     const today = new Date();
     
     switch(packageData.status) {
@@ -81,6 +104,8 @@ const PackageDetail = () => {
   
   // Share package tracking information with others
   const shareTracking = async () => {
+    if (!packageData) return;
+    
     try {
       await Share.share({
         message: `Seguimiento de mi paquete #${packageData.id}. Estado actual: ${packageData.status}. Puedes seguirlo en nuestra aplicación.`,
@@ -90,6 +115,36 @@ const PackageDetail = () => {
       console.log(error);
     }
   };
+
+  // Show loading indicator while package data is being fetched
+  if (loading) {
+    return (
+      <SafeAreaWrapper>
+        <View style={[styles.container, styles.loadingContainer]}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Cargando detalles del paquete...</Text>
+        </View>
+      </SafeAreaWrapper>
+    );
+  }
+
+  // Handle case where package data is not found
+  if (!packageData) {
+    return (
+      <SafeAreaWrapper>
+        <View style={[styles.container, styles.errorContainer]}>
+          <Ionicons name="alert-circle-outline" size={60} color="#d9534f" />
+          <Text style={styles.errorText}>Paquete no encontrado</Text>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.backButtonText}>Volver</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaWrapper>
+    );
+  }
 
   return (
     <SafeAreaWrapper>
@@ -214,19 +269,19 @@ const PackageDetail = () => {
                 
                 <View style={styles.infoItem}>
                   <Text style={styles.infoLabel}>Tipo</Text>
-                  <Text style={styles.infoValue}>{packageData.type || 'Paquete'}</Text>
+                  <Text style={styles.infoValue}>{packageData.packageType || 'Estándar'}</Text>
                 </View>
               </View>
               
               <View style={styles.infoRow}>
                 <View style={styles.infoItem}>
                   <Text style={styles.infoLabel}>Peso</Text>
-                  <Text style={styles.infoValue}>{packageData.weight || '2.5'} kg</Text>
+                  <Text style={styles.infoValue}>{packageData.weight || '0'} kg</Text>
                 </View>
                 
                 <View style={styles.infoItem}>
                   <Text style={styles.infoLabel}>Dimensiones</Text>
-                  <Text style={styles.infoValue}>{packageData.dimensions || '30 x 20 x 15'} cm</Text>
+                  <Text style={styles.infoValue}>{packageData.dimensions || 'N/A'}</Text>
                 </View>
               </View>
             </View>
@@ -242,8 +297,8 @@ const PackageDetail = () => {
                 </View>
                 <View style={styles.addressInfo}>
                   <Text style={styles.addressLabel}>Origen</Text>
-                  <Text style={styles.addressText}>{packageData.origin || 'Centro de Distribución'}</Text>
-                  <Text style={styles.addressSecondary}>{packageData.sender || 'Remitente Principal'}</Text>
+                  <Text style={styles.addressText}>{packageData.origin || 'No especificado'}</Text>
+                  <Text style={styles.addressSecondary}>{packageData.sender || 'No especificado'}</Text>
                 </View>
               </View>
               
@@ -255,8 +310,8 @@ const PackageDetail = () => {
                 </View>
                 <View style={styles.addressInfo}>
                   <Text style={styles.addressLabel}>Destino</Text>
-                  <Text style={styles.addressText}>{packageData.address || packageData.destination}</Text>
-                  <Text style={styles.addressSecondary}>{packageData.recipient || 'Destinatario'}</Text>
+                  <Text style={styles.addressText}>{packageData.address || packageData.destination || 'No especificado'}</Text>
+                  <Text style={styles.addressSecondary}>{packageData.recipient || 'No especificado'}</Text>
                 </View>
               </View>
             </View>

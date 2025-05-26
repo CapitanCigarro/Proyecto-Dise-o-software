@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
 import styles from './ClientHome.styles';
+// Import the mock data
+import mockData from '../../../../assets/mockDataClient.json';
 
 // Data structure for notification items
 interface Notification {
@@ -35,39 +37,82 @@ const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
     total: 0
   });
   const [userName, setUserName] = useState('');
+  const [userId, setUserId] = useState('');
   
-  // Load mock data and user information on component mount
+  // Maximum items to show without scrolling
+  const MAX_VISIBLE_NOTIFICATIONS = 3;
+  const MAX_VISIBLE_PACKAGES = 3;
+  
+  // Load data from mockData.json on component mount
   useEffect(() => {
     const loadMockData = async () => {
       try {
         const user = await AsyncStorage.getItem('user');
+        let currentUserId = '1'; // Default to first user if none stored
+        
         if (user) {
           const userData = JSON.parse(user);
           setUserName(userData.name || '');
+          
+          // If we have a user ID in storage, use it
+          if (userData.id) {
+            currentUserId = userData.id;
+            setUserId(currentUserId);
+          }
+        } else {
+          // If no user in storage, use the first user from mock data
+          const firstUser = mockData.users[0];
+          setUserName(firstUser.name);
+          setUserId(firstUser.id);
         }
         
-        const mockNotifications = [
-          { id: '1', message: 'Tu paquete #1234 ha sido recogido', date: '2023-05-23 10:30' },
-          { id: '2', message: 'Tu paquete #5678 ha sido entregado', date: '2023-05-22 14:15' },
-        ];
+        // Filter notifications for the current user
+        const userNotifications = mockData.notifications.filter(
+          notification => notification.userId === currentUserId
+        );
         
-        const mockPackages = [
-          { id: '1234', status: 'En tránsito', destination: 'Calle Principal 123', date: '2023-05-23' },
-          { id: '5678', status: 'Entregado', destination: 'Avenida Central 456', date: '2023-05-22' },
-          { id: '9012', status: 'Pendiente', destination: 'Plaza Central 789', date: '2023-05-21' },
-        ];
+        // Filter packages for the current user (assuming sender is the current user)
+        const userPackages = mockData.packages.filter(
+          pkg => mockData.users.find(u => u.id === currentUserId)?.name === pkg.sender
+        );
         
-        setNotifications(mockNotifications);
-        setRecentPackages(mockPackages);
+        // Map packages to the expected format
+        const formattedPackages = userPackages.map(pkg => ({
+          id: pkg.id,
+          status: pkg.status,
+          destination: pkg.destination,
+          date: pkg.date
+        }));
         
-        const active = mockPackages.filter(p => p.status !== 'Entregado').length;
-        const delivered = mockPackages.filter(p => p.status === 'Entregado').length;
+        // Map notifications to the expected format
+        const formattedNotifications = userNotifications.map(notification => ({
+          id: notification.id,
+          message: notification.message,
+          date: notification.date
+        }));
         
-        setStats({
-          active,
-          delivered,
-          total: mockPackages.length
-        });
+        setNotifications(formattedNotifications);
+        setRecentPackages(formattedPackages);
+        
+        // Set stats based on user's stats from mock data
+        const userStats = mockData.stats[`user${currentUserId}`];
+        if (userStats) {
+          setStats({
+            active: userStats.active,
+            delivered: userStats.delivered,
+            total: userStats.total
+          });
+        } else {
+          // Calculate stats from packages if not available directly
+          const active = formattedPackages.filter(p => p.status !== 'Entregado').length;
+          const delivered = formattedPackages.filter(p => p.status === 'Entregado').length;
+          
+          setStats({
+            active,
+            delivered,
+            total: formattedPackages.length
+          });
+        }
         
       } catch (error) {
         console.error('Error loading data:', error);
@@ -138,27 +183,17 @@ const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
           </View>
           
           {notifications.length > 0 ? (
-            <FlatList
-              data={notifications}
-              renderItem={({ item }) => (
-                <View style={styles.notificationItem}>
+            <View style={styles.notificationsContainer}>
+              {notifications.slice(0, MAX_VISIBLE_NOTIFICATIONS).map(item => (
+                <View key={item.id} style={styles.notificationItem}>
                   <View style={styles.notificationDot} />
                   <View style={styles.notificationContent}>
                     <Text style={styles.notificationMessage}>{item.message}</Text>
                     <Text style={styles.notificationDate}>{item.date}</Text>
                   </View>
                 </View>
-              )}
-              keyExtractor={item => item.id}
-              scrollEnabled={false}
-              style={styles.notificationsList}
-              ListEmptyComponent={
-                <View style={styles.emptyContainer}>
-                  <Ionicons name="notifications-off-outline" size={40} color="#ccc" />
-                  <Text style={styles.emptyText}>No hay notificaciones nuevas</Text>
-                </View>
-              }
-            />
+              ))}
+            </View>
           ) : (
             <View style={styles.emptyContainer}>
               <Ionicons name="notifications-off-outline" size={40} color="#ccc" />
@@ -180,10 +215,10 @@ const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
           </View>
           
           {recentPackages.length > 0 ? (
-            <FlatList
-              data={recentPackages}
-              renderItem={({ item }) => (
+            <View style={styles.packagesContainer}>
+              {recentPackages.slice(0, MAX_VISIBLE_PACKAGES).map(item => (
                 <TouchableOpacity 
+                  key={item.id}
                   style={styles.packageItem}
                   onPress={() => navigation.navigate('PackageTracking', { packageId: item.id })}
                 >
@@ -197,17 +232,8 @@ const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
                     <Text style={styles.statusBadgeText}>{item.status}</Text>
                   </View>
                 </TouchableOpacity>
-              )}
-              keyExtractor={item => item.id}
-              scrollEnabled={false}
-              style={styles.packagesList}
-              ListEmptyComponent={
-                <View style={styles.emptyContainer}>
-                  <Ionicons name="cube-outline" size={40} color="#ccc" />
-                  <Text style={styles.emptyText}>No hay paquetes recientes</Text>
-                </View>
-              }
-            />
+              ))}
+            </View>
           ) : (
             <View style={styles.emptyContainer}>
               <Ionicons name="cube-outline" size={40} color="#ccc" />
