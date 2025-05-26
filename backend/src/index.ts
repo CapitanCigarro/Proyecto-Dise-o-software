@@ -1,6 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import { Pool } from 'pg';
+import rutaRoutes from './rutas/calcular'; // Importa tus rutas
+import asignadas from './rutas/asignadas'; // Importa las rutas asignadas
 
 // Configurar variables de entorno
 dotenv.config();
@@ -19,6 +21,10 @@ const pool = new Pool({
 
 // Middleware para parsear JSON
 app.use(express.json());
+
+// Monta tus rutas
+app.use('/api', rutaRoutes); // Todas tus rutas de API estarán bajo /api
+app.use('/api', asignadas);
 
 // Ruta básica
 app.get('/', (req, res) => {

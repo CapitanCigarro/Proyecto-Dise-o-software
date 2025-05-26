@@ -1,0 +1,29 @@
+### Listar rutas asignadas para conductor123
+GET http://localhost:3000/api/rutas/asignadas?usuario_id=conductor123
+
+### Listar rutas asignadas para conductor456
+GET http://localhost:3000/api/rutas/asignadas?usuario_id=conductor456
+
+### Probar usuario_id no existente
+GET http://localhost:3000/api/rutas/asignadas?usuario_id=usuario_inexistente
+
+### Probar sin usuario_id (debería dar error 400)
+GET http://localhost:3000/api/rutas/asignadas
+
+### Ruta corta: Santiago a Providencia
+POST http://localhost:3000/api/rutas
+Content-Type: application/json
+
+{
+    "origen": [-70.6501, -33.4411],  
+    "destino": [-70.6062, -33.4172]   
+}
+
+### Ruta de prueba larga (puede fallar en el servidor público de OSRM) - concepcio a santiago
+POST http://localhost:3000/api/rutas
+Content-Type: application/json
+
+{
+    "origen": [-70.6501, -33.4411],
+    "destino": [-73.047526, -36.820126]
+}
