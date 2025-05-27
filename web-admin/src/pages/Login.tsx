@@ -37,72 +37,88 @@ const Login = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Iniciar Sesión</h1>
-      <p style={styles.subtitle}>Accede al panel de administración</p>
-      <form onSubmit={handleLogin}>
-        <div style={styles.formGroup}>
-          <label htmlFor="email" style={styles.label}>Correo:</label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            style={{
-              ...styles.input,
-              ...(emailFocused ? styles.inputFocus : {}),
-            }}
-            onFocus={() => setEmailFocused(true)}
-            onBlur={() => setEmailFocused(false)}
-            autoComplete="username"
-          />
-        </div>
-        <div style={styles.formGroup}>
-          <label htmlFor="password" style={styles.label}>Contraseña:</label>
-          <input
-            id="password"
-            type="password"
-            required
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            style={{
-              ...styles.input,
-              ...(passwordFocused ? styles.inputFocus : {}),
-            }}
-            onFocus={() => setPasswordFocused(true)}
-            onBlur={() => setPasswordFocused(false)}
-            autoComplete="current-password"
-          />
-        </div>
+    <>
+      <div style={styles.background} />
+      <div style={styles.container}>
+        <h1 style={styles.title}>Iniciar Sesión</h1>
+        <p style={styles.subtitle}>Accede al panel de administración</p>
+        <form onSubmit={handleLogin}>
+          <div style={styles.formGroup}>
+            <label htmlFor="email" style={styles.label}>Correo:</label>
+            <input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              style={{
+                ...styles.input,
+                ...(emailFocused ? styles.inputFocus : {}),
+              }}
+              onFocus={() => setEmailFocused(true)}
+              onBlur={() => setEmailFocused(false)}
+              autoComplete="username"
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <label htmlFor="password" style={styles.label}>Contraseña:</label>
+            <input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              style={{
+                ...styles.input,
+                ...(passwordFocused ? styles.inputFocus : {}),
+              }}
+              onFocus={() => setPasswordFocused(true)}
+              onBlur={() => setPasswordFocused(false)}
+              autoComplete="current-password"
+            />
+          </div>
 
-        {error && <p style={{ color: 'red', marginBottom: 12 }}>{error}</p>}
+          {error && <p style={{ color: 'red', marginBottom: 12 }}>{error}</p>}
 
-        <button
-          type="submit"
-          style={{
-            ...styles.button,
-            ...(buttonHover ? styles.buttonHover : {}),
-          }}
-          onMouseEnter={() => setButtonHover(true)}
-          onMouseLeave={() => setButtonHover(false)}
-        >
-          Ingresar
-        </button>
-      </form>
-    </div>
+          <button
+            type="submit"
+            style={{
+              ...styles.button,
+              ...(buttonHover ? styles.buttonHover : {}),
+            }}
+            onMouseEnter={() => setButtonHover(true)}
+            onMouseLeave={() => setButtonHover(false)}
+          >
+            Ingresar
+          </button>
+        </form>
+      </div>
+    </>
   );
 };
 
 const styles = {
+  background: {
+    position: 'fixed' as const, // para que quede fijo en toda la pantalla
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    backgroundImage: `url('/Wallpaper.jpg')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    filter: 'blur(8px)',    // el efecto difuminado
+    zIndex: -1,             // que quede detrás de todo
+  },
   container: {
     maxWidth: 400,
     margin: '4rem auto',
     padding: 24,
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
     borderRadius: 16,
     boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    position: 'relative' as const,
   },
   title: {
     fontSize: 24,
@@ -128,7 +144,7 @@ const styles = {
     fontSize: 14,
   },
   input: {
-    width: '100%',
+    width: '90%',
     padding: '14px 16px',
     fontSize: 16,
     borderRadius: 12,
