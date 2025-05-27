@@ -40,7 +40,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUserRole(user.role);
     } catch (error) {
       console.error('Failed to save user data', error);
-      // Podrías lanzar o manejar el error aquí
     }
   };
 
