@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Bar } from 'react-chartjs-2';
@@ -17,7 +17,6 @@ const Dashboard = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  // Datos mock que luego puedes reemplazar por API calls
   const metrics = {
     totalEnvios: 120,
     entregados: 85,
@@ -44,58 +43,68 @@ const Dashboard = () => {
   ];
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Panel de Administración</h1>
-      <p>Resumen general del estado del sistema.</p>
+    <div style={styles.page}>
+      <div style={styles.backgroundBlur} />
+      <div style={styles.container}>
+        <h1 style={styles.title}>Panel de Administración</h1>
+        <p style={styles.subtitle}>Resumen general del estado del sistema.</p>
 
-      {/* MÉTRICAS */}
-      <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-        <Card title="Total Envíos Hoy" value={metrics.totalEnvios} />
-        <Card title="Entregados" value={metrics.entregados} />
-        <Card title="Pendientes" value={metrics.pendientes} />
-        <Card title="Conductores Activos" value={metrics.conductoresActivos} />
-        <Card title="Entregas a Tiempo" value={metrics.tasaEntregaATiempo} />
-      </div>
+        {/* MÉTRICAS */}
+        <div style={styles.metricsWrapper}>
+          <Card title="Total Envíos Hoy" value={metrics.totalEnvios} />
+          <Card title="Entregados" value={metrics.entregados} />
+          <Card title="Pendientes" value={metrics.pendientes} />
+          <Card title="Conductores Activos" value={metrics.conductoresActivos} />
+          <Card title="Entregas a Tiempo" value={metrics.tasaEntregaATiempo} />
+        </div>
 
-      {/* GRÁFICO */}
-      <div style={{ marginTop: '3rem' }}>
-        <h2>Entregas por Día</h2>
-        <Bar data={chartData} />
-      </div>
+        {/* GRÁFICO */}
+        <div style={styles.chartWrapper}>
+          <h2>Entregas por Día</h2>
+          <div style={styles.chartBox}>
+            <Bar data={chartData} />
+          </div>
+        </div>
 
-      {/* ÚLTIMOS ENVÍOS */}
-      <div style={{ marginTop: '3rem' }}>
-        <h2>Últimos Envíos</h2>
-        <table border={1} cellPadding={10} style={{ width: '100%', marginTop: '1rem' }}>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Cliente</th>
-              <th>Estado</th>
-              <th>Fecha</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ultimosEnvios.map((envio) => (
-              <tr key={envio.id}>
-                <td>{envio.id}</td>
-                <td>{envio.cliente}</td>
-                <td>{envio.estado}</td>
-                <td>{envio.fecha}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        {/* ÚLTIMOS ENVÍOS */}
+        <div style={styles.lastShipmentsWrapper}>
+          <h2>Últimos Envíos</h2>
+          <div style={styles.lastShipmentsBox}>
+            <table cellPadding={10} style={styles.table}>
+              <thead style={styles.tableHeader}>
+                <tr>
+                  <th>ID</th>
+                  <th>Cliente</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ultimosEnvios.map((envio) => (
+                  <tr key={envio.id}>
+                    <td>{envio.id}</td>
+                    <td>{envio.cliente}</td>
+                    <td>{envio.estado}</td>
+                    <td>{envio.fecha}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-      {/* ACCESOS RÁPIDOS */}
-      <div style={{ marginTop: '3rem', display: 'flex', gap: '1rem' }}>
-        <button onClick={() => navigate('/envios')}>Ver Envíos</button>
-        <button onClick={() => navigate('/asignar-rutas')}>Asignar Rutas</button>
-        <button onClick={() => navigate('/reportes')}>Ver Reportes</button>
-        <button onClick={logout} style={{ marginLeft: 'auto' }}>
-          Cerrar sesión
-        </button>
+        {/* ACCESOS RÁPIDOS */}
+        <div style={styles.quickAccessWrapper}>
+          <button onClick={() => navigate('/envios')} style={styles.button}>Ver Envíos</button>
+          <button onClick={() => navigate('/asignar-rutas')} style={styles.button}>Asignar Rutas</button>
+          <button onClick={() => navigate('/reportes')} style={styles.button}>Ver Reportes</button>
+          <button
+            onClick={logout}
+            style={{ ...styles.button, ...styles.logoutButton }}
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -107,18 +116,126 @@ type CardProps = {
 };
 
 const Card = ({ title, value }: CardProps) => (
-  <div
-    style={{
-      border: '1px solid #ccc',
-      borderRadius: '8px',
-      padding: '1rem',
-      minWidth: '150px',
-      textAlign: 'center',
-    }}
-  >
-    <h2 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{title}</h2>
-    <p style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{value}</p>
+  <div style={styles.card}>
+    <h2 style={styles.cardTitle}>{title}</h2>
+    <p style={styles.cardValue}>{value}</p>
   </div>
 );
+
+const styles: { [key: string]: CSSProperties } = {
+  page: {
+    position: 'relative',
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '2rem',
+    overflow: 'hidden',
+},
+
+  backgroundBlur: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundImage: `url('/Wallpaper.jpg')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    filter: 'blur(8px)',
+    zIndex: 0,
+},
+  container: {
+    position: 'relative',
+    zIndex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backdropFilter: 'blur(10px)',
+    borderRadius: '16px',
+    padding: '2rem',
+    maxWidth: '1200px',
+    width: '100%',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+    overflowY: 'auto',
+    maxHeight: '100%',
+},
+
+  title: {
+    textAlign: 'center',
+  },
+  subtitle: {
+    textAlign: 'center',
+    marginBottom: '2rem',
+  },
+  metricsWrapper: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '1rem',
+    justifyContent: 'center',
+  },
+  chartWrapper: {
+    marginTop: '3rem',
+  },
+  chartBox: {
+    backgroundColor: '#fff',
+    borderRadius: '12px',
+    padding: '1rem',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+  },
+  lastShipmentsWrapper: {
+    marginTop: '3rem',
+  },
+  lastShipmentsBox: {
+    backgroundColor: '#fff',
+    borderRadius: '12px',
+    padding: '1rem',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    overflowX: 'auto',
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+  },
+  tableHeader: {
+    backgroundColor: '#f5f5f5',
+  },
+  quickAccessWrapper: {
+    marginTop: '3rem',
+    display: 'flex',
+    gap: '1rem',
+    justifyContent: 'flex-end',
+    flexWrap: 'wrap',
+  },
+  button: {
+    padding: '0.75rem 1.2rem',
+    backgroundColor: '#4F46E5',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontWeight: '500',
+  },
+  logoutButton: {
+    backgroundColor: '#DC3545',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: '12px',
+    padding: '1.2rem',
+    minWidth: '150px',
+    textAlign: 'center',
+    flex: 1,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+  },
+  cardTitle: {
+    fontSize: '1.1rem',
+    marginBottom: '0.5rem',
+    color: '#333',
+  },
+  cardValue: {
+    fontSize: '1.6rem',
+    fontWeight: 'bold',
+    color: '#4F46E5',
+  },
+};
 
 export default Dashboard;
