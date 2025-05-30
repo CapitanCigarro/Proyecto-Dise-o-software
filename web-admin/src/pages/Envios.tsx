@@ -5,7 +5,7 @@ interface Envio {
   cliente: string;
   conductor: string;
   estado: 'pendiente' | 'en camino' | 'entregado' | 'cancelado';
-  fecha: string; // ISO string o formato simple
+  fecha: string;
 }
 
 const datosMock: Envio[] = [
