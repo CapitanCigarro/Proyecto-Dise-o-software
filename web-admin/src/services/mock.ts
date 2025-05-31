@@ -48,5 +48,13 @@ mock.onGet('/dashboard').reply(200, {
   ]
 });
 
+// Al final de mock.ts, después de otros mocks
+mock.onGet('/envios').reply(200, [
+  { id: 1, cliente: 'Juan Pérez', conductor: 'Carlos Pereira', estado: 'Pendiente', fecha: '2025-05-27' },
+  { id: 2, cliente: 'María López', conductor: 'Ana Lisa', estado: 'En camino', fecha: '2025-05-27' },
+  { id: 3, cliente: 'Luis Gómez', conductor: 'Carlos Pereira', estado: 'Entregado', fecha: '2025-05-26' },
+  { id: 4, cliente: 'Sofía Díaz', conductor: 'Ana Lisa', estado: 'Cancelado', fecha: '2025-05-25' },
+]);
+
 
 export default mock;

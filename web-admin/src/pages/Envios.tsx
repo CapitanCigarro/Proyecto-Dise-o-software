@@ -1,28 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from '../services/axios';
+import '../services/mock';
 
 interface Envio {
   id: number;
   cliente: string;
   conductor: string;
-  estado: 'pendiente' | 'en camino' | 'entregado' | 'cancelado';
+  estado: 'Pendiente' | 'En camino' | 'Entregado' | 'Cancelado';
   fecha: string;
 }
 
-const datosMock: Envio[] = [
-  { id: 1, cliente: 'Juan Pérez', conductor: 'Carlos Pereira', estado: 'pendiente', fecha: '2025-05-27' },
-  { id: 2, cliente: 'María López', conductor: 'Ana Lisa', estado: 'en camino', fecha: '2025-05-27' },
-  { id: 3, cliente: 'Luis Gómez', conductor: 'Carlos Pereira', estado: 'entregado', fecha: '2025-05-26' },
-  { id: 4, cliente: 'Sofía Díaz', conductor: 'Ana Lisa', estado: 'cancelado', fecha: '2025-05-25' },
-];
-
-const estados = ['todos', 'pendiente', 'en camino', 'entregado', 'cancelado'];
+const estados = ['todos', 'Pendiente', 'En camino', 'Entregado', 'Cancelado'];
 
 const Envios = () => {
+  const [envios, setEnvios] = useState<Envio[]>([]);
   const [filtroEstado, setFiltroEstado] = useState<string>('todos');
 
+  useEffect(() => {
+    axios.get('/envios')
+      .then(res => setEnvios(res.data))
+      .catch(err => {
+        console.error('Error cargando envíos:', err);
+        setEnvios([]); // o podrías mostrar un mensaje de error
+      });
+  }, []);
+
   const enviosFiltrados = filtroEstado === 'todos'
-    ? datosMock
-    : datosMock.filter(envio => envio.estado === filtroEstado);
+    ? envios
+    : envios.filter(envio => envio.estado === filtroEstado);
 
   return (
     <div style={styles.page}>
