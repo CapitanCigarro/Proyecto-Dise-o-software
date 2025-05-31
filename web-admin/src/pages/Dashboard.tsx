@@ -62,7 +62,7 @@ const Dashboard = () => {
         <div style={styles.chartWrapper}>
           <h2>Entregas por Día</h2>
           <div style={styles.chartBox}>
-            <Bar data={chartData} />
+            <Bar data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
           </div>
         </div>
 
@@ -182,6 +182,7 @@ const styles: { [key: string]: CSSProperties } = {
     borderRadius: '12px',
     padding: '1rem',
     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    height: 'clamp(400px, 80vh, 600px)',
   },
   lastShipmentsWrapper: {
     marginTop: '3rem',

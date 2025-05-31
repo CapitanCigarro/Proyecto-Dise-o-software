@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Ajusta la ruta según donde tengas el AuthContext
-
-const MOCK_USERS = [
-  { email: 'cliente@example.com', password: 'password123', role: 'cliente', token: 'token-cliente' },
-  { email: 'conductor@example.com', password: 'password123', role: 'conductor', token: 'token-conductor' },
-  { email: 'admin@example.com', password: 'adminpass', role: 'admin', token: 'token-admin' },
-];
+import { useAuth } from '../context/AuthContext';
+import axios from '../services/axios';
+import '../services/mock';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,22 +15,30 @@ const Login = () => {
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    const user = MOCK_USERS.find(u => u.email === email && u.password === password);
+  try {
+    const response = await axios.post('/login', { email, password });
+    const user = response.data;
 
-    if (user) {
-    if (user.role === 'admin') {
-      login(user);  // Guarda token y rol en contexto + localStorage
-      navigate('/dashboard');
-    } else {
-      setError('Acceso denegado: solo administradores pueden ingresar');
+    if (!user) {
+      setError('Correo o contraseña incorrectos');
+      return;
     }
-  } else {
-    setError('Correo o contraseña incorrectos');
+
+    if (user.role !== 'admin') {
+      setError('Acceso denegado: solo administradores pueden ingresar');
+      return;
+    }
+
+    login(user);
+    navigate('/dashboard');
+
+  } catch (err: any) {
+    setError(err.response?.data?.message || 'Error al iniciar sesión');
   }
-  };
+};
 
   return (
     <>
