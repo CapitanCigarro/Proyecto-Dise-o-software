@@ -1,7 +1,10 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Bar } from 'react-chartjs-2';
+import axios from '../services/axios';
+import '../services/mock';
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -17,30 +20,46 @@ const Dashboard = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  const metrics = {
-    totalEnvios: 120,
-    entregados: 85,
-    pendientes: 35,
-    conductoresActivos: 8,
-    tasaEntregaATiempo: '91%',
-  };
+  const [metrics, setMetrics] = useState({
+    totalEnvios: 0,
+    entregados: 0,
+    pendientes: 0,
+    conductoresActivos: 0,
+    tasaEntregaATiempo: '0%',
+  });
 
-  const chartData = {
-    labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'],
-    datasets: [
-      {
-        label: 'Entregas por día',
-        data: [20, 25, 22, 30, 28],
-        backgroundColor: '#4F46E5',
-      },
-    ],
-  };
+  const [chartData, setChartData] = useState({
+    labels: [],
+    datasets: [],
+  });
 
-  const ultimosEnvios = [
-    { id: 'PKG-001', cliente: 'Juan Pérez', conductor: 'Pedrito Jimenez', estado: 'Entregado', fecha: '2025-05-27' },
-    { id: 'PKG-002', cliente: 'María González',conductor: 'Carlos Sanchez', estado: 'Pendiente', fecha: '2025-05-28' },
-    { id: 'PKG-003', cliente: 'Pedro Ramírez',conductor: 'Dino Saurio', estado: 'En ruta', fecha: '2025-05-28' },
-  ];
+  type Envio = {
+  id: string;
+  cliente: string;
+  conductor: string;
+  estado: string;
+  fecha: string;
+};
+
+const [ultimosEnvios, setUltimosEnvios] = useState<Envio[]>([]);
+
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await axios.get('/dashboard');
+        const data = response.data;
+
+        setMetrics(data.metrics);
+        setChartData(data.chartData);
+        setUltimosEnvios(data.ultimosEnvios);
+      } catch (error) {
+        console.error('Error cargando datos del dashboard:', error);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   return (
     <div style={styles.page}>

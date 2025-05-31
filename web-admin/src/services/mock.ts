@@ -22,12 +22,31 @@ mock.onPost('/login').reply(config => {
   }
 });
 
-// Mock de paquetes
-mock.onGet('/paquetes').reply(200, [
-  { id: 1, nombre: 'Paquete 1', estado: 'pendiente' },
-  { id: 2, nombre: 'Paquete 2', estado: 'entregado' },
-]);
+// Mock del dashboard (métricas, gráficas y últimos envíos)
+mock.onGet('/dashboard').reply(200, {
+  metrics: {
+    totalEnvios: 120,
+    entregados: 85,
+    pendientes: 35,
+    conductoresActivos: 8,
+    tasaEntregaATiempo: '91%',
+  },
+  chartData: {
+    labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'],
+    datasets: [
+      {
+        label: 'Entregas por día',
+        data: [20, 25, 22, 30, 28],
+        backgroundColor: '#4F46E5',
+      },
+    ],
+  },
+  ultimosEnvios: [
+    { id: 'PKG-001', cliente: 'Juan Pérez', conductor: 'Pedrito Jimenez', estado: 'Entregado', fecha: '2025-05-27' },
+    { id: 'PKG-002', cliente: 'María González', conductor: 'Carlos Sanchez', estado: 'Pendiente', fecha: '2025-05-28' },
+    { id: 'PKG-003', cliente: 'Pedro Ramírez', conductor: 'Dino Saurio', estado: 'En ruta', fecha: '2025-05-28' },
+  ]
+});
 
-// Puedes agregar mocks para asignación de rutas, reportes, etc.
 
 export default mock;
