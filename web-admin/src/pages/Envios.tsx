@@ -9,10 +9,10 @@ interface Envio {
 }
 
 const datosMock: Envio[] = [
-  { id: 1, cliente: 'Juan Pérez', conductor: 'Carlos', estado: 'pendiente', fecha: '2025-05-27' },
-  { id: 2, cliente: 'María López', conductor: 'Ana', estado: 'en camino', fecha: '2025-05-27' },
-  { id: 3, cliente: 'Luis Gómez', conductor: 'Carlos', estado: 'entregado', fecha: '2025-05-26' },
-  { id: 4, cliente: 'Sofía Díaz', conductor: 'Ana', estado: 'cancelado', fecha: '2025-05-25' },
+  { id: 1, cliente: 'Juan Pérez', conductor: 'Carlos Pereira', estado: 'pendiente', fecha: '2025-05-27' },
+  { id: 2, cliente: 'María López', conductor: 'Ana Lisa', estado: 'en camino', fecha: '2025-05-27' },
+  { id: 3, cliente: 'Luis Gómez', conductor: 'Carlos Pereira', estado: 'entregado', fecha: '2025-05-26' },
+  { id: 4, cliente: 'Sofía Díaz', conductor: 'Ana Lisa', estado: 'cancelado', fecha: '2025-05-25' },
 ];
 
 const estados = ['todos', 'pendiente', 'en camino', 'entregado', 'cancelado'];
@@ -136,6 +136,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   tableHeader: {
     backgroundColor: '#f5f5f5',
+    textAlign: 'left',
   },
 };
 

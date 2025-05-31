@@ -37,9 +37,9 @@ const Dashboard = () => {
   };
 
   const ultimosEnvios = [
-    { id: 'PKG-001', cliente: 'Juan Pérez', estado: 'Entregado', fecha: '2025-05-27' },
-    { id: 'PKG-002', cliente: 'María González', estado: 'Pendiente', fecha: '2025-05-28' },
-    { id: 'PKG-003', cliente: 'Pedro Ramírez', estado: 'En ruta', fecha: '2025-05-28' },
+    { id: 'PKG-001', cliente: 'Juan Pérez', conductor: 'Pedrito Jimenez', estado: 'Entregado', fecha: '2025-05-27' },
+    { id: 'PKG-002', cliente: 'María González',conductor: 'Carlos Sanchez', estado: 'Pendiente', fecha: '2025-05-28' },
+    { id: 'PKG-003', cliente: 'Pedro Ramírez',conductor: 'Dino Saurio', estado: 'En ruta', fecha: '2025-05-28' },
   ];
 
   return (
@@ -49,7 +49,7 @@ const Dashboard = () => {
         <h1 style={styles.title}>Panel de Administración</h1>
         <p style={styles.subtitle}>Resumen general del estado del sistema.</p>
 
-        {/* MÉTRICAS */}
+        {/* METRICAS */}
         <div style={styles.metricsWrapper}>
           <Card title="Total Envíos Hoy" value={metrics.totalEnvios} />
           <Card title="Entregados" value={metrics.entregados} />
@@ -58,7 +58,7 @@ const Dashboard = () => {
           <Card title="Entregas a Tiempo" value={metrics.tasaEntregaATiempo} />
         </div>
 
-        {/* GRÁFICO */}
+        {/* GRAFICO */}
         <div style={styles.chartWrapper}>
           <h2>Entregas por Día</h2>
           <div style={styles.chartBox}>
@@ -75,6 +75,7 @@ const Dashboard = () => {
                 <tr>
                   <th>ID</th>
                   <th>Cliente</th>
+                  <th>Conductor</th>
                   <th>Estado</th>
                   <th>Fecha</th>
                 </tr>
@@ -84,6 +85,7 @@ const Dashboard = () => {
                   <tr key={envio.id}>
                     <td>{envio.id}</td>
                     <td>{envio.cliente}</td>
+                    <td>{envio.conductor}</td>
                     <td>{envio.estado}</td>
                     <td>{envio.fecha}</td>
                   </tr>
@@ -93,7 +95,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* ACCESOS RÁPIDOS */}
+        {/* ACCESOS RAPIDOS */}
         <div style={styles.quickAccessWrapper}>
           <button onClick={() => navigate('/envios')} style={styles.button}>Ver Envíos</button>
           <button onClick={() => navigate('/asignar-rutas')} style={styles.button}>Asignar Rutas</button>
@@ -197,6 +199,7 @@ const styles: { [key: string]: CSSProperties } = {
   },
   tableHeader: {
     backgroundColor: '#f5f5f5',
+    textAlign: 'left',
   },
   quickAccessWrapper: {
     marginTop: '3rem',
