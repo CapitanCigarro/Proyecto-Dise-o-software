@@ -8,6 +8,7 @@ import '../services/mock';
 import {
   Chart as ChartJS,
   CategoryScale,
+  ChartData,
   LinearScale,
   BarElement,
   Tooltip,
@@ -28,10 +29,10 @@ const Dashboard = () => {
     tasaEntregaATiempo: '0%',
   });
 
-  const [chartData, setChartData] = useState({
-    labels: [],
-    datasets: [],
-  });
+  const [chartData, setChartData] = useState<ChartData<'bar'>>({
+  labels: [],
+  datasets: [],
+});
 
   type Envio = {
   id: string;
@@ -47,12 +48,80 @@ const [ultimosEnvios, setUltimosEnvios] = useState<Envio[]>([]);
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await axios.get('/dashboard');
-        const data = response.data;
+        const res = await axios.get('/envios');
+        const envios: Envio[] = res.data;
 
-        setMetrics(data.metrics);
-        setChartData(data.chartData);
-        setUltimosEnvios(data.ultimosEnvios);
+        const hoy = new Date().toISOString().split('T')[0];
+
+        const totalEnvios = envios.length;
+        const entregados = envios.filter(e => e.estado.toLowerCase() === 'entregado').length;
+        const pendientes = envios.filter(e => e.estado.toLowerCase() === 'pendiente').length;
+
+        const conductoresUnicos = new Set(envios.map(e => e.conductor));
+        const conductoresActivos = conductoresUnicos.size;
+
+        const entregasHoy = envios.filter(e => e.fecha === hoy);
+        const entregasHoyEntregadas = entregasHoy.filter(e => e.estado.toLowerCase() === 'entregado').length;
+
+        const tasaEntregaATiempo = entregasHoy.length > 0
+          ? `${Math.round((entregasHoyEntregadas / entregasHoy.length) * 100)}%`
+          : '0%';
+
+        // Generar fechas y etiquetas reales para los últimos 5 días
+        const hoyDate = new Date();
+        const fechas: Date[] = [...Array(7)].map((_, i) => {
+          const d = new Date(hoyDate);
+          d.setDate(d.getDate() - (6 - i)); // 5 días hacia atrás
+          return d;
+        });
+
+        const diasLabels = fechas.map(f =>
+          f.toLocaleDateString('es-CL', { weekday: 'short' }) // etiquetas como "lun.", "mar.", etc.
+        );
+
+        const fechasStr = fechas.map(f =>
+          f.toISOString().split('T')[0] // formato YYYY-MM-DD para comparación
+        );
+
+// Contar entregas por fecha
+const entregasPorFecha: Record<string, number> = {};
+envios.forEach(e => {
+  const estado = e.estado.toLowerCase();
+  const fecha = e.fecha;
+  if (estado === 'entregado') {
+    entregasPorFecha[fecha] = (entregasPorFecha[fecha] || 0) + 1;
+  }
+});
+
+const entregasPorDia = fechasStr.map(fecha => entregasPorFecha[fecha] || 0);
+
+
+        // Últimos 5 envíos
+        const ultimosCinco = [...envios]
+          .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
+          .slice(0, 5);
+
+        setMetrics({
+          totalEnvios,
+          entregados,
+          pendientes,
+          conductoresActivos,
+          tasaEntregaATiempo,
+        });
+
+        setChartData({
+          labels: diasLabels,
+          datasets: [
+            {
+              label: 'Entregas por día',
+              data: entregasPorDia,
+              backgroundColor: '#4F46E5',
+            },
+          ],
+        });
+
+        setUltimosEnvios(ultimosCinco);
+
       } catch (error) {
         console.error('Error cargando datos del dashboard:', error);
       }
@@ -70,11 +139,11 @@ const [ultimosEnvios, setUltimosEnvios] = useState<Envio[]>([]);
 
         {/* METRICAS */}
         <div style={styles.metricsWrapper}>
-          <Card title="Total Envíos Hoy" value={metrics.totalEnvios} />
+          <Card title="Total Envíos" value={metrics.totalEnvios} />
           <Card title="Entregados" value={metrics.entregados} />
           <Card title="Pendientes" value={metrics.pendientes} />
           <Card title="Conductores Activos" value={metrics.conductoresActivos} />
-          <Card title="Entregas a Tiempo" value={metrics.tasaEntregaATiempo} />
+          <Card title="Entregas a Tiempo Hoy" value={metrics.tasaEntregaATiempo} />
         </div>
 
         {/* GRAFICO */}
