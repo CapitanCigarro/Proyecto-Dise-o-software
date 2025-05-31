@@ -8,6 +8,8 @@ interface Envio {
   conductor: string;
   estado: 'Pendiente' | 'En camino' | 'Entregado' | 'Cancelado';
   fecha: string;
+  horaAsignacion: string;
+  horaEntrega: string;
 }
 
 const estados = ['todos', 'Pendiente', 'En camino', 'Entregado', 'Cancelado'];
@@ -61,6 +63,8 @@ const Envios = () => {
                 <th>Conductor</th>
                 <th>Estado</th>
                 <th>Fecha</th>
+                <th>Hora Asignación</th>
+                <th>Hora Entrega</th>
               </tr>
             </thead>
             <tbody>
@@ -71,6 +75,8 @@ const Envios = () => {
                   <td>{envio.conductor}</td>
                   <td>{envio.estado}</td>
                   <td>{envio.fecha}</td>
+                  <td>{envio.horaAsignacion}</td>
+                  <td>{envio.horaEntrega}</td>
                 </tr>
               ))}
               {enviosFiltrados.length === 0 && (
