@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from '../services/axios';
 import '../services/mock';
 
+// Definicion del tipo de dato Envio
 interface Envio {
   id: number;
   cliente: string;
@@ -11,15 +12,17 @@ interface Envio {
   horaAsignacion: string;
   horaEntrega: string;
 }
-
+// Opciones para filtrar por estado
 const estados = ['todos', 'Pendiente', 'En camino', 'Entregado', 'Cancelado'];
 
 const Envios = () => {
+  // Estados para almacenar envíos y filtros
   const [envios, setEnvios] = useState<Envio[]>([]);
   const [filtroEstado, setFiltroEstado] = useState<string>('todos');
   const [filtroFecha, setFiltroFecha] = useState<string>(''); // formato yyyy-mm-dd
   const [filtroConductor, setFiltroConductor] = useState<string>('todos');
 
+  // Carga datos desde el mock
   useEffect(() => {
     axios.get('/envios')
       .then(res => setEnvios(res.data))
@@ -29,8 +32,10 @@ const Envios = () => {
       });
   }, []);
 
+  // Lista de conductores unicos desde los datos
   const conductoresUnicos = Array.from(new Set(envios.map(e => e.conductor)));
 
+  // Aplicacion de filtros combinados sobre la lista de envios
   const enviosFiltrados = envios.filter(envio => {
     const matchEstado = filtroEstado === 'todos' || envio.estado === filtroEstado;
     const matchFecha = !filtroFecha || envio.fecha === filtroFecha;
@@ -127,7 +132,7 @@ const Envios = () => {
   );
 };
 
-
+// Estilos CSS en objeto JS
 const styles: { [key: string]: React.CSSProperties } = {
   page: {
     position: 'relative',
