@@ -15,12 +15,16 @@ import {
   Legend,
 } from 'chart.js';
 
+// Registro de componentes para Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
+// Componente principal del Dashboard
 const Dashboard = () => {
+  // Hook de autenticacion para cerrar sesion
   const { logout } = useAuth();
   const navigate = useNavigate();
 
+  // Estado para metricas generales del dashboard
   const [metrics, setMetrics] = useState({
     totalEnvios: 0,
     entregados: 0,
@@ -29,11 +33,13 @@ const Dashboard = () => {
     tasaEntregaATiempo: '0%',
   });
 
+  // Estado para los datos del grafico de barras
   const [chartData, setChartData] = useState<ChartData<'bar'>>({
   labels: [],
   datasets: [],
 });
 
+// Representar un envio individual
   type Envio = {
   id: string;
   cliente: string;
@@ -42,17 +48,21 @@ const Dashboard = () => {
   fecha: string;
 };
 
+// Estado para almacenar los ultimos envios
 const [ultimosEnvios, setUltimosEnvios] = useState<Envio[]>([]);
 
-
+  // Hook para cargar los datos
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        // Obtener todos los envios desde el mock
         const res = await axios.get('/envios');
         const envios: Envio[] = res.data;
 
+        // Fecha actual en formato YYYY-MM-DD
         const hoy = new Date().toISOString().split('T')[0];
 
+        // Metricas generales
         const totalEnvios = envios.length;
         const entregados = envios.filter(e => e.estado.toLowerCase() === 'entregado').length;
         const pendientes = envios.filter(e => e.estado.toLowerCase() === 'pendiente').length;
@@ -60,6 +70,7 @@ const [ultimosEnvios, setUltimosEnvios] = useState<Envio[]>([]);
         const conductoresUnicos = new Set(envios.map(e => e.conductor));
         const conductoresActivos = conductoresUnicos.size;
 
+        // Tasa de entrega a tiempo para hoy
         const entregasHoy = envios.filter(e => e.fecha === hoy);
         const entregasHoyEntregadas = entregasHoy.filter(e => e.estado.toLowerCase() === 'entregado').length;
 
@@ -67,40 +78,43 @@ const [ultimosEnvios, setUltimosEnvios] = useState<Envio[]>([]);
           ? `${Math.round((entregasHoyEntregadas / entregasHoy.length) * 100)}%`
           : '0%';
 
-        // Generar fechas y etiquetas reales para los últimos 5 días
+        // Fechas para los ultimos 7 dias
         const hoyDate = new Date();
         const fechas: Date[] = [...Array(7)].map((_, i) => {
           const d = new Date(hoyDate);
-          d.setDate(d.getDate() - (6 - i)); // 5 días hacia atrás
+          d.setDate(d.getDate() - (6 - i)); // Dias hacia atras
           return d;
         });
 
+        // Etiquetas para los dias 
         const diasLabels = fechas.map(f =>
           f.toLocaleDateString('es-CL', { weekday: 'short' }) // etiquetas como "lun.", "mar.", etc.
         );
 
+        // Fechas
         const fechasStr = fechas.map(f =>
           f.toISOString().split('T')[0] // formato YYYY-MM-DD para comparación
         );
 
-// Contar entregas por fecha
-const entregasPorFecha: Record<string, number> = {};
-envios.forEach(e => {
-  const estado = e.estado.toLowerCase();
-  const fecha = e.fecha;
-  if (estado === 'entregado') {
-    entregasPorFecha[fecha] = (entregasPorFecha[fecha] || 0) + 1;
-  }
-});
+        // Contar entregas por fecha
+        const entregasPorFecha: Record<string, number> = {};
+        envios.forEach(e => {
+          const estado = e.estado.toLowerCase();
+          const fecha = e.fecha;
+          if (estado === 'entregado') {
+            entregasPorFecha[fecha] = (entregasPorFecha[fecha] || 0) + 1;
+          }
+        });
 
-const entregasPorDia = fechasStr.map(fecha => entregasPorFecha[fecha] || 0);
-
+        // Array con cantidad de entregas por dia
+        const entregasPorDia = fechasStr.map(fecha => entregasPorFecha[fecha] || 0);
 
         // Últimos 5 envíos
         const ultimosCinco = [...envios]
           .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
           .slice(0, 5);
 
+        // Actualizar estados del dashboard
         setMetrics({
           totalEnvios,
           entregados,
@@ -109,6 +123,7 @@ const entregasPorDia = fechasStr.map(fecha => entregasPorFecha[fecha] || 0);
           tasaEntregaATiempo,
         });
 
+        // Configurar datos del grafico
         setChartData({
           labels: diasLabels,
           datasets: [
@@ -199,7 +214,7 @@ const entregasPorDia = fechasStr.map(fecha => entregasPorFecha[fecha] || 0);
     </div>
   );
 };
-
+// Componente para mostrar una metrica individual
 type CardProps = {
   title: string;
   value: number | string;
@@ -212,6 +227,7 @@ const Card = ({ title, value }: CardProps) => (
   </div>
 );
 
+// Estilos CSS en objeto JS
 const styles: { [key: string]: CSSProperties } = {
   page: {
     position: 'relative',
