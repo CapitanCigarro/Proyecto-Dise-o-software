@@ -1,17 +1,19 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import ClientHome from '../screens/client/ClientHome';
-import ClientProfile from '../screens/client/ClientProfile';
+import ClientHome from '../screens/client/ClientHome/ClientHome';
+import ClientProfile from '../screens/client/ClientProfile/ClientProfile';
 import { PackageTrackingStack, PackageRegistrationStack } from './ClientStackNavigator';
 
-import { NavigationStyles } from './NavigationStyles';
+import { NavigationStyles } from './Navigation.styles';
 import { getClientTabIcon } from './navigationUtils';
 import { ROUTES } from './routes';
 import { ClientTabParamList } from './types';
 
+// Create tab navigator for client application screens
 const ClientTab = createBottomTabNavigator<ClientTabParamList>();
 
+// Main tab navigation component for client user interface
 export const ClientTabNavigator = () => {
   return (
     <ClientTab.Navigator
@@ -20,7 +22,7 @@ export const ClientTabNavigator = () => {
           return getClientTabIcon(route.name, focused)({ color, size });
         },
         tabBarStyle: NavigationStyles.tabBar,
-        headerShown: false, // Ocultar todos los headers del TabNavigator
+        headerShown: false, 
       })}
     >
       <ClientTab.Screen 

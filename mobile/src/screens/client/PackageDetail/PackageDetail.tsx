@@ -1,30 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
-  Text, 
-  StyleSheet, 
+  Text,
   ScrollView, 
   TouchableOpacity, 
   Image,
   Share,
-  Linking,
-  Dimensions
+  Dimensions,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { PackageDetailScreenRouteProp, PackageDetailScreenNavigationProp } from '../../navigation/types';
-import SafeAreaWrapper from '../../components/SafeAreaWrapper';
+import { PackageDetailScreenRouteProp, PackageDetailScreenNavigationProp } from '../../../navigation/types';
+import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
+import styles from './PackageDetail.styles';
+// Import mockData
+import mockData from '../../../../assets/mockDataClient.json';
 
 const { width } = Dimensions.get('window');
 
+// Component to display detailed information about a package shipment
 const PackageDetail = () => {
   const navigation = useNavigation<PackageDetailScreenNavigationProp>();
   const route = useRoute<PackageDetailScreenRouteProp>();
-  const { package: packageData } = route.params;
+  const { packageId } = route.params;
   
-  // Current step in tracking journey
-  const [currentStep, setCurrentStep] = useState(getStatusStep(packageData.status));
+  // State to hold the package data
+  const [packageData, setPackageData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentStep, setCurrentStep] = useState(0);
 
+  // Load package data from mockData.json on component mount
+  useEffect(() => {
+    // Find the package with the matching ID in mockData
+    const foundPackage = mockData.packages.find(pkg => pkg.id === packageId);
+    
+    if (foundPackage) {
+      setPackageData(foundPackage);
+      setCurrentStep(getStatusStep(foundPackage.status));
+    } else {
+      // Handle case where package is not found
+      console.error(`Package with ID ${packageId} not found in mockData`);
+    }
+    
+    setLoading(false);
+  }, [packageId]);
+
+  // Determine color based on package delivery status
   const getStatusColor = (status: string) => {
     switch(status) {
       case 'En tránsito': return '#f0ad4e';
@@ -34,6 +56,7 @@ const PackageDetail = () => {
     }
   };
   
+  // Convert status string to numeric step for timeline display
   function getStatusStep(status: string) {
     switch(status) {
       case 'Pendiente': return 0;
@@ -43,8 +66,10 @@ const PackageDetail = () => {
     }
   }
   
-  // Expected delivery data based on status
+  // Calculate delivery dates based on current status
   const getDeliveryInfo = () => {
+    if (!packageData) return { estimatedPickup: 'Cargando...', estimatedDelivery: 'Cargando...' };
+    
     const today = new Date();
     
     switch(packageData.status) {
@@ -77,7 +102,10 @@ const PackageDetail = () => {
   
   const deliveryInfo = getDeliveryInfo();
   
+  // Share package tracking information with others
   const shareTracking = async () => {
+    if (!packageData) return;
+    
     try {
       await Share.share({
         message: `Seguimiento de mi paquete #${packageData.id}. Estado actual: ${packageData.status}. Puedes seguirlo en nuestra aplicación.`,
@@ -87,10 +115,36 @@ const PackageDetail = () => {
       console.log(error);
     }
   };
-  
-  const callSupport = () => {
-    Linking.openURL('tel:0800-123-4567');
-  };
+
+  // Show loading indicator while package data is being fetched
+  if (loading) {
+    return (
+      <SafeAreaWrapper>
+        <View style={[styles.container, styles.loadingContainer]}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Cargando detalles del paquete...</Text>
+        </View>
+      </SafeAreaWrapper>
+    );
+  }
+
+  // Handle case where package data is not found
+  if (!packageData) {
+    return (
+      <SafeAreaWrapper>
+        <View style={[styles.container, styles.errorContainer]}>
+          <Ionicons name="alert-circle-outline" size={60} color="#d9534f" />
+          <Text style={styles.errorText}>Paquete no encontrado</Text>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.backButtonText}>Volver</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaWrapper>
+    );
+  }
 
   return (
     <SafeAreaWrapper>
@@ -215,19 +269,19 @@ const PackageDetail = () => {
                 
                 <View style={styles.infoItem}>
                   <Text style={styles.infoLabel}>Tipo</Text>
-                  <Text style={styles.infoValue}>{packageData.type || 'Paquete'}</Text>
+                  <Text style={styles.infoValue}>{packageData.packageType || 'Estándar'}</Text>
                 </View>
               </View>
               
               <View style={styles.infoRow}>
                 <View style={styles.infoItem}>
                   <Text style={styles.infoLabel}>Peso</Text>
-                  <Text style={styles.infoValue}>{packageData.weight || '2.5'} kg</Text>
+                  <Text style={styles.infoValue}>{packageData.weight || '0'} kg</Text>
                 </View>
                 
                 <View style={styles.infoItem}>
                   <Text style={styles.infoLabel}>Dimensiones</Text>
-                  <Text style={styles.infoValue}>{packageData.dimensions || '30 x 20 x 15'} cm</Text>
+                  <Text style={styles.infoValue}>{packageData.dimensions || 'N/A'}</Text>
                 </View>
               </View>
             </View>
@@ -243,8 +297,8 @@ const PackageDetail = () => {
                 </View>
                 <View style={styles.addressInfo}>
                   <Text style={styles.addressLabel}>Origen</Text>
-                  <Text style={styles.addressText}>{packageData.origin || 'Centro de Distribución'}</Text>
-                  <Text style={styles.addressSecondary}>{packageData.sender || 'Remitente Principal'}</Text>
+                  <Text style={styles.addressText}>{packageData.origin || 'No especificado'}</Text>
+                  <Text style={styles.addressSecondary}>{packageData.sender || 'No especificado'}</Text>
                 </View>
               </View>
               
@@ -256,8 +310,8 @@ const PackageDetail = () => {
                 </View>
                 <View style={styles.addressInfo}>
                   <Text style={styles.addressLabel}>Destino</Text>
-                  <Text style={styles.addressText}>{packageData.address || packageData.destination}</Text>
-                  <Text style={styles.addressSecondary}>{packageData.recipient || 'Destinatario'}</Text>
+                  <Text style={styles.addressText}>{packageData.address || packageData.destination || 'No especificado'}</Text>
+                  <Text style={styles.addressSecondary}>{packageData.recipient || 'No especificado'}</Text>
                 </View>
               </View>
             </View>
@@ -272,324 +326,10 @@ const PackageDetail = () => {
               </View>
             </View>
           )}
-          
-          {/* Support Section */}
-          <View style={styles.supportSection}>
-            <Text style={styles.supportText}>¿Tienes alguna pregunta sobre tu envío?</Text>
-            <TouchableOpacity style={styles.supportButton} onPress={callSupport}>
-              <Ionicons name="call-outline" size={18} color="#fff" />
-              <Text style={styles.supportButtonText}>Contactar a Soporte</Text>
-            </TouchableOpacity>
-          </View>
         </ScrollView>
       </View>
     </SafeAreaWrapper>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    paddingTop: 10,
-    paddingBottom: 20,
-    paddingHorizontal: 15,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  shareButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  packageHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  packageIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#ffffff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    marginRight: 15,
-  },
-  packageInfo: {
-    flex: 1,
-  },
-  packageId: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
-  },
-  statusText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  content: {
-    flex: 1,
-    padding: 15,
-  },
-  trackingContainer: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  trackingTimeline: {
-    position: 'relative',
-    paddingLeft: 30,
-    marginTop: 10,
-  },
-  timelineLine: {
-    position: 'absolute',
-    left: 15,
-    top: 15,
-    bottom: 15,
-    width: 2,
-    backgroundColor: '#ddd',
-    zIndex: 1,
-  },
-  trackingStep: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 25,
-    position: 'relative',
-    zIndex: 2,
-  },
-  stepCircle: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-    marginLeft: -15,
-  },
-  stepCompleted: {
-    backgroundColor: '#5cb85c',
-  },
-  stepPending: {
-    backgroundColor: '#ddd',
-  },
-  stepContent: {
-    flex: 1,
-  },
-  stepTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  stepDate: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 2,
-  },
-  deliveryInfoContainer: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  deliveryInfoItem: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 5,
-  },
-  deliveryInfoText: {
-    marginLeft: 10,
-  },
-  deliveryInfoLabel: {
-    fontSize: 12,
-    color: '#666',
-  },
-  deliveryInfoValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginTop: 2,
-  },
-  section: {
-    marginBottom: 15,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
-    paddingHorizontal: 5,
-  },
-  detailCard: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  infoItem: {
-    flex: 1,
-  },
-  infoLabel: {
-    fontSize: 12,
-    color: '#666',
-  },
-  infoValue: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-    marginTop: 2,
-  },
-  addressCard: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  addressRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingVertical: 10,
-  },
-  addressDot: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#007AFF22',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  addressDivider: {
-    height: 1,
-    backgroundColor: '#f0f0f0',
-    marginVertical: 5,
-    marginLeft: 45,
-  },
-  addressInfo: {
-    flex: 1,
-  },
-  addressLabel: {
-    fontSize: 12,
-    color: '#666',
-  },
-  addressText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#333',
-    marginTop: 2,
-    marginBottom: 2,
-  },
-  addressSecondary: {
-    fontSize: 14,
-    color: '#666',
-  },
-  descriptionCard: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  description: {
-    fontSize: 15,
-    color: '#333',
-    lineHeight: 22,
-  },
-  supportSection: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 15,
-    marginVertical: 15,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  supportText: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 15,
-  },
-  supportButton: {
-    backgroundColor: '#007AFF',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 25,
-  },
-  supportButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-    marginLeft: 8,
-  },
-});
 
 export default PackageDetail;

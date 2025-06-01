@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   View, 
   Text, 
-  StyleSheet, 
   FlatList, 
   TouchableOpacity, 
   TextInput,
@@ -15,8 +14,12 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import SafeAreaWrapper from '../../components/SafeAreaWrapper';
+import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
+import styles from './PackageTracking.styles';
+// Import mockData
+import mockData from '../../../../assets/mockDataClient.json';
 
+// Data structure for package information
 interface Package {
   id: string;
   sender: string;
@@ -25,9 +28,19 @@ interface Package {
   status: string;
   date: string;
   description?: string;
+  destination?: string;
+  origin?: string;
+  weight?: string;
+  dimensions?: string;
+  packageType?: string;
+  estimatedCost?: string;
+  notes?: string;
+  createdAt?: string;
 }
 
+// Screen component for viewing and tracking packages
 const PackageTracking = ({ route, navigation }) => {
+  // State management for package data and UI
   const [packages, setPackages] = useState<Package[]>([]);
   const [filteredPackages, setFilteredPackages] = useState<Package[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,85 +51,64 @@ const PackageTracking = ({ route, navigation }) => {
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  // References and parameters for navigation
   const specificPackageId = route.params?.packageId;
   const searchInputRef = useRef<TextInput>(null);
   const animatedHeaderHeight = useRef(new Animated.Value(120)).current;
   
-  // Load packages data
+  // Load packages on component mount or when package ID changes
   useEffect(() => {
     loadPackages();
   }, [specificPackageId]);
   
+  // Fetch package data from storage or use mockData
   const loadPackages = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const packagesJson = await AsyncStorage.getItem('packages');
       let packagesData = [];
+      const storedUser = await AsyncStorage.getItem('user');
+      let currentUserId = '1'; // Default to first user if none stored
       
-      if (packagesJson) {
-        packagesData = JSON.parse(packagesJson);
-      } else {
-        // If no data, set mock data for demo
-        packagesData = [
-          { 
-            id: '1234', 
-            sender: 'Juan Pérez', 
-            recipient: 'María García', 
-            address: 'Calle Principal 123', 
-            status: 'En tránsito',
-            date: '2023-05-20',
-            description: 'Caja mediana'
-          },
-          { 
-            id: '5678', 
-            sender: 'Juan Pérez', 
-            recipient: 'Carlos Rodríguez', 
-            address: 'Avenida Central 456', 
-            status: 'Entregado',
-            date: '2023-05-18',
-            description: 'Sobre pequeño'
-          },
-          { 
-            id: '9012', 
-            sender: 'Juan Pérez', 
-            recipient: 'Ana López', 
-            address: 'Plaza Mayor 789', 
-            status: 'Pendiente',
-            date: '2023-05-23',
-            description: 'Paquete frágil'
-          },
-          { 
-            id: '3456', 
-            sender: 'Juan Pérez', 
-            recipient: 'Luis Torres', 
-            address: 'Boulevard Norte 234', 
-            status: 'Entregado',
-            date: '2023-05-15',
-            description: 'Documentos importantes'
-          },
-          { 
-            id: '7890', 
-            sender: 'Juan Pérez', 
-            recipient: 'Sandra Vega', 
-            address: 'Paseo del Río 567', 
-            status: 'En tránsito',
-            date: '2023-05-21',
-            description: 'Paquete electrónico'
-          },
-        ];
-        
-        // Save mock data to AsyncStorage
-        await AsyncStorage.setItem('packages', JSON.stringify(packagesData));
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        if (userData.id) {
+          currentUserId = userData.id;
+        }
       }
       
-      // Sort packages by date
+      // Get packages from mockData
+      packagesData = mockData.packages.filter(pkg => {
+        // Find packages where sender matches current user
+        const user = mockData.users.find(u => u.id === currentUserId);
+        return user && pkg.sender === user.name;
+      });
+      
+      // Ensure all packages have all the required fields
+      packagesData = packagesData.map(pkg => ({
+        id: pkg.id || '',
+        sender: pkg.sender || '',
+        recipient: pkg.recipient || '',
+        address: pkg.address || '',
+        status: pkg.status || '',
+        date: pkg.date || '',
+        description: pkg.description || '',
+        destination: pkg.destination || '',
+        origin: pkg.origin || '',
+        weight: pkg.weight || '',
+        dimensions: pkg.dimensions || '',
+        packageType: pkg.packageType || '',
+        estimatedCost: pkg.estimatedCost || '',
+        notes: pkg.notes || '',
+        createdAt: pkg.createdAt || ''
+      }));
+      
+      // Sort packages based on current sort order
       packagesData = sortPackages(packagesData, sortOrder);
       
       setPackages(packagesData);
       
-      // Apply specific package ID filter if provided
       if (specificPackageId) {
         setSearchQuery(specificPackageId);
         const filtered = packagesData.filter(pkg => 
@@ -124,7 +116,6 @@ const PackageTracking = ({ route, navigation }) => {
         );
         setFilteredPackages(filtered);
       } else if (selectedFilter !== 'all') {
-        // Apply current status filter
         const filtered = packagesData.filter(pkg => pkg.status === selectedFilter);
         setFilteredPackages(filtered);
       } else {
@@ -139,13 +130,13 @@ const PackageTracking = ({ route, navigation }) => {
     }
   };
   
-  // Refresh handler
+  // Handle pull-to-refresh functionality
   const onRefresh = () => {
     setRefreshing(true);
     loadPackages();
   };
   
-  // Search handler
+  // Filter packages based on search text
   const handleSearch = (text: string) => {
     setSearchQuery(text);
     
@@ -166,11 +157,10 @@ const PackageTracking = ({ route, navigation }) => {
     }
   };
   
-  // Filter by status
+  // Filter packages by delivery status
   const filterByStatus = (status: string) => {
     setSelectedFilter(status);
     
-    // Clear search when changing filters
     if (searchQuery) {
       setSearchQuery('');
     }
@@ -183,7 +173,7 @@ const PackageTracking = ({ route, navigation }) => {
     }
   };
   
-  // Sort packages
+  // Sort packages by date
   const sortPackages = (packagesToSort, order) => {
     return [...packagesToSort].sort((a, b) => {
       const dateA = new Date(a.date).getTime();
@@ -192,7 +182,7 @@ const PackageTracking = ({ route, navigation }) => {
     });
   };
   
-  // Toggle sort order
+  // Change sort order and update package list
   const toggleSortOrder = (order: string) => {
     setSortOrder(order);
     setShowSortOptions(false);
@@ -208,7 +198,7 @@ const PackageTracking = ({ route, navigation }) => {
     }
   };
   
-  // UI helpers
+  // Get appropriate color for package status
   const getStatusColor = (status: string) => {
     switch(status) {
       case 'En tránsito': return '#f0ad4e';
@@ -218,6 +208,7 @@ const PackageTracking = ({ route, navigation }) => {
     }
   };
   
+  // Get background color based on package status
   const getStatusBackground = (status: string) => {
     switch(status) {
       case 'En tránsito': return '#fff8e1';
@@ -227,6 +218,7 @@ const PackageTracking = ({ route, navigation }) => {
     }
   };
   
+  // Render icon based on package status
   const renderStatusIcon = (status: string) => {
     switch(status) {
       case 'En tránsito':
@@ -240,7 +232,7 @@ const PackageTracking = ({ route, navigation }) => {
     }
   };
   
-  // Group packages by date
+  // Convert date string to readable format (Today, Yesterday, etc.)
   const getDateLabel = (dateString: string) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -260,7 +252,7 @@ const PackageTracking = ({ route, navigation }) => {
     }
   };
   
-  // Format date for display
+  // Format date for display in user's locale
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const options: Intl.DateTimeFormatOptions = { 
@@ -271,15 +263,14 @@ const PackageTracking = ({ route, navigation }) => {
     return date.toLocaleDateString('es-ES', options);
   };
   
-  // Scroll handler for collapsing header
+  // Handle scroll events for collapsing header animation
   const handleScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { y: animatedHeaderHeight } } }],
     { useNativeDriver: false }
   );
   
-  // Render package item
+  // Render individual package item in the list
   const renderPackageItem = ({ item, index }: { item: Package, index: number }) => {
-    // Group header logic
     const showDateHeader = index === 0 || 
       item.date !== filteredPackages[index - 1].date;
     
@@ -295,7 +286,7 @@ const PackageTracking = ({ route, navigation }) => {
             styles.packageItem, 
             { backgroundColor: getStatusBackground(item.status) }
           ]}
-          onPress={() => navigation.navigate('PackageDetail', { package: item })}
+          onPress={() => navigation.navigate('PackageDetail', { packageId: item.id })}
           activeOpacity={0.8}
         >
           <View style={styles.packageHeader}>
@@ -341,21 +332,19 @@ const PackageTracking = ({ route, navigation }) => {
     );
   };
   
-  // Calculate header height based on scroll position
+  // Animation values for collapsing header
   const headerHeight = animatedHeaderHeight.interpolate({
     inputRange: [0, 60],
     outputRange: [120, 60],
     extrapolate: 'clamp'
   });
   
-  // Calculate header title opacity based on scroll position
   const headerTitleOpacity = animatedHeaderHeight.interpolate({
     inputRange: [40, 60],
     outputRange: [0, 1],
     extrapolate: 'clamp'
   });
   
-  // Calculate header subtitle opacity based on scroll position
   const headerSubtitleOpacity = animatedHeaderHeight.interpolate({
     inputRange: [0, 40],
     outputRange: [1, 0],
@@ -545,7 +534,7 @@ const PackageTracking = ({ route, navigation }) => {
           </View>
         )}
         
-        {/* Main content */}
+        {/* Main content - packages list or empty/loading states */}
         {loading && !refreshing ? (
           <View style={styles.loaderContainer}>
             <ActivityIndicator size="large" color="#007AFF" />
@@ -605,7 +594,7 @@ const PackageTracking = ({ route, navigation }) => {
           </View>
         )}
         
-        {/* Floating action button - only show when we have content and not in search mode */}
+        {/* Floating action button for adding new packages */}
         {filteredPackages.length > 0 && !searchQuery && (
           <TouchableOpacity 
             style={styles.fab}
@@ -618,342 +607,5 @@ const PackageTracking = ({ route, navigation }) => {
     </SafeAreaWrapper>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    backgroundColor: '#fff',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 20,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    zIndex: 10,
-  },
-  headerContent: {
-    position: 'relative',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 5,
-  },
-  collapsedHeaderTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    position: 'absolute',
-    bottom: 0,
-  },
-  headerActions: {
-    position: 'absolute',
-    right: 20,
-    bottom: 15,
-    flexDirection: 'row',
-  },
-  sortButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sortOptionsContainer: {
-    position: 'absolute',
-    top: 120,
-    right: 20,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-    zIndex: 100,
-    width: 210,
-  },
-  sortOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  selectedSortOption: {
-    backgroundColor: '#f0f7ff',
-  },
-  sortOptionText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  selectedSortOptionText: {
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    marginHorizontal: 15,
-    marginVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 12,
-    fontSize: 16,
-  },
-  filterContainer: {
-    paddingHorizontal: 15,
-    marginBottom: 5,
-  },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 10,
-    backgroundColor: '#eee',
-  },
-  filterButtonActive: {
-    backgroundColor: '#007AFF',
-  },
-  filterIcon: {
-    marginRight: 5,
-  },
-  filterText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  filterTextActive: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  resultsContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 5,
-  },
-  resultsText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  listContainer: {
-    padding: 15,
-    paddingTop: 5,
-  },
-  dateHeader: {
-    backgroundColor: '#f5f5f5',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 4,
-    marginBottom: 5,
-    marginTop: 10,
-  },
-  dateHeaderText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-  },
-  packageItem: {
-    borderRadius: 12,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    overflow: 'hidden',
-  },
-  packageHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
-  },
-  packageId: {
-    flex: 1,
-  },
-  idText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 15,
-  },
-  statusText: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    marginLeft: 5,
-  },
-  packageDetails: {
-    padding: 15,
-  },
-  recipientRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  addressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  descriptionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  detailIcon: {
-    marginRight: 10,
-    width: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  recipientText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#333',
-    flex: 1,
-  },
-  addressText: {
-    fontSize: 14,
-    color: '#666',
-    flex: 1,
-  },
-  descriptionText: {
-    fontSize: 14,
-    color: '#888',
-    fontStyle: 'italic',
-    flex: 1,
-  },
-  packageFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(0,0,0,0.03)',
-  },
-  packageFooterText: {
-    fontSize: 12,
-    color: '#999',
-    marginRight: 5,
-  },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  loaderText: {
-    marginTop: 10,
-    color: '#666',
-    fontSize: 16,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginVertical: 15,
-  },
-  retryButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  retryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  emptyImage: {
-    width: 120,
-    height: 120,
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  registerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginTop: 5,
-  },
-  registerButtonIcon: {
-    marginRight: 8,
-  },
-  registerButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-});
 
 export default PackageTracking;

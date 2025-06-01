@@ -2,21 +2,20 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 
-// Import driver screens
-import DriverHome from '../screens/driver/DriverHome';
-import RouteVisualization from '../screens/driver/RouteVisualization';
-import DriverProfile from '../screens/driver/DriverProfile';
+import DriverHome from '../screens/driver/DriverHome/DriverHome';
+import RouteVisualization from '../screens/driver/RouteVisualization/RouteVisualization';
+import DriverProfile from '../screens/driver/DriverProfile/DriverProfile';
 
-// Import navigation utilities
-import { NavigationStyles } from './NavigationStyles';
+import { NavigationStyles } from './Navigation.styles';
 import { ROUTES } from './routes';
 import { getDriverTabIcon } from './navigationUtils';
 import { DriverTabParamList } from './types';
 
+// Create navigators for driver app screens
 const DriverTab = createBottomTabNavigator<DriverTabParamList>();
 const DriverStack = createStackNavigator();
 
-// Route visualization stack to handle map navigation
+// Stack navigator for route visualization screens
 const RouteVisualizationStack = () => {
   return (
     <DriverStack.Navigator screenOptions={{ headerShown: false }}>
@@ -28,6 +27,7 @@ const RouteVisualizationStack = () => {
   );
 };
 
+// Main tab navigator for driver interface
 export const DriverTabNavigator = () => {
   return (
     <DriverTab.Navigator
@@ -38,7 +38,7 @@ export const DriverTabNavigator = () => {
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: 'gray',
         tabBarStyle: NavigationStyles.tabBar,
-        headerShown: false, // Ocultar todos los headers del TabNavigator
+        headerShown: false,
       })}
     >
       <DriverTab.Screen 
