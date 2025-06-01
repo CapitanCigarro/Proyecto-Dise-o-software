@@ -15,6 +15,7 @@ interface Envio {
 // Opciones para filtrar por estado
 const estados = ['todos', 'Pendiente', 'En camino', 'Entregado', 'Cancelado'];
 
+// Componente principal de Envios
 const Envios = () => {
   // Estados para almacenar envíos y filtros
   const [envios, setEnvios] = useState<Envio[]>([]);

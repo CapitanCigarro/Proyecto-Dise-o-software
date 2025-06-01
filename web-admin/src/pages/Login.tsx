@@ -4,10 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import axios from '../services/axios';
 import '../services/mock';
 
+// Componente funcional Login
 const Login = () => {
+  // Hooks de navegacion y autenticacion
   const navigate = useNavigate();
   const { login } = useAuth();
   
+  // Estados para formulario de login
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [buttonHover, setButtonHover] = useState(false);
@@ -15,23 +18,28 @@ const Login = () => {
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [error, setError] = useState('');
 
+  // Maneja el formulario de login
   const handleLogin = async (e: React.FormEvent) => {
   e.preventDefault();
 
   try {
+    // Enviar credenciales a la API
     const response = await axios.post('/login', { email, password });
     const user = response.data;
 
+    // Validar existencia de usuario
     if (!user) {
       setError('Correo o contraseña incorrectos');
       return;
     }
 
+    // Valida si el rol es admin
     if (user.role !== 'admin') {
       setError('Acceso denegado: solo administradores pueden ingresar');
       return;
     }
 
+    // Redirige a dashboard si el login es exitoso
     login(user);
     navigate('/dashboard');
 
@@ -101,6 +109,7 @@ const Login = () => {
   );
 };
 
+// Estilos CSS en objeto JS
 const styles = {
   background: {
     position: 'fixed' as const, // para que quede fijo en toda la pantalla

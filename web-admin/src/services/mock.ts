@@ -1,6 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
 import axios from './axios';
 
+// Inicializacion del mock para Axios  sin retardo
 const mock = new MockAdapter(axios, { delayResponse: 0 });
 
 // Mock de login
@@ -13,15 +14,19 @@ mock.onPost('/login').reply(config => {
     { email: 'conductor@example.com', password: 'password123', role: 'conductor', token: 'token-conductor' },
   ];
 
+  // Buscar un usuario que coincida con las credenciales proporcionadas
   const user = users.find(u => u.email === email && u.password === password);
 
+  // Si se encuentra un usuario valido, retornar token y rol con codigo 200
   if (user) {
     return [200, { token: user.token, role: user.role }];
   } else {
+    // Si no se encuentra coincidencia, retornar error 401
     return [401, { message: 'Correo o contraseña incorrectos' }];
   }
 });
 
+// Mock de datos de envio
 mock.onGet('/envios').reply(200, [
   { id: 1, cliente: 'Juan Pérez', conductor: 'Carlos Pereira', estado: 'Pendiente', fecha: '2025-05-27', horaAsignacion: '09:00', horaEntrega: '---' },
 { id: 2, cliente: 'María López', conductor: 'Ana Lisa', estado: 'En camino', fecha: '2025-05-27', horaAsignacion: '09:30', horaEntrega: '---' },
