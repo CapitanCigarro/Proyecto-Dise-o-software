@@ -17,19 +17,26 @@ const estados = ['todos', 'Pendiente', 'En camino', 'Entregado', 'Cancelado'];
 const Envios = () => {
   const [envios, setEnvios] = useState<Envio[]>([]);
   const [filtroEstado, setFiltroEstado] = useState<string>('todos');
+  const [filtroFecha, setFiltroFecha] = useState<string>(''); // formato yyyy-mm-dd
+  const [filtroConductor, setFiltroConductor] = useState<string>('todos');
 
   useEffect(() => {
     axios.get('/envios')
       .then(res => setEnvios(res.data))
       .catch(err => {
         console.error('Error cargando envíos:', err);
-        setEnvios([]); // o podrías mostrar un mensaje de error
+        setEnvios([]);
       });
   }, []);
 
-  const enviosFiltrados = filtroEstado === 'todos'
-    ? envios
-    : envios.filter(envio => envio.estado === filtroEstado);
+  const conductoresUnicos = Array.from(new Set(envios.map(e => e.conductor)));
+
+  const enviosFiltrados = envios.filter(envio => {
+    const matchEstado = filtroEstado === 'todos' || envio.estado === filtroEstado;
+    const matchFecha = !filtroFecha || envio.fecha === filtroFecha;
+    const matchConductor = filtroConductor === 'todos' || envio.conductor === filtroConductor;
+    return matchEstado && matchFecha && matchConductor;
+  });
 
   return (
     <div style={styles.page}>
@@ -38,8 +45,8 @@ const Envios = () => {
         <h2 style={styles.title}>Listado de envíos diarios</h2>
 
         <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
-          <label>
-            Filtrar por estado:{' '}
+          <label style={{ marginRight: '1rem' }}>
+            Estado:{' '}
             <select
               value={filtroEstado}
               onChange={e => setFiltroEstado(e.target.value)}
@@ -48,6 +55,32 @@ const Envios = () => {
               {estados.map(estado => (
                 <option key={estado} value={estado}>
                   {estado.charAt(0).toUpperCase() + estado.slice(1)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label style={{ marginRight: '1rem' }}>
+            Fecha:{' '}
+            <input
+              type="date"
+              value={filtroFecha}
+              onChange={e => setFiltroFecha(e.target.value)}
+              style={{ padding: '0.5rem', borderRadius: '6px' }}
+            />
+          </label>
+
+          <label>
+            Conductor:{' '}
+            <select
+              value={filtroConductor}
+              onChange={e => setFiltroConductor(e.target.value)}
+              style={{ padding: '0.5rem', borderRadius: '6px' }}
+            >
+              <option value="todos">Todos</option>
+              {conductoresUnicos.map(conductor => (
+                <option key={conductor} value={conductor}>
+                  {conductor}
                 </option>
               ))}
             </select>
@@ -81,7 +114,7 @@ const Envios = () => {
               ))}
               {enviosFiltrados.length === 0 && (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '1rem' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '1rem' }}>
                     No hay envíos para mostrar
                   </td>
                 </tr>
@@ -93,6 +126,7 @@ const Envios = () => {
     </div>
   );
 };
+
 
 const styles: { [key: string]: React.CSSProperties } = {
   page: {
