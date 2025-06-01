@@ -6,6 +6,7 @@ import Dashboard from '../pages/Dashboard';
 import Envios from '../pages/Envios';
 import PrivateRoute from '../components/PrivateRoute';
 import { useAuth } from '../context/AuthContext';
+import Reportes from '../pages/Reportes';
 
 const AppRoutes = () => {
   const { userToken } = useAuth();
@@ -27,6 +28,14 @@ const AppRoutes = () => {
         element={
           <PrivateRoute requiredRole="admin">
             <Envios />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/reportes"
+        element={
+          <PrivateRoute requiredRole="admin">
+            <Reportes />
           </PrivateRoute>
         }
       />

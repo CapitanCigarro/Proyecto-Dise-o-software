@@ -62,7 +62,7 @@ mock.onGet('/envios').reply(200, [
 { id: 37, cliente: 'Rocío Gallardo', conductor: 'Carlos Pereira', estado: 'Pendiente', fecha: '2025-05-28', horaAsignacion: '10:00', horaEntrega: '---' },
 { id: 38, cliente: 'Damián Escobar', conductor: 'Ana Lisa', estado: 'Entregado', fecha: '2025-05-29', horaAsignacion: '09:00', horaEntrega: '11:15' },
 { id: 39, cliente: 'Lucía Figueroa', conductor: 'Juan López', estado: 'En camino', fecha: '2025-05-30', horaAsignacion: '10:30', horaEntrega: '---' },
-{ id: 40, cliente: 'Bastián Paredes', conductor: 'Francisco Pino', estado: 'Pendiente', fecha: '2025-05-30', horaAsignacion: '08:45', horaEntrega: '---' },
+{ id: 40, cliente: 'Bastián Paredes', conductor: 'Francisco Pino', estado: 'Entregado', fecha: '2025-05-30', horaAsignacion: '08:45', horaEntrega: '12:15' },
 { id: 41, cliente: 'Fernanda Carrasco', conductor: 'Carlos Pereira', estado: 'Entregado', fecha: '2025-05-30', horaAsignacion: '07:30', horaEntrega: '09:30' },
 
 ]);
