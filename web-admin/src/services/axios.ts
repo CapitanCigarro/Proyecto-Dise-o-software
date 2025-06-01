@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: '/api', // Cambia esto cuando tengas tu backend real
+  baseURL: '/api', // Cambiar cunado backend
   headers: {
     'Content-Type': 'application/json',
   },

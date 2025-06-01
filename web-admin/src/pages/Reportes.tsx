@@ -14,6 +14,8 @@ import '../services/mock';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
+
+// Estructura de un envio
 type Envio = {
   id: number;
   cliente: string;
@@ -24,20 +26,26 @@ type Envio = {
   horaEntrega: string;
 };
 
+// Convierte una hora en a minutos (HH:MM)
 function horaToMinutos(hora: string): number {
   const [h, m] = hora.split(':').map(Number);
   return h * 60 + m;
 }
 
+// Calculo tiempo total de entrega en minutos
 function tiempoEntregaMinutos(envio: Envio): number {
   return horaToMinutos(envio.horaEntrega) - horaToMinutos(envio.horaAsignacion);
 }
 
+// Componente principal de Reportes
 const Reportes: React.FC = () => {
+
+  // Estados para almacenar lista de envios, controlar indicadores de carga y almacena mensaje de error
   const [envios, setEnvios] = useState<Envio[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Hook que ejecuta la peticion GET al montar el componente
   useEffect(() => {
     axios
       .get('/envios')
@@ -51,19 +59,23 @@ const Reportes: React.FC = () => {
         console.error(err);
       });
   }, []);
-
+  
+  // Filtra envios entregados y tienen hora de entrega valida
   const entregas = useMemo(() => (
     envios.filter(e => e.estado === 'Entregado' && e.horaEntrega !== '---')
   ), [envios]);
 
+  // Mapea la lista de entregas con los tiempos de entrega en minutos
   const tiempos = useMemo(() => (
     entregas.map(tiempoEntregaMinutos)
   ), [entregas]);
 
+  // Calculo de estadisticas basicas
   const promedio = tiempos.reduce((a, b) => a + b, 0) / tiempos.length || 0;
   const max = tiempos.length ? Math.max(...tiempos) : 0;
   const min = tiempos.length ? Math.min(...tiempos) : 0;
 
+  // Rendimiento por conductor
   const rendimiento = useMemo(() => {
     const r: Record<string, { entregas: number; totalTiempo: number }> = {};
     entregas.forEach(e => {
@@ -76,9 +88,13 @@ const Reportes: React.FC = () => {
     return r;
   }, [entregas]);
 
+  // Lista de nombres de conductores
   const conductores = Object.keys(rendimiento);
+
+  // Cant de entregas por conductor
   const entregasPorConductor = conductores.map(c => rendimiento[c].entregas);
 
+  // Datos para el grafico
   const data: ChartData<'bar'> = useMemo(() => ({
     labels: conductores,
     datasets: [
@@ -91,6 +107,7 @@ const Reportes: React.FC = () => {
     ],
   }), [conductores, entregasPorConductor]);
 
+  // Configuracion del grafico
   const options = {
     responsive: true,
     plugins: {
@@ -169,7 +186,7 @@ const Reportes: React.FC = () => {
   );
 };
 
-// styles igual que antes
+// Estilos CSS en objeto JS
 const styles: { [key: string]: CSSProperties } = {
   page: {
     position: 'relative',

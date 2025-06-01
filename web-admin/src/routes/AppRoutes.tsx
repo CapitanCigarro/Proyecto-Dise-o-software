@@ -1,4 +1,3 @@
-// src/routes/AppRoutes.tsx (o donde estés guardando tus rutas)
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from '../pages/Login';
@@ -9,8 +8,10 @@ import { useAuth } from '../context/AuthContext';
 import Reportes from '../pages/Reportes';
 
 const AppRoutes = () => {
+  // Obtiene el token de autenticacion del contexto
   const { userToken } = useAuth();
 
+  // Redirecciona a las pags dashboard/envios/reportes
   return (
     <Routes>
       <Route path="/" element={<Navigate to={userToken ? "/dashboard" : "/login"} replace />} />

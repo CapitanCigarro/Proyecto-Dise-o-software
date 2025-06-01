@@ -112,7 +112,7 @@ const Login = () => {
 // Estilos CSS en objeto JS
 const styles = {
   background: {
-    position: 'fixed' as const, // para que quede fijo en toda la pantalla
+    position: 'fixed' as const,
     top: 0,
     left: 0,
     width: '100vw',
@@ -120,8 +120,8 @@ const styles = {
     backgroundImage: `url('/Wallpaper.jpg')`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    filter: 'blur(8px)',    // el efecto difuminado
-    zIndex: -1,             // que quede detrás de todo
+    filter: 'blur(8px)',  
+    zIndex: -1,            
   },
   container: {
     maxWidth: 400,
