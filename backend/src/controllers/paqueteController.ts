@@ -1,14 +1,22 @@
 import { Request, Response } from 'express';
 import pool from '../db';
 
-export const getPaquetes = async (req: Request, res: Response): Promise< Response | void > => {
+export const getPaquetes = async (req: Request, res: Response): Promise<Response | void> => {
+  const { usuario_correo } = req.params; // Lo tomas de la URL
+  console.log(usuario_correo);
+  if (!usuario_correo) {
+    return res.status(400).json({ message: 'Debe especificar el correo del usuario' });
+  }
+
   try {
-    const result = await pool.query('SELECT * FROM Diseno.Paquete');
-    res.json(result.rows);
+    const result = await pool.query('SELECT * FROM Diseno.Paquete WHERE usuario_correo = $1', [usuario_correo]);
+    console.log(result.rows);
+    return res.json(result.rows);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener paquetes' });
+    return res.status(500).json({ message: 'Error al obtener paquetes' });
   }
 };
+
 
 export const crearPaquete = async (req: Request, res: Response): Promise< Response | void > => {
   console.log('Creando paquete con datos:', req.body);

@@ -36,7 +36,7 @@ export const loginUser = async (req: Request, res: Response): Promise<Response |
     if (!validPassword) {
       return res.status(401).json({ message: 'Contraseña incorrecta' });
     }
-
+    console.log('Contraseña valida');
     // 3. Crear token JWT (con tu secret)
     const token = jwt.sign(
       { correo: user.usuario_correo, nombre: user.usuario_nombre, rol: user.usuario_rol },
@@ -45,7 +45,7 @@ export const loginUser = async (req: Request, res: Response): Promise<Response |
     );
 
     // 4. Enviar respuesta con token
-    res.json({ token });
+    res.json({ token, role: user.usuario_rol });
 
   } catch (error) {
     console.error(error);

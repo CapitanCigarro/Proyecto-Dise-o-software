@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, FormEvent } from 'react';
 import {
     View,
     Text,
@@ -16,6 +16,7 @@ import { useAuth } from '../../context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import SafeAreaWrapper from '../../components/SafeAreaWrapper';
 import styles from './Login.styles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Test user credentials for development and demonstration
 const MOCK_USERS = [
@@ -78,39 +79,52 @@ const Login = () => {
         return isValid;
     };
 
-    // Process login submission with validation and authentication
-    const handleLogin = async () => {
+    const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault(); // Muy importante para que no recargue
+
         if (!validateForm()) {
             return;
         }
 
         setLoading(true);
+        setErrors({}); // Limpio errores previos
 
         try {
-            // In a real app, this would be replaced with an API call
-            // For now, using mock data with a simulated delay
-            setTimeout(async () => {
-                const user = MOCK_USERS.find(
-                    (u) => u.email === email && u.password === password && u.role === role
-                );
+            const response = await fetch('http://192.168.1.5:3000/api/users/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ usuario_correo: email, usuario_password: password }),
+            });
 
-                if (user) {
-                    // Use the login function from AuthContext
-                    await login({
-                        email: user.email,
-                        role: user.role,
-                        token: 'mock-jwt-token'
-                    });
-                } else {
-                    Alert.alert(
-                        'Error de autenticación',
-                        'Credenciales incorrectas. Por favor intente nuevamente.'
-                    );
-                }
+            if (!response.ok) {
+                const errorData = await response.json();
+                setErrors({ email: errorData.message || 'Error en login' });
                 setLoading(false);
-            }, 1500); // Simulating network request
+                return;
+            }
+
+            const data = await response.json();
+
+            console.log('Login exitoso', data);
+
+            // Guarda el token usando AsyncStorage, que es lo correcto en React Native
+            await AsyncStorage.setItem('token', data.token);
+
+            // Elimina esta línea:
+            // localStorage.setItem('token', data.token);
+
+            await login({
+                email,
+                role: data.role || 'guest', // Ajusta según lo que retorne tu backend
+                token: data.token,
+            });
+
+            setLoading(false);
         } catch (error) {
-            Alert.alert('Error', 'Ocurrió un error al iniciar sesión');
+            console.error('Error al iniciar sesión:', error);
+            setErrors({ email: 'Error al conectar con el servidor' });
             setLoading(false);
         }
     };
