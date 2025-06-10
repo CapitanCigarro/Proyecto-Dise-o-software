@@ -2,11 +2,14 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { Pool } from 'pg';
 
+import cors from 'cors';
+import osrmRoutes from './routes/osrm';
+
 // Configurar variables de entorno
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3007;
 
 // Configurar conexión a PostgreSQL
 const pool = new Pool({
@@ -17,15 +20,14 @@ const pool = new Pool({
   port: Number(process.env.DB_PORT),
 });
 
-// Middleware para parsear JSON
+// Middleware
+app.use(cors());
 app.use(express.json());
 
-// Ruta básica
-app.get('/', (req, res) => {
-  res.send('¡Backend funcionando!');
-});
+// Routes
+app.use('/api/osrm', osrmRoutes);
 
-// Iniciar servidor
-app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

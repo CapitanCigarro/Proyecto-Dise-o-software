@@ -6,6 +6,7 @@ import Envios from '../pages/Envios';
 import PrivateRoute from '../components/PrivateRoute';
 import { useAuth } from '../context/AuthContext';
 import Reportes from '../pages/Reportes';
+import RoutePlanner from '../pages/RoutePlanner';
 
 const AppRoutes = () => {
   // Obtiene el token de autenticacion del contexto
@@ -37,6 +38,14 @@ const AppRoutes = () => {
         element={
           <PrivateRoute requiredRole="admin">
             <Reportes />
+          </PrivateRoute>
+        }
+      />
+            <Route
+        path="/asignar-rutas"
+        element={
+          <PrivateRoute requiredRole="admin">
+            <RoutePlanner />
           </PrivateRoute>
         }
       />
