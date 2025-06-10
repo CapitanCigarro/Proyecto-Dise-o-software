@@ -2,14 +2,36 @@ import express from 'express';
 import userRoutes from './routes/userRoutes';
 import paqueteRoutes from './routes/paqueteRoutes';
 import pool from './db'; // Importa tu pool de conexiones
+import dotenv from 'dotenv';
+import { Pool } from 'pg';
 
-const app = express();
+import cors from 'cors';
+import osrmRoutes from './routes/osrm';
 
 app.use(express.json());
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3007;
 
 app.use('/api/users', userRoutes);
 app.use('/api/paquetes', paqueteRoutes);
 
+// Configurar conexión a PostgreSQL
+const pool = new Pool({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: Number(process.env.DB_PORT),
+});
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.use('/api/osrm', osrmRoutes);
 
 // Ruta de prueba de conexión a la base de datos
 app.get('/test-db', async (req, res) => {
@@ -27,17 +49,18 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, async () => {
-  console.log(`Servidor escuchando en http://localhost:${PORT}`);
-  
-  // Verificación de conexión al iniciar
+const startServer = async () => {
   try {
     const client = await pool.connect();
     console.log('✅ Conexión exitosa a PostgreSQL');
     client.release();
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`);
+    });
   } catch (error) {
     console.error('❌ Error al conectar con PostgreSQL:', error);
   }
-});
+};
+
+startServer();

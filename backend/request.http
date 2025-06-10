@@ -1,0 +1,4 @@
+curl "http://localhost:3007/api/osrm/route?startLat=-36.823271&startLon=-73.039517&endLat=-36.826818&endLon=-73.039560"
+
+###
+curl "http://localhost:3007/api/osrm/route?startLat=-36.823271&startLon=-73.039517&endLat=-36.614119&endLon=-72.959328"
