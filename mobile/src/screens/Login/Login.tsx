@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, FormEvent } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -17,12 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import SafeAreaWrapper from '../../components/SafeAreaWrapper';
 import styles from './Login.styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// Test user credentials for development and demonstration
-const MOCK_USERS = [
-    { email: 'cliente@example.com', password: 'password123', role: 'cliente' },
-    { email: 'conductor@example.com', password: 'password123', role: 'conductor' },
-];
+import { authService } from '../../services/authService';
 
 // Authentication screen for user login with role selection
 const Login = () => {
@@ -41,16 +36,26 @@ const Login = () => {
     // Authentication context for login functionality
     const { login } = useAuth();
     
-    // Auto-populate credentials when user switches roles
+    // Check for saved credentials on component mount
     useEffect(() => {
-        const selectedUser = MOCK_USERS.find(user => user.role === role);
-        if (selectedUser) {
-            setEmail(selectedUser.email);
-            setPassword(selectedUser.password);
-            // Clear any previous validation errors when auto-filling
-            setErrors({});
-        }
-    }, [role]);
+        const loadSavedCredentials = async () => {
+            try {
+                const savedEmail = await AsyncStorage.getItem('savedEmail');
+                const savedPassword = await AsyncStorage.getItem('savedPassword');
+                const savedRememberMe = await AsyncStorage.getItem('rememberMe');
+                
+                if (savedEmail && savedPassword && savedRememberMe === 'true') {
+                    setEmail(savedEmail);
+                    setPassword(savedPassword);
+                    setRememberMe(true);
+                }
+            } catch (error) {
+                console.error('Error loading saved credentials:', error);
+            }
+        };
+        
+        loadSavedCredentials();
+    }, []);
 
     // Validate form fields before submission
     const validateForm = () => {
@@ -79,9 +84,7 @@ const Login = () => {
         return isValid;
     };
 
-    const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault(); // Muy importante para que no recargue
-
+    const handleLogin = async () => {
         if (!validateForm()) {
             return;
         }
@@ -90,41 +93,42 @@ const Login = () => {
         setErrors({}); // Limpio errores previos
 
         try {
-            const response = await fetch('http://192.168.1.5:3000/api/users/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ usuario_correo: email, usuario_password: password }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                setErrors({ email: errorData.message || 'Error en login' });
-                setLoading(false);
-                return;
-            }
-
-            const data = await response.json();
-
+            // Pass the role as third parameter
+            const data = await authService.login(email, password, role);
+            
             console.log('Login exitoso', data);
 
-            // Guarda el token usando AsyncStorage, que es lo correcto en React Native
-            await AsyncStorage.setItem('token', data.token);
+            // Save credentials if rememberMe is checked
+            if (rememberMe) {
+                await AsyncStorage.setItem('savedEmail', email);
+                await AsyncStorage.setItem('savedPassword', password);
+                await AsyncStorage.setItem('rememberMe', 'true');
+            } else {
+                // Clear saved credentials if rememberMe is unchecked
+                await AsyncStorage.removeItem('savedEmail');
+                await AsyncStorage.removeItem('savedPassword');
+                await AsyncStorage.removeItem('rememberMe');
+            }
 
-            // Elimina esta línea:
-            // localStorage.setItem('token', data.token);
+            // Guarda el token usando AsyncStorage
+            await AsyncStorage.setItem('token', data.token);
 
             await login({
                 email,
-                role: data.role || 'guest', // Ajusta según lo que retorne tu backend
+                role: role, 
                 token: data.token,
             });
-
-            setLoading(false);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error al iniciar sesión:', error);
-            setErrors({ email: 'Error al conectar con el servidor' });
+            
+            if (error.status === 401) {
+                setErrors({ email: 'Credenciales incorrectas' });
+            } else if (error.status === 403) {
+                setErrors({ email: 'No tienes permiso para acceder con este rol' });
+            } else {
+                setErrors({ email: error.message || 'Error al conectar con el servidor' });
+            }
+        } finally {
             setLoading(false);
         }
     };
@@ -138,12 +142,18 @@ const Login = () => {
                 { text: 'Cancelar', style: 'cancel' },
                 { 
                     text: 'Enviar', 
-                    onPress: () => {
+                    onPress: async () => {
                         if (!email || !/\S+@\S+\.\S+/.test(email)) {
                             Alert.alert('Error', 'Por favor, ingrese un correo electrónico válido primero.');
                             return;
                         }
-                        Alert.alert('Correo enviado', `Se ha enviado un enlace de recuperación a ${email}`);
+                        
+                        try {
+                            await authService.requestPasswordReset(email);
+                            Alert.alert('Correo enviado', `Se ha enviado un enlace de recuperación a ${email}`);
+                        } catch (error) {
+                            Alert.alert('Error', 'No se pudo enviar el correo de recuperación.');
+                        }
                     }
                 }
             ]

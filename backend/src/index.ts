@@ -1,37 +1,28 @@
 import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import pool from './db'; // Importamos el pool ya configurado
 import userRoutes from './routes/userRoutes';
 import paqueteRoutes from './routes/paqueteRoutes';
-import pool from './db'; // Importa tu pool de conexiones
-import dotenv from 'dotenv';
-import { Pool } from 'pg';
-
-import cors from 'cors';
 import osrmRoutes from './routes/osrm';
+import adminRoutes from './routes/adminRoutes';
 
-app.use(express.json());
+// Load environment variables first
 dotenv.config();
 
+// Initialize express app
 const app = express();
 const PORT = process.env.PORT || 3007;
-
-app.use('/api/users', userRoutes);
-app.use('/api/paquetes', paqueteRoutes);
-
-// Configurar conexión a PostgreSQL
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: Number(process.env.DB_PORT),
-});
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use('/api/users', userRoutes);
+app.use('/api/paquetes', paqueteRoutes);
 app.use('/api/osrm', osrmRoutes);
+app.use('/api/admin', adminRoutes); 
 
 // Ruta de prueba de conexión a la base de datos
 app.get('/test-db', async (req, res) => {
@@ -47,6 +38,11 @@ app.get('/test-db', async (req, res) => {
     console.error('Error de conexión:', error);
     res.status(500).json({ error: 'Error al conectar con la base de datos' });
   }
+});
+
+// Ruta de prueba simple
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API funcionando correctamente' });
 });
 
 const startServer = async () => {

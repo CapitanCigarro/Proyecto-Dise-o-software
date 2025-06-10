@@ -6,12 +6,12 @@ import jwt from 'jsonwebtoken';
 export const loginUser = async (req: Request, res: Response): Promise<Response | void> => {
   console.log("Body recibidio:", req.body);
   
-  const { usuario_correo, usuario_password } = req.body;
+  const { usuario_correo, usuario_password, usuario_rol } = req.body;
 
-  if(!usuario_correo || !usuario_password) {
-    console.error('Faltan campos requeridos:', { usuario_correo, usuario_password });
+  if(!usuario_correo || !usuario_password || !usuario_rol) {
+    console.error('Faltan campos requeridos:', { usuario_correo, usuario_password, usuario_rol });
     return res.status(400).json({ 
-      message: 'Correo y contraseña son requeridos'});
+      message: 'Correo, contraseña y rol son requeridos'});
   }
 
   try {
@@ -37,6 +37,32 @@ export const loginUser = async (req: Request, res: Response): Promise<Response |
       return res.status(401).json({ message: 'Contraseña incorrecta' });
     }
     console.log('Contraseña valida');
+    
+    // Verificar que el rol sea válido (1=admin, 2=cliente, 3=conductor)
+    if (![1, 2, 3].includes(user.usuario_rol)) {
+      return res.status(403).json({ 
+        message: 'Rol de usuario no válido o no autorizado',
+        rol: user.usuario_rol 
+      });
+    }
+    
+    // Verificar que el rol proporcionado coincida con el de la base de datos
+    if (parseInt(usuario_rol) !== user.usuario_rol) {
+      return res.status(403).json({ 
+        message: 'El rol proporcionado no coincide con el rol del usuario',
+        rolProporcionado: usuario_rol,
+        rolEnBaseDeDatos: user.usuario_rol
+      });
+    }
+    
+    // Mapeo de roles para el mensaje de log
+    const rolNombre: { [key: number]: string } = {
+      1: 'administrador',
+      2: 'cliente',
+      3: 'conductor'
+    };
+    console.log(`Usuario autenticado con rol: ${rolNombre[user.usuario_rol]}`);
+    
     // 3. Crear token JWT (con tu secret)
     const token = jwt.sign(
       { correo: user.usuario_correo, nombre: user.usuario_nombre, rol: user.usuario_rol },
