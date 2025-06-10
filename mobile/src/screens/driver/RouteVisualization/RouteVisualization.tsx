@@ -68,7 +68,7 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({ route, navigati
             setSelectedDestination(destination);
           }
         }
-      } catch (error) {
+      } catch (error) { 
         console.error('Error loading data:', error);
       } finally {
         setLoading(false);
