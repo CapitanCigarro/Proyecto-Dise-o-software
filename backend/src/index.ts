@@ -5,7 +5,7 @@ import pool from './db'; // Importamos el pool ya configurado
 import userRoutes from './routes/userRoutes';
 import paqueteRoutes from './routes/paqueteRoutes';
 import osrmRoutes from './routes/osrm';
-import adminRoutes from './routes/adminRoutes';
+import rutaRoutes from './routes/rutaRoutes';
 
 // Load environment variables first
 dotenv.config();
@@ -22,7 +22,7 @@ app.use(express.json());
 app.use('/api/users', userRoutes);
 app.use('/api/paquetes', paqueteRoutes);
 app.use('/api/osrm', osrmRoutes);
-app.use('/api/admin', adminRoutes); 
+app.use('/api/rutas', rutaRoutes);
 
 // Ruta de prueba de conexión a la base de datos
 app.get('/test-db', async (req, res) => {

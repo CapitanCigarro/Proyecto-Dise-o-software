@@ -7,154 +7,135 @@ import {
   Switch,
   Alert,
   TextInput,
-  Modal
+  Modal,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../context/AuthContext';
 import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
 import styles from './ClientProfile.styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// Import the mock data
-import mockData from '../../../../assets/mockDataClient.json';
+import { apiRequest } from '../../../services/api';
+import { packageService } from '../../../services/packageService';
 
-// Client profile screen component displaying user information and settings
+// Profile screen that displays user information and package delivery statistics
 const ClientProfile = () => {
-  // User data state for profile information
+  // User personal information state
   const [userData, setUserData] = useState({
     name: '',
     email: '',
-    phone: '',
-    role: '',
     address: '',
-    memberSince: '',
-    shippingCompleted: 0,
-    shippingInProgress: 0
+    role: 'Cliente',
+    memberSince: new Date().toLocaleDateString('es-CL'),
   });
+  
+  // Package delivery statistics state
+  const [packageStats, setPackageStats] = useState({
+    completed: 0,
+    inProgress: 0
+  });
+  
+  // Loading indicator state
+  const [loading, setLoading] = useState(true);
 
+  // Auth context for handling user logout
   const { logout } = useAuth();
   
-  // State for managing notification preferences
+  // User notification preference state
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  
-  // State for managing profile editing mode
-  const [isEditing, setIsEditing] = useState(false);
-  const [editFormData, setEditFormData] = useState({...userData});
 
-  // Load user data from mockData.json on component mount
+  // Load user data and calculate package statistics
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const storedUser = await AsyncStorage.getItem('user');
-        let userId = '1'; // Default to first user if none stored
+        setLoading(true);
+        const userInfoString = await AsyncStorage.getItem('userInfo');
         
-        if (storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          if (parsedUser.id) {
-            userId = parsedUser.id;
-          }
-        }
-        
-        // Find the user in mockData
-        const user = mockData.users.find(u => u.id === userId);
-        
-        if (user) {
-          // Update user data state with data from mockData
-          setUserData({
-            name: user.name || '',
-            email: user.email || '',
-            phone: user.phone || '',
-            role: user.role || '',
-            address: user.address || '',
-            memberSince: user.memberSince || '',
-            shippingCompleted: user.shippingCompleted || 0,
-            shippingInProgress: user.shippingInProgress || 0
-          });
+        if (userInfoString) {
+          const userInfo = JSON.parse(userInfoString);
           
-          // Also update the edit form data
-          setEditFormData({
-            name: user.name || '',
-            email: user.email || '',
-            phone: user.phone || '',
-            role: user.role || '',
-            address: user.address || '',
-            memberSince: user.memberSince || '',
-            shippingCompleted: user.shippingCompleted || 0,
-            shippingInProgress: user.shippingInProgress || 0
-          });
+          const token = userInfo.token;
+          const userEmail = userInfo.email;
+          
+          try {
+            // Get user packages to calculate statistics
+            const packages = await packageService.getUserPackages(userEmail);
+            
+            // Calculate package statistics
+            const completedPackages = packages.filter(pkg => pkg.paquete_estado === 'Entregado').length;
+            const inProgressPackages = packages.filter(pkg => pkg.paquete_estado === 'En tránsito' || pkg.paquete_estado === 'Por enviar').length;
+            
+            setPackageStats({
+              completed: completedPackages,
+              inProgress: inProgressPackages
+            });
+            
+            setUserData({
+              name: userInfo.name || 'Usuario',
+              email: userEmail,
+              address: userInfo.address || 'No disponible',
+              role: 'Cliente',
+              memberSince: new Date().toLocaleDateString('es-CL'),
+            });
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+          }
         }
       } catch (error) {
         console.error('Error loading user data:', error);
+      } finally {
+        setLoading(false);
       }
     };
     
     loadUserData();
   }, []);
 
-  // Handle user logout with confirmation dialog
+  // Show confirmation dialog before logging out
   const handleLogout = async () => {
-    try {
-      Alert.alert(
-        'Cerrar Sesión',
-        '¿Estás seguro que deseas salir?',
-        [
-          {
-            text: 'Cancelar',
-            style: 'cancel'
-          },
-          {
-            text: 'Sí, salir',
-            onPress: async () => {
-              await logout();
-            }
+    Alert.alert(
+      'Cerrar Sesión',
+      '¿Estás seguro que deseas salir?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        },
+        {
+          text: 'Sí, salir',
+          onPress: async () => {
+            await logout();
           }
-        ]
-      );
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
+        }
+      ]
+    );
   };
   
-  // Initialize edit form with current user data
+  // Display "coming soon" message for profile editing feature
   const handleEditProfile = () => {
-    setEditFormData({...userData});
-    setIsEditing(true);
+    Alert.alert(
+      'Próximamente',
+      'La función de editar perfil estará disponible en futuras actualizaciones.',
+      [{ text: 'Entendido', style: 'default' }]
+    );
   };
-  
-  // Validate and save profile changes
-  const handleSaveProfile = async () => {
-    if (!editFormData.name || !editFormData.email || !editFormData.phone || !editFormData.address) {
-      Alert.alert('Campos requeridos', 'Por favor completa todos los campos');
-      return;
-    }
-    
-    setUserData({...userData, ...editFormData});
-    setIsEditing(false);
-    
-    // Update the user in AsyncStorage
-    try {
-      const storedUser = await AsyncStorage.getItem('user');
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        const updatedUser = {
-          ...parsedUser,
-          name: editFormData.name,
-          email: editFormData.email,
-          phone: editFormData.phone,
-          address: editFormData.address
-        };
-        await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
-      }
-    } catch (error) {
-      console.error('Error updating user data:', error);
-    }
-    
-    Alert.alert('Perfil actualizado', 'Tus datos han sido actualizados correctamente');
-  };
+
+  // Show loading indicator while data is being fetched
+  if (loading) {
+    return (
+      <SafeAreaWrapper>
+        <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={{ marginTop: 16, fontSize: 16, color: '#555' }}>Cargando perfil...</Text>
+        </View>
+      </SafeAreaWrapper>
+    );
+  }
 
   return (
     <SafeAreaWrapper>
       <ScrollView style={styles.container}>
-        {/* Profile header with user avatar and stats */}
+        {/* Header section with profile picture and package statistics */}
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
             <Ionicons name="person-circle" size={100} color="white" />
@@ -165,14 +146,14 @@ const ClientProfile = () => {
           
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{userData.shippingCompleted}</Text>
+              <Text style={styles.statNumber}>{packageStats.completed}</Text>
               <Text style={styles.statLabel}>Completados</Text>
             </View>
             
             <View style={styles.statDivider} />
             
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{userData.shippingInProgress}</Text>
+              <Text style={styles.statNumber}>{packageStats.inProgress}</Text>
               <Text style={styles.statLabel}>En progreso</Text>
             </View>
           </View>
@@ -186,7 +167,7 @@ const ClientProfile = () => {
           </TouchableOpacity>
         </View>
         
-        {/* Personal information section with contact details */}
+        {/* Personal information card with contact details */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Información Personal</Text>
           
@@ -203,7 +184,7 @@ const ClientProfile = () => {
               <Ionicons name="call-outline" size={22} color="#007AFF" style={styles.icon} />
               <View style={styles.infoTextContainer}>
                 <Text style={styles.infoLabel}>Teléfono</Text>
-                <Text style={styles.infoText}>{userData.phone}</Text>
+                <Text style={styles.infoText}>Próximamente</Text>
               </View>
             </View>
             
@@ -225,7 +206,7 @@ const ClientProfile = () => {
           </View>
         </View>
         
-        {/* Notification preferences section */}
+        {/* Notification settings section */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Notificaciones</Text>
           
@@ -246,7 +227,7 @@ const ClientProfile = () => {
           </View>
         </View>
         
-        {/* Logout button and app version */}
+        {/* Logout button and app version information */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={20} color="white" style={styles.buttonIcon} />
           <Text style={styles.buttonText}>Cerrar Sesión</Text>
@@ -254,64 +235,6 @@ const ClientProfile = () => {
         
         <Text style={styles.versionText}>Versión 1.0.0</Text>
       </ScrollView>
-      
-      {/* Modal for editing profile information */}
-      <Modal
-        visible={isEditing}
-        animationType="slide"
-        transparent={true}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Editar Perfil</Text>
-              <TouchableOpacity onPress={() => setIsEditing(false)}>
-                <Ionicons name="close" size={24} color="#333" />
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView style={styles.formContainer}>
-              <Text style={styles.inputLabel}>Nombre</Text>
-              <TextInput
-                style={styles.input}
-                value={editFormData.name}
-                onChangeText={(text) => setEditFormData({...editFormData, name: text})}
-                placeholder="Nombre completo"
-              />
-              
-              <Text style={styles.inputLabel}>Correo electrónico</Text>
-              <TextInput
-                style={styles.input}
-                value={editFormData.email}
-                onChangeText={(text) => setEditFormData({...editFormData, email: text})}
-                placeholder="Correo electrónico"
-                keyboardType="email-address"
-              />
-              
-              <Text style={styles.inputLabel}>Teléfono</Text>
-              <TextInput
-                style={styles.input}
-                value={editFormData.phone}
-                onChangeText={(text) => setEditFormData({...editFormData, phone: text})}
-                placeholder="Número de teléfono"
-                keyboardType="phone-pad"
-              />
-              
-              <Text style={styles.inputLabel}>Dirección</Text>
-              <TextInput
-                style={styles.input}
-                value={editFormData.address}
-                onChangeText={(text) => setEditFormData({...editFormData, address: text})}
-                placeholder="Dirección de envío"
-              />
-            </ScrollView>
-            
-            <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
-              <Text style={styles.saveButtonText}>Guardar Cambios</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaWrapper>
   );
 };

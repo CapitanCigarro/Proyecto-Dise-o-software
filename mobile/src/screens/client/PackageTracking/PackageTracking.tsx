@@ -16,31 +16,24 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
 import styles from './PackageTracking.styles';
-// Import mockData
-import mockData from '../../../../assets/mockDataClient.json';
+import { packageService } from '../../../services/packageService';
+import { ROUTES } from '../../../navigation/routes';
 
-// Data structure for package information
+// Interface defining the structure of package data from backend
 interface Package {
-  id: string;
-  sender: string;
-  recipient: string;
-  address: string;
-  status: string;
-  date: string;
-  description?: string;
-  destination?: string;
-  origin?: string;
-  weight?: string;
-  dimensions?: string;
-  packageType?: string;
-  estimatedCost?: string;
-  notes?: string;
-  createdAt?: string;
+  paquete_id: number;
+  paquete_peso: string;
+  paquete_dimensiones: string;
+  paquete_estado: string;
+  paquete_destinatario: string;
+  paquete_fecha: string;
+  usuario_correo: string;
+  ruta_id: number;
 }
 
-// Screen component for viewing and tracking packages
+// Main component for viewing and tracking packages with filtering and sorting
 const PackageTracking = ({ route, navigation }) => {
-  // State management for package data and UI
+  // State management for package data, filtering, and UI
   const [packages, setPackages] = useState<Package[]>([]);
   const [filteredPackages, setFilteredPackages] = useState<Package[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,75 +44,55 @@ const PackageTracking = ({ route, navigation }) => {
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // References and parameters for navigation
+  // References for animation and navigation parameters
   const specificPackageId = route.params?.packageId;
   const searchInputRef = useRef<TextInput>(null);
   const animatedHeaderHeight = useRef(new Animated.Value(120)).current;
   
-  // Load packages on component mount or when package ID changes
+  // Initialize data and fetch packages from API on component mount
   useEffect(() => {
     loadPackages();
   }, [specificPackageId]);
   
-  // Fetch package data from storage or use mockData
+  // Fetch packages from API and update state with sorted results
   const loadPackages = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      let packagesData = [];
-      const storedUser = await AsyncStorage.getItem('user');
-      let currentUserId = '1'; // Default to first user if none stored
-      
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        if (userData.id) {
-          currentUserId = userData.id;
-        }
+      const userInfoString = await AsyncStorage.getItem('userInfo');
+      if (!userInfoString) {
+        setError('No se encontró información del usuario. Por favor inicie sesión nuevamente.');
+        setLoading(false);
+        return;
       }
       
-      // Get packages from mockData
-      packagesData = mockData.packages.filter(pkg => {
-        // Find packages where sender matches current user
-        const user = mockData.users.find(u => u.id === currentUserId);
-        return user && pkg.sender === user.name;
-      });
+      const userInfo = JSON.parse(userInfoString);
+      const userEmail = userInfo.email;
       
-      // Ensure all packages have all the required fields
-      packagesData = packagesData.map(pkg => ({
-        id: pkg.id || '',
-        sender: pkg.sender || '',
-        recipient: pkg.recipient || '',
-        address: pkg.address || '',
-        status: pkg.status || '',
-        date: pkg.date || '',
-        description: pkg.description || '',
-        destination: pkg.destination || '',
-        origin: pkg.origin || '',
-        weight: pkg.weight || '',
-        dimensions: pkg.dimensions || '',
-        packageType: pkg.packageType || '',
-        estimatedCost: pkg.estimatedCost || '',
-        notes: pkg.notes || '',
-        createdAt: pkg.createdAt || ''
-      }));
+      if (!userEmail) {
+        setError('No se encontró el correo del usuario. Por favor inicie sesión nuevamente.');
+        setLoading(false);
+        return;
+      }
       
-      // Sort packages based on current sort order
-      packagesData = sortPackages(packagesData, sortOrder);
+      const packagesData = await packageService.getUserPackages(userEmail);
       
-      setPackages(packagesData);
+      const sortedPackages = sortPackages(packagesData, sortOrder);
+      
+      setPackages(sortedPackages);
       
       if (specificPackageId) {
-        setSearchQuery(specificPackageId);
-        const filtered = packagesData.filter(pkg => 
-          pkg.id.includes(specificPackageId)
+        setSearchQuery(specificPackageId.toString());
+        const filtered = sortedPackages.filter(pkg => 
+          pkg.paquete_id.toString().includes(specificPackageId.toString())
         );
         setFilteredPackages(filtered);
       } else if (selectedFilter !== 'all') {
-        const filtered = packagesData.filter(pkg => pkg.status === selectedFilter);
+        const filtered = sortedPackages.filter(pkg => pkg.paquete_estado === selectedFilter);
         setFilteredPackages(filtered);
       } else {
-        setFilteredPackages(packagesData);
+        setFilteredPackages(sortedPackages);
       }
     } catch (error) {
       console.error("Error loading packages:", error);
@@ -130,26 +103,25 @@ const PackageTracking = ({ route, navigation }) => {
     }
   };
   
-  // Handle pull-to-refresh functionality
+  // Handle pull-to-refresh functionality to reload data
   const onRefresh = () => {
     setRefreshing(true);
     loadPackages();
   };
   
-  // Filter packages based on search text
+  // Filter packages based on search query text
   const handleSearch = (text: string) => {
     setSearchQuery(text);
     
     if (text) {
       const filtered = packages.filter(pkg => 
-        pkg.id.includes(text) || 
-        pkg.recipient.toLowerCase().includes(text.toLowerCase()) ||
-        pkg.address.toLowerCase().includes(text.toLowerCase())
+        pkg.paquete_id.toString().includes(text) || 
+        pkg.paquete_destinatario.toLowerCase().includes(text.toLowerCase())
       );
       setFilteredPackages(filtered);
     } else {
       if (selectedFilter !== 'all') {
-        const filtered = packages.filter(pkg => pkg.status === selectedFilter);
+        const filtered = packages.filter(pkg => pkg.paquete_estado === selectedFilter);
         setFilteredPackages(filtered);
       } else {
         setFilteredPackages(packages);
@@ -157,7 +129,7 @@ const PackageTracking = ({ route, navigation }) => {
     }
   };
   
-  // Filter packages by delivery status
+  // Apply status-based filter to packages list
   const filterByStatus = (status: string) => {
     setSelectedFilter(status);
     
@@ -168,21 +140,21 @@ const PackageTracking = ({ route, navigation }) => {
     if (status === 'all') {
       setFilteredPackages(packages);
     } else {
-      const filtered = packages.filter(pkg => pkg.status === status);
+      const filtered = packages.filter(pkg => pkg.paquete_estado === status);
       setFilteredPackages(filtered);
     }
   };
   
-  // Sort packages by date
+  // Sort packages by date in ascending or descending order
   const sortPackages = (packagesToSort, order) => {
     return [...packagesToSort].sort((a, b) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
+      const dateA = new Date(a.paquete_fecha).getTime();
+      const dateB = new Date(b.paquete_fecha).getTime();
       return order === 'newest' ? dateB - dateA : dateA - dateB;
     });
   };
   
-  // Change sort order and update package list
+  // Update sort order and apply to package list
   const toggleSortOrder = (order: string) => {
     setSortOrder(order);
     setShowSortOptions(false);
@@ -191,76 +163,91 @@ const PackageTracking = ({ route, navigation }) => {
     setPackages(sorted);
     
     if (selectedFilter !== 'all') {
-      const filtered = sorted.filter(pkg => pkg.status === selectedFilter);
+      const filtered = sorted.filter(pkg => pkg.paquete_estado === selectedFilter);
       setFilteredPackages(filtered);
     } else {
       setFilteredPackages(sorted);
     }
   };
   
-  // Get appropriate color for package status
+  // Determine color for package status indicators
   const getStatusColor = (status: string) => {
     switch(status) {
       case 'En tránsito': return '#f0ad4e';
       case 'Entregado': return '#5cb85c';
-      case 'Pendiente': return '#d9534f';
+      case 'Por enviar': return '#d9534f';
       default: return '#0275d8';
     }
   };
   
-  // Get background color based on package status
+  // Get background color for package cards based on status
   const getStatusBackground = (status: string) => {
     switch(status) {
       case 'En tránsito': return '#fff8e1';
       case 'Entregado': return '#f1f8f1';
-      case 'Pendiente': return '#fff6f6';
+      case 'Por enviar': return '#fff6f6';
       default: return '#f0f7ff';
     }
   };
   
-  // Render icon based on package status
+  // Render appropriate icon for each package status
   const renderStatusIcon = (status: string) => {
     switch(status) {
       case 'En tránsito':
         return <Ionicons name="time-outline" size={24} color="#f0ad4e" />;
       case 'Entregado':
         return <Ionicons name="checkmark-circle-outline" size={24} color="#5cb85c" />;
-      case 'Pendiente':
+      case 'Por enviar':
         return <Ionicons name="hourglass-outline" size={24} color="#d9534f" />;
       default:
         return <Ionicons name="help-circle-outline" size={24} color="#0275d8" />;
     }
   };
   
-  // Convert date string to readable format (Today, Yesterday, etc.)
-  const getDateLabel = (dateString: string) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    const date = new Date(dateString);
-    date.setHours(0, 0, 0, 0);
-    
-    if (date.getTime() === today.getTime()) {
-      return 'Hoy';
-    } else if (date.getTime() === yesterday.getTime()) {
-      return 'Ayer';
-    } else {
+  // Format date strings using Chile's timezone
+  const formatChileanDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      const options = { 
+        timeZone: 'America/Santiago',
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit'
+      };
+      return date.toLocaleDateString('es-CL', options);
+    } catch (error) {
+      console.error('Error al formatear fecha:', error);
       return dateString;
     }
   };
   
-  // Format date for display in user's locale
+  // Convert date to relative format (Today, Yesterday) or formatted date
+  const getDateLabel = (dateString) => {
+    const now = new Date();
+    
+    const packageDate = new Date(dateString);
+    
+    const chileOptions = { timeZone: 'America/Santiago' };
+    
+    const todayInChile = new Date(now.toLocaleDateString('en-US', chileOptions));
+    
+    const packageDateInChile = new Date(packageDate.toLocaleDateString('en-US', chileOptions));
+    
+    const yesterdayInChile = new Date(todayInChile);
+    yesterdayInChile.setDate(yesterdayInChile.getDate() - 1);
+    
+    if (packageDateInChile.getTime() === todayInChile.getTime()) {
+      return 'Hoy';
+    } else if (packageDateInChile.getTime() === yesterdayInChile.getTime()) {
+      return 'Ayer';
+    } else {
+      return formatChileanDate(dateString);
+    }
+  };
+  
+  // Format date for display in package details
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const options: Intl.DateTimeFormatOptions = { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    };
-    return date.toLocaleDateString('es-ES', options);
+    return formatChileanDate(dateString);
   };
   
   // Handle scroll events for collapsing header animation
@@ -269,37 +256,37 @@ const PackageTracking = ({ route, navigation }) => {
     { useNativeDriver: false }
   );
   
-  // Render individual package item in the list
+  // Render individual package item with conditional date header
   const renderPackageItem = ({ item, index }: { item: Package, index: number }) => {
     const showDateHeader = index === 0 || 
-      item.date !== filteredPackages[index - 1].date;
+      item.paquete_fecha !== filteredPackages[index - 1].paquete_fecha;
     
     return (
       <>
         {showDateHeader && (
           <View style={styles.dateHeader}>
-            <Text style={styles.dateHeaderText}>{getDateLabel(item.date)} - {formatDate(item.date)}</Text>
+            <Text style={styles.dateHeaderText}>{getDateLabel(item.paquete_fecha)}</Text>
           </View>
         )}
         <TouchableOpacity 
           style={[
             styles.packageItem, 
-            { backgroundColor: getStatusBackground(item.status) }
+            { backgroundColor: getStatusBackground(item.paquete_estado) }
           ]}
-          onPress={() => navigation.navigate('PackageDetail', { packageId: item.id })}
+          onPress={() => navigation.navigate(ROUTES.CLIENT.PACKAGE_DETAIL, { package: item })}
           activeOpacity={0.8}
         >
           <View style={styles.packageHeader}>
             <View style={styles.packageId}>
-              <Text style={styles.idText}>#{item.id}</Text>
+              <Text style={styles.idText}>#{item.paquete_id}</Text>
             </View>
             <View style={[
               styles.statusContainer, 
-              { backgroundColor: getStatusColor(item.status) + '22' }
+              { backgroundColor: getStatusColor(item.paquete_estado) + '22' }
             ]}>
-              {renderStatusIcon(item.status)}
-              <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
-                {item.status}
+              {renderStatusIcon(item.paquete_estado)}
+              <Text style={[styles.statusText, { color: getStatusColor(item.paquete_estado) }]}>
+                {item.paquete_estado}
               </Text>
             </View>
           </View>
@@ -307,20 +294,20 @@ const PackageTracking = ({ route, navigation }) => {
           <View style={styles.packageDetails}>
             <View style={styles.recipientRow}>
               <Ionicons name="person-outline" size={18} color="#666" style={styles.detailIcon} />
-              <Text style={styles.recipientText}>{item.recipient}</Text>
+              <Text style={styles.recipientText}>{item.paquete_destinatario}</Text>
             </View>
             
-            <View style={styles.addressRow}>
-              <Ionicons name="location-outline" size={18} color="#666" style={styles.detailIcon} />
-              <Text style={styles.addressText}>{item.address}</Text>
+            <View style={styles.dimensionsRow}>
+              <Ionicons name="cube-outline" size={18} color="#666" style={styles.detailIcon} />
+              <Text style={styles.dimensionsText}>
+                {item.paquete_dimensiones} - {item.paquete_peso} kg
+              </Text>
             </View>
             
-            {item.description && (
-              <View style={styles.descriptionRow}>
-                <Ionicons name="information-circle-outline" size={18} color="#666" style={styles.detailIcon} />
-                <Text style={styles.descriptionText}>{item.description}</Text>
-              </View>
-            )}
+            <View style={styles.dateRow}>
+              <Ionicons name="calendar-outline" size={18} color="#666" style={styles.detailIcon} />
+              <Text style={styles.dateText}>Creado: {formatDate(item.paquete_fecha)}</Text>
+            </View>
           </View>
           
           <View style={styles.packageFooter}>
@@ -332,7 +319,7 @@ const PackageTracking = ({ route, navigation }) => {
     );
   };
   
-  // Animation values for collapsing header
+  // Animation interpolation values for collapsing header effect
   const headerHeight = animatedHeaderHeight.interpolate({
     inputRange: [0, 60],
     outputRange: [120, 60],
@@ -442,7 +429,7 @@ const PackageTracking = ({ route, navigation }) => {
           <TextInput
             ref={searchInputRef}
             style={styles.searchInput}
-            placeholder="Buscar por ID, destinatario o dirección"
+            placeholder="Buscar por ID o destinatario"
             value={searchQuery}
             onChangeText={handleSearch}
             returnKeyType="search"
@@ -473,17 +460,17 @@ const PackageTracking = ({ route, navigation }) => {
             </TouchableOpacity>
             
             <TouchableOpacity 
-              style={[styles.filterButton, selectedFilter === 'Pendiente' && styles.filterButtonActive]}
-              onPress={() => filterByStatus('Pendiente')}
+              style={[styles.filterButton, selectedFilter === 'Por enviar' && styles.filterButtonActive]}
+              onPress={() => filterByStatus('Por enviar')}
             >
               <Ionicons 
                 name="hourglass-outline" 
                 size={16} 
-                color={selectedFilter === 'Pendiente' ? "#fff" : "#666"}
+                color={selectedFilter === 'Por enviar' ? "#fff" : "#666"}
                 style={styles.filterIcon}
               />
-              <Text style={[styles.filterText, selectedFilter === 'Pendiente' && styles.filterTextActive]}>
-                Pendientes
+              <Text style={[styles.filterText, selectedFilter === 'Por enviar' && styles.filterTextActive]}>
+                Por enviar
               </Text>
             </TouchableOpacity>
             
@@ -555,7 +542,7 @@ const PackageTracking = ({ route, navigation }) => {
           <FlatList
             data={filteredPackages}
             renderItem={renderPackageItem}
-            keyExtractor={item => item.id}
+            keyExtractor={item => item.paquete_id.toString()}
             contentContainerStyle={styles.listContainer}
             onScroll={handleScroll}
             scrollEventThrottle={16}
@@ -586,7 +573,9 @@ const PackageTracking = ({ route, navigation }) => {
             )}
             <TouchableOpacity 
               style={styles.registerButton}
-              onPress={() => navigation.navigate('PackageRegistration')}
+              onPress={() => navigation.navigate(ROUTES.CLIENT.PACKAGE_TRACKING, {
+                screen: ROUTES.CLIENT.PACKAGE_REGISTRATION_FORM
+              })}
             >
               <Ionicons name="add-circle-outline" size={18} color="#fff" style={styles.registerButtonIcon} />
               <Text style={styles.registerButtonText}>Registrar nuevo paquete</Text>
@@ -598,7 +587,9 @@ const PackageTracking = ({ route, navigation }) => {
         {filteredPackages.length > 0 && !searchQuery && (
           <TouchableOpacity 
             style={styles.fab}
-            onPress={() => navigation.navigate('PackageRegistration')}
+            onPress={() => navigation.navigate(ROUTES.CLIENT.PACKAGE_TRACKING, {
+              screen: ROUTES.CLIENT.PACKAGE_REGISTRATION_FORM
+            })}
           >
             <Ionicons name="add" size={24} color="#fff" />
           </TouchableOpacity>

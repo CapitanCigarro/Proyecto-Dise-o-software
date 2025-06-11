@@ -3,9 +3,6 @@ curl "http://localhost:3007/api/osrm/route?startLat=-36.823271&startLon=-73.0395
 ###
 curl "http://localhost:3007/api/osrm/route?startLat=-36.823271&startLon=-73.039517&endLat=-36.614119&endLon=-72.959328"
 
-### Aplicar el Hash a las contraseñas 
-POST http://localhost:3007/api/admin/update-passwords
-
 ### Login de usuario
 POST http://localhost:3007/api/users/login
 Content-Type: application/json
@@ -15,3 +12,25 @@ Content-Type: application/json
   "usuario_password": "cliente123",
   "usuario_rol": 2
 }
+
+### Get available routes
+GET http://localhost:3007/api/rutas
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3JyZW8iOiJjbGllbnRlMUBnbWFpbC5jb20iLCJub21icmUiOiJNYXLDrWEgR2FyY8OtYSIsInJvbCI6MiwiaWF0IjoxNzQ5NTk5MTc5LCJleHAiOjE3NTAyMDM5Nzl9.9NDnNqTg5UZ04hUbQLO20eM8tr7OjcbwQdbGjnYDl8E
+
+### Create a new package
+POST http://localhost:3007/api/paquetes
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3JyZW8iOiJjbGllbnRlMUBnbWFpbC5jb20iLCJub21icmUiOiJNYXLDrWEgR2FyY8OtYSIsInJvbCI6MiwiaWF0IjoxNzQ5NTk5MTc5LCJleHAiOjE3NTAyMDM5Nzl9.9NDnNqTg5UZ04hUbQLO20eM8tr7OjcbwQdbGjnYDl8E
+
+{
+  "paquete_peso": 3.5,
+  "paquete_dimensiones": "30x20x15 cm",
+  "paquete_destinatario": "Juan Pérez",
+  "paquete_fecha": "2025-06-10",
+  "usuario_correo": "cliente1@gmail.com",
+  "ruta_id": 1
+}
+
+### Verify package was created
+GET http://localhost:3007/api/paquetes/cliente1@gmail.com
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3JyZW8iOiJjbGllbnRlMUBnbWFpbC5jb20iLCJub21icmUiOiJNYXLDrWEgR2FyY8OtYSIsInJvbCI6MiwiaWF0IjoxNzQ5NTk5MTc5LCJleHAiOjE3NTAyMDM5Nzl9.9NDnNqTg5UZ04hUbQLO20eM8tr7OjcbwQdbGjnYDl8E

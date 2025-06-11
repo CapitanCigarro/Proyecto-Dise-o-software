@@ -11,9 +11,8 @@ export type ClientTabParamList = {
 };
 
 // Parameters for client stack navigation screens with their props
-export type ClientStackParamList = {
-  [ROUTES.CLIENT.PACKAGE_TRACKING_LIST]: undefined;
-  [ROUTES.CLIENT.PACKAGE_DETAIL]: { package: any };
+export type ClientHomeStackParamList = {
+  [ROUTES.CLIENT.HOME_SCREEN]: undefined; // Cambia esto para usar HOME_SCREEN
   [ROUTES.CLIENT.PACKAGE_REGISTRATION_FORM]: undefined;
 };
 

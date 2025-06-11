@@ -19,9 +19,9 @@ import styles from './Login.styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../../services/authService';
 
-// Authentication screen for user login with role selection
+// Main authentication screen with role-based login functionality
 const Login = () => {
-    // Form state and UI control variables
+    // Form state management and input validation
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('cliente');
@@ -30,13 +30,13 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     
-    // Reference for focus management between inputs
+    // Reference for handling input focus navigation
     const passwordInputRef = useRef<TextInput>(null);
     
-    // Authentication context for login functionality
+    // Authentication context for login state management
     const { login } = useAuth();
     
-    // Check for saved credentials on component mount
+    // Load previously saved credentials if remember me was checked
     useEffect(() => {
         const loadSavedCredentials = async () => {
             try {
@@ -57,12 +57,11 @@ const Login = () => {
         loadSavedCredentials();
     }, []);
 
-    // Validate form fields before submission
+    // Validate form input fields before submission
     const validateForm = () => {
         let formErrors: { email?: string; password?: string } = {};
         let isValid = true;
 
-        // Email validation
         if (!email) {
             formErrors.email = 'El correo es obligatorio';
             isValid = false;
@@ -71,7 +70,6 @@ const Login = () => {
             isValid = false;
         }
 
-        // Password validation
         if (!password) {
             formErrors.password = 'La contraseña es obligatoria';
             isValid = false;
@@ -84,33 +82,37 @@ const Login = () => {
         return isValid;
     };
 
+    // Process login request and handle authentication result
     const handleLogin = async () => {
         if (!validateForm()) {
             return;
         }
 
         setLoading(true);
-        setErrors({}); // Limpio errores previos
+        setErrors({});
 
         try {
-            // Pass the role as third parameter
             const data = await authService.login(email, password, role);
             
             console.log('Login exitoso', data);
 
-            // Save credentials if rememberMe is checked
             if (rememberMe) {
                 await AsyncStorage.setItem('savedEmail', email);
                 await AsyncStorage.setItem('savedPassword', password);
                 await AsyncStorage.setItem('rememberMe', 'true');
             } else {
-                // Clear saved credentials if rememberMe is unchecked
                 await AsyncStorage.removeItem('savedEmail');
                 await AsyncStorage.removeItem('savedPassword');
                 await AsyncStorage.removeItem('rememberMe');
             }
 
-            // Guarda el token usando AsyncStorage
+            const userInfo = {
+                email: email,
+                token: data.token,
+                role: role
+            };
+            
+            await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
             await AsyncStorage.setItem('token', data.token);
 
             await login({
@@ -133,7 +135,7 @@ const Login = () => {
         }
     };
     
-    // Handle password recovery request
+    // Handle password recovery request via email
     const handleForgotPassword = () => {
         Alert.alert(
             'Recuperar contraseña',
@@ -177,7 +179,7 @@ const Login = () => {
                 />
                 
                 <View style={styles.formWrapper}>
-                    {/* Logo and Title */}
+                    {/* App logo and title section */}
                     <View style={styles.logoContainer}>
                         <Image 
                             source={{ uri: 'https://img.icons8.com/color/96/000000/delivery-truck.png' }}
@@ -188,7 +190,7 @@ const Login = () => {
                         <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
                     </View>
                     
-                    {/* Role Selection */}
+                    {/* User role selection toggles */}
                     <View style={styles.roleContainer}>
                         <TouchableOpacity 
                             style={[
@@ -235,7 +237,7 @@ const Login = () => {
                         </TouchableOpacity>
                     </View>
                     
-                    {/* Email Field */}
+                    {/* Email input field with validation */}
                     <View style={styles.inputContainer}>
                         <View style={styles.inputIconContainer}>
                             <Ionicons name="mail" size={20} color="#007AFF" />
@@ -263,7 +265,7 @@ const Login = () => {
                         </Text>
                     )}
                     
-                    {/* Password Field */}
+                    {/* Password input field with toggle visibility */}
                     <View style={styles.inputContainer}>
                         <View style={styles.inputIconContainer}>
                             <Ionicons name="lock-closed" size={20} color="#007AFF" />
@@ -301,7 +303,7 @@ const Login = () => {
                         </Text>
                     )}
                     
-                    {/* Additional options row */}
+                    {/* Remember me and forgot password options */}
                     <View style={styles.optionsRow}>
                         <TouchableOpacity 
                             style={styles.checkboxContainer}
@@ -318,7 +320,7 @@ const Login = () => {
                         </TouchableOpacity>
                     </View>
                     
-                    {/* Login action button */}
+                    {/* Submit button with loading state */}
                     <TouchableOpacity
                         style={[styles.loginButton, loading && styles.loginButtonDisabled]}
                         onPress={handleLogin}
@@ -332,7 +334,7 @@ const Login = () => {
                         )}
                     </TouchableOpacity>
                     
-                    {/* App version information */}
+                    {/* Version information */}
                     <Text style={styles.versionText}>v1.0.0</Text>
                 </View>
             </KeyboardAvoidingView>

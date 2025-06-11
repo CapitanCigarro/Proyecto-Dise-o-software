@@ -1,6 +1,7 @@
 import { StyleSheet, Dimensions } from 'react-native';
 import { colors, typography, spacing, borderRadius, shadows } from '../../../theme/globalStyles';
 
+// Stylesheet for the package tracking screens with list and detail views
 const styles = StyleSheet.create({
   // Main container for the entire screen
   container: {
@@ -8,7 +9,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.main,
   },
   
-  // Header section with title and subtitle
+  // Header section with title and navigation elements
   header: {
     backgroundColor: colors.background.card,
     justifyContent: 'flex-end',
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   
-  // Collapsed header state for scrolling
+  // Compact header for scrolled state
   collapsedHeaderTitle: {
     fontSize: typography.fontSize.subheading,
     fontWeight: typography.fontWeight.bold,
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   
-  // Header action buttons container
+  // Container for header action buttons
   headerActions: {
     position: 'absolute',
     right: spacing.section,
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   
-  // Sort options dropdown menu
+  // Dropdown menu for sorting options
   sortOptionsContainer: {
     position: 'absolute',
     top: 120,
@@ -88,7 +89,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
   },
   
-  // Search bar for finding packages
+  // Search input for filtering packages
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.body,
   },
   
-  // Status filter buttons row
+  // Filter buttons for package status selection
   filterContainer: {
     paddingHorizontal: spacing.md,
     marginBottom: spacing.xs,
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
   },
   
-  // Search results counter
+  // Results count display
   resultsContainer: {
     paddingHorizontal: spacing.section,
     paddingVertical: spacing.xs,
@@ -148,13 +149,13 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
   },
   
-  // Package list container
+  // Container for the list of packages
   listContainer: {
     padding: spacing.md,
     paddingTop: spacing.xs,
   },
   
-  // Date group headers for package lists
+  // Date section headers in package list
   dateHeader: {
     backgroundColor: colors.background.main,
     paddingVertical: spacing.xs,
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   
-  // Package card header with ID and status
+  // Header section of package card
   packageHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
   },
   
-  // Package status indicator
+  // Status indicator badge
   statusContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
     marginLeft: spacing.xs,
   },
   
-  // Package details section
+  // Main content area of package card
   packageDetails: {
     padding: spacing.md,
   },
@@ -251,8 +252,15 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     flex: 1,
   },
+
+  // Package dimensions information
+  dimensionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
   
-  // Footer for package card with timestamp
+  // Footer section of package card
   packageFooter: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -267,7 +275,7 @@ const styles = StyleSheet.create({
     marginRight: spacing.xs,
   },
   
-  // Loading state container
+  // Loading state indicator
   loaderContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -306,7 +314,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
   },
   
-  // Empty state when no packages found
+  // Empty state when no packages exist
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -331,7 +339,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.section,
   },
   
-  // Register new package button
+  // Button to create new package
   registerButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -350,7 +358,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
   },
   
-  // Floating action button for quick actions
+  // Floating action button
   fab: {
     position: 'absolute',
     bottom: spacing.section,
@@ -362,6 +370,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     ...shadows.medium,
+  },
+  
+  // Date information display in package details
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  dateText: {
+    fontSize: 14,
+    color: '#666',
+    flex: 1,
   },
 });
 

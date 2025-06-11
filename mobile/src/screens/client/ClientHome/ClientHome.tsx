@@ -1,34 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
 import styles from './ClientHome.styles';
-// Import the mock data
 import mockData from '../../../../assets/mockDataClient.json';
+import { ROUTES } from '../../../navigation/routes';
+import { packageService } from '../../../services/packageService';
 
-// Data structure for notification items
+// Interface for notification items
 interface Notification {
   id: string;
   message: string;
   date: string;
 }
 
-// Data structure for package items
+// Interface for package data
 interface Package {
-  id: string;
-  status: string;
-  destination: string;
-  date: string;
+  paquete_id: number;
+  paquete_peso: string;
+  paquete_dimensiones: string;
+  paquete_estado: string;
+  paquete_destinatario: string;
+  paquete_fecha: string;
+  usuario_correo: string;
+  ruta_id: number;
 }
 
-// Props definition for the Client Home screen
 interface ClientHomeProps {
   navigation: any;
 }
 
-// Main dashboard component for client users
+// Main dashboard component for client users to track packages
 const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
+  // State for user data and notifications
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [recentPackages, setRecentPackages] = useState<Package[]>([]);
   const [stats, setStats] = useState({
@@ -39,87 +44,47 @@ const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
   const [userName, setUserName] = useState('');
   const [userId, setUserId] = useState('');
   
-  // Maximum items to show without scrolling
   const MAX_VISIBLE_NOTIFICATIONS = 3;
   const MAX_VISIBLE_PACKAGES = 3;
   
-  // Load data from mockData.json on component mount
+  // Fetch user data and packages from storage and API
   useEffect(() => {
-    const loadMockData = async () => {
+    const loadUserData = async () => {
       try {
-        const user = await AsyncStorage.getItem('user');
-        let currentUserId = '1'; // Default to first user if none stored
+        const userInfoString = await AsyncStorage.getItem('userInfo');
+        if (!userInfoString) {
+          console.error('No user info found in storage');
+          return;
+        }
+
+        const userInfo = JSON.parse(userInfoString);
+        setUserName(userInfo.name || '');
         
-        if (user) {
-          const userData = JSON.parse(user);
-          setUserName(userData.name || '');
-          
-          // If we have a user ID in storage, use it
-          if (userData.id) {
-            currentUserId = userData.id;
-            setUserId(currentUserId);
-          }
-        } else {
-          // If no user in storage, use the first user from mock data
-          const firstUser = mockData.users[0];
-          setUserName(firstUser.name);
-          setUserId(firstUser.id);
+        const userEmail = userInfo.email;
+        if (!userEmail) {
+          console.error('No user email found');
+          return;
         }
         
-        // Filter notifications for the current user
-        const userNotifications = mockData.notifications.filter(
-          notification => notification.userId === currentUserId
-        );
+        const packages = await packageService.getUserPackages(userEmail);
+        setRecentPackages(packages);
         
-        // Filter packages for the current user (assuming sender is the current user)
-        const userPackages = mockData.packages.filter(
-          pkg => mockData.users.find(u => u.id === currentUserId)?.name === pkg.sender
-        );
+        const active = packages.filter(p => p.paquete_estado !== 'Entregado').length;
+        const delivered = packages.filter(p => p.paquete_estado === 'Entregado').length;
         
-        // Map packages to the expected format
-        const formattedPackages = userPackages.map(pkg => ({
-          id: pkg.id,
-          status: pkg.status,
-          destination: pkg.destination,
-          date: pkg.date
-        }));
-        
-        // Map notifications to the expected format
-        const formattedNotifications = userNotifications.map(notification => ({
-          id: notification.id,
-          message: notification.message,
-          date: notification.date
-        }));
-        
-        setNotifications(formattedNotifications);
-        setRecentPackages(formattedPackages);
-        
-        // Set stats based on user's stats from mock data
-        const userStats = mockData.stats[`user${currentUserId}`];
-        if (userStats) {
-          setStats({
-            active: userStats.active,
-            delivered: userStats.delivered,
-            total: userStats.total
-          });
-        } else {
-          // Calculate stats from packages if not available directly
-          const active = formattedPackages.filter(p => p.status !== 'Entregado').length;
-          const delivered = formattedPackages.filter(p => p.status === 'Entregado').length;
-          
-          setStats({
-            active,
-            delivered,
-            total: formattedPackages.length
-          });
-        }
+        setStats({
+          active,
+          delivered,
+          total: packages.length
+        });
         
       } catch (error) {
         console.error('Error loading data:', error);
+        setRecentPackages([]);
       }
     };
     
-    loadMockData();
+    loadUserData();
   }, []);
   
   // Determine color based on package status
@@ -127,15 +92,34 @@ const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
     switch(status) {
       case 'En tránsito': return '#f0ad4e';
       case 'Entregado': return '#5cb85c';
-      case 'Pendiente': return '#d9534f';
+      case 'Por enviar': return '#d9534f';
       default: return '#0275d8';
+    }
+  };
+  
+  // Format date string to Chilean format
+  const formatChileanDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      
+      const options = { 
+        timeZone: 'America/Santiago',
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit'
+      };
+      
+      return date.toLocaleDateString('es-CL', options);
+    } catch (error) {
+      console.error('Error al formatear fecha:', error);
+      return dateString;
     }
   };
   
   return (
     <SafeAreaWrapper>
       <ScrollView style={styles.container}>
-        {/* Header with welcome message and New Package button */}
+        {/* Header section with welcome message and action button */}
         <View style={styles.welcomeHeader}>
           <View>
             <Text style={styles.welcomeText}>
@@ -145,14 +129,14 @@ const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
           </View>
           <TouchableOpacity 
             style={styles.newPackageButton}
-            onPress={() => navigation.navigate('PackageRegistration')}
+            onPress={() => navigation.navigate(ROUTES.CLIENT.PACKAGE_REGISTRATION_FORM)}
           >
             <Ionicons name="add-circle" size={18} color="#fff" />
             <Text style={styles.newPackageButtonText}>Nuevo Paquete</Text>
           </TouchableOpacity>
         </View>
         
-        {/* Stats Summary */}
+        {/* Package statistics summary */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>{stats.active}</Text>
@@ -196,20 +180,23 @@ const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
             </View>
           ) : (
             <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>PROXIMAMENTE</Text>
               <Ionicons name="notifications-off-outline" size={40} color="#ccc" />
               <Text style={styles.emptyText}>No hay notificaciones nuevas</Text>
             </View>
           )}
         </View>
         
-        {/* Recent packages section */}
+        {/* Recent packages list with navigation to details */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleContainer}>
               <Ionicons name="cube-outline" size={20} color="#333" style={{marginRight: 6}} />
               <Text style={styles.sectionTitle}>Paquetes Recientes</Text>
             </View>
-            <TouchableOpacity onPress={() => navigation.navigate('PackageTracking')}>
+            <TouchableOpacity onPress={() => navigation.navigate(ROUTES.CLIENT.PACKAGE_TRACKING, {
+              screen: ROUTES.CLIENT.PACKAGE_TRACKING_LIST
+            })}>
               <Text style={styles.seeAllText}>Ver todos</Text>
             </TouchableOpacity>
           </View>
@@ -218,18 +205,21 @@ const ClientHome: React.FC<ClientHomeProps> = ({ navigation }) => {
             <View style={styles.packagesContainer}>
               {recentPackages.slice(0, MAX_VISIBLE_PACKAGES).map(item => (
                 <TouchableOpacity 
-                  key={item.id}
+                  key={item.paquete_id}
                   style={styles.packageItem}
-                  onPress={() => navigation.navigate('PackageTracking', { packageId: item.id })}
+                  onPress={() => navigation.navigate(ROUTES.CLIENT.PACKAGE_TRACKING, {
+                    screen: ROUTES.CLIENT.PACKAGE_DETAIL,
+                    params: { package: item }
+                  })}
                 >
-                  <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(item.status) }]} />
+                  <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(item.paquete_estado) }]} />
                   <View style={styles.packageInfo}>
-                    <Text style={styles.packageId}>Paquete #{item.id}</Text>
-                    <Text style={styles.packageDestination}>{item.destination}</Text>
-                    <Text style={styles.packageDate}>{item.date}</Text>
+                    <Text style={styles.packageId}>Paquete #{item.paquete_id}</Text>
+                    <Text style={styles.packageDestination}>{item.paquete_destinatario}</Text>
+                    <Text style={styles.packageDate}>{formatChileanDate(item.paquete_fecha)}</Text>
                   </View>
-                  <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-                    <Text style={styles.statusBadgeText}>{item.status}</Text>
+                  <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.paquete_estado) }]}>
+                    <Text style={styles.statusBadgeText}>{item.paquete_estado}</Text>
                   </View>
                 </TouchableOpacity>
               ))}

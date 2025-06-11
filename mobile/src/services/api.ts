@@ -1,5 +1,7 @@
-const API_URL = 'http://192.168.50.19:3007/api'; //Pone tu IP o URL del servidor aquí
+// Base URL for all API requests
+const API_URL = 'http://192.168.50.19:3007/api'; //Reemplaza http://TU_IP:3007/api
 
+// Central function for making HTTP requests to the backend API
 export const apiRequest = async (
   endpoint: string,
   method: string = 'GET',

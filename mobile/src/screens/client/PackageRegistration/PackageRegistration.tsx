@@ -16,255 +16,235 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
 import styles from './PackageRegistration.styles';
+import { packageService } from '../../../services/packageService';
+import { Picker } from '@react-native-picker/picker';
 
-// Package registration screen with multi-step form workflow
+// Screen for registering new packages with form and confirmation modal
 const PackageRegistration = ({ navigation }) => {
-  // Form data for package information
+  // Main form state to store all package information
   const [formData, setFormData] = useState({
-    sender: '',
-    recipient: '',
-    address: '',
-    phone: '',
-    weight: '',
-    width: '',
-    height: '',
-    length: '',
-    description: '',
-    packageType: 'standard' // default package type
+    paquete_peso: '',
+    paquete_dimensiones: '',
+    paquete_destinatario: '',
+    paquete_fecha: new Date().toISOString().split('T')[0],
+    usuario_correo: '',
+    ruta_id: ''
   });
   
-  // UI state management for form validation and display
+  // Separate state for tracking individual dimension values
+  const [dimensions, setDimensions] = useState({
+    width: '',
+    height: '',
+    length: ''
+  });
+
+  // UI and form state management
   const [errors, setErrors] = useState({});
-  const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
-  const [addressSuggestions, setAddressSuggestions] = useState([]);
-  const [estimatedCost, setEstimatedCost] = useState('');
-  const [progressValue] = useState(new Animated.Value(0));
+  const [availableRoutes, setAvailableRoutes] = useState([]);
+  const [isLoadingRoutes, setIsLoadingRoutes] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
-  // Form steps configuration
-  const steps = [
-    { title: "Remitente", icon: "person-outline" },
-    { title: "Destinatario", icon: "location-outline" },
-    { title: "Paquete", icon: "cube-outline" },
-    { title: "Revisión", icon: "checkmark-circle-outline" }
-  ];
-
-  // Update progress bar and calculate cost based on current step
+  // Load user data and available routes on component mount
   useEffect(() => {
-    Animated.timing(progressValue, {
-      toValue: (currentStep + 1) / steps.length,
-      duration: 300,
-      useNativeDriver: false
-    }).start();
+    const initializeData = async () => {
+      try {
+        const userInfo = await AsyncStorage.getItem('userInfo');
+        if (!userInfo) {
+          Alert.alert('Sesión expirada', 'Por favor inicie sesión nuevamente.');
+          navigation.replace('Login');
+          return;
+        }
+        
+        const parsedUserInfo = JSON.parse(userInfo);
+        
+        if (!parsedUserInfo.token) {
+          Alert.alert('Sesión inválida', 'Por favor inicie sesión nuevamente.');
+          navigation.replace('Login');
+          return;
+        }
+        
+        if (parsedUserInfo.email) {
+          setFormData(prev => ({
+            ...prev,
+            usuario_correo: parsedUserInfo.email
+          }));
+        }
+        
+        setIsLoadingRoutes(true);
+        const routesData = await packageService.getRoutes();
+        setAvailableRoutes(routesData);
+        
+        if (routesData.length > 0) {
+          setFormData(prev => ({
+            ...prev,
+            ruta_id: routesData[0].ruta_id.toString()
+          }));
+        }
+      } catch (error) {
+        console.error('Error initializing data:', error);
+        
+        if (error.status === 401) {
+          Alert.alert(
+            'Sesión expirada', 
+            'Su sesión ha expirado. Por favor inicie sesión nuevamente.',
+            [{ text: 'OK', onPress: () => navigation.replace('Login') }]
+          );
+          return;
+        }
+        
+        Alert.alert('Error', 'No se pudieron cargar las rutas disponibles');
+      } finally {
+        setIsLoadingRoutes(false);
+      }
+    };
     
-    if (currentStep === 2) {
-      calculateCost();
-    }
-  }, [currentStep, formData.weight, formData.width, formData.height, formData.length]);
-
-  // Generate address suggestions when typing
+    initializeData();
+  }, [navigation]);
+  
+  // Update package dimensions string when individual dimensions change
   useEffect(() => {
-    if (formData.address.length > 3 && currentStep === 1) {
-      const timer = setTimeout(() => {
-        const mockSuggestions = [
-          { id: 1, address: `${formData.address}, Calle Principal 123` },
-          { id: 2, address: `${formData.address}, Avenida Central 456` },
-          { id: 3, address: `${formData.address}, Plaza Mayor 789` }
-        ];
-        setAddressSuggestions(mockSuggestions);
-        setShowAddressSuggestions(true);
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    } else {
-      setShowAddressSuggestions(false);
+    if (dimensions.width && dimensions.height && dimensions.length) {
+      const dimensionsString = `${dimensions.width}x${dimensions.height}x${dimensions.length} cm`;
+      setFormData(prev => ({
+        ...prev,
+        paquete_dimensiones: dimensionsString
+      }));
     }
-  }, [formData.address]);
+  }, [dimensions]);
   
-  // Calculate shipping cost based on dimensions, weight and package type
-  const calculateCost = () => {
-    const { weight, width, height, length, packageType } = formData;
-    
-    if (weight && width && height && length && 
-        !isNaN(weight) && !isNaN(width) && !isNaN(height) && !isNaN(length)) {
-      
-      const volume = Number(width) * Number(height) * Number(length);
-      
-      let price = Number(weight) * 5 + volume * 0.001;
-      
-      if (packageType === 'fragile') price *= 1.5;
-      if (packageType === 'express') price *= 1.75;
-      
-      setEstimatedCost(price.toFixed(2));
-    } else {
-      setEstimatedCost('');
-    }
-  };
-  
-  // Validate current step before proceeding
-  const validateCurrentStep = () => {
-    let newErrors = {};
-    
-    switch (currentStep) {
-      case 0: // Sender validation
-        if (!formData.sender) newErrors.sender = 'El nombre del remitente es requerido';
-        break;
-        
-      case 1: // Recipient validation
-        if (!formData.recipient) newErrors.recipient = 'El nombre del destinatario es requerido';
-        if (!formData.address) newErrors.address = 'La dirección es requerida';
-        if (!formData.phone) newErrors.phone = 'El teléfono es requerido';
-        
-        const phoneRegex = /^\d{7,15}$/;
-        if (formData.phone && !phoneRegex.test(formData.phone.replace(/[\s-]/g, ''))) {
-          newErrors.phone = 'Ingrese un número de teléfono válido';
-        }
-        break;
-        
-      case 2: // Package validation
-        if (!formData.weight) {
-          newErrors.weight = 'El peso es requerido';
-        } else if (isNaN(Number(formData.weight))) {
-          newErrors.weight = 'El peso debe ser un número';
-        }
-        
-        if (!formData.width) {
-          newErrors.width = 'El ancho es requerido';
-        } else if (isNaN(Number(formData.width))) {
-          newErrors.width = 'El ancho debe ser un número';
-        }
-        
-        if (!formData.height) {
-          newErrors.height = 'El alto es requerido'; 
-        } else if (isNaN(Number(formData.height))) {
-          newErrors.height = 'El alto debe ser un número';
-        }
-        
-        if (!formData.length) {
-          newErrors.length = 'El largo es requerido';
-        } else if (isNaN(Number(formData.length))) {
-          newErrors.length = 'El largo debe ser un número';
-        }
-        break;
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-  
-  // Validate entire form before submission
+  // Validate all form fields and return whether form is valid
   const validateForm = () => {
     let newErrors = {};
     
-    if (!formData.sender) newErrors.sender = 'El nombre del remitente es requerido';
-    if (!formData.recipient) newErrors.recipient = 'El nombre del destinatario es requerido';
-    if (!formData.address) newErrors.address = 'La dirección es requerida';
-    if (!formData.phone) newErrors.phone = 'El teléfono es requerido';
-    if (!formData.weight) newErrors.weight = 'El peso es requerido';
-    if (!formData.width) newErrors.width = 'El ancho es requerido';
-    if (!formData.height) newErrors.height = 'El alto es requerido';
-    if (!formData.length) newErrors.length = 'El largo es requerido';
-    
-    if (formData.weight && isNaN(Number(formData.weight))) {
-      newErrors.weight = 'El peso debe ser un número';
-    }
-    if (formData.width && isNaN(Number(formData.width))) {
-      newErrors.width = 'El ancho debe ser un número';
-    }
-    if (formData.height && isNaN(Number(formData.height))) {
-      newErrors.height = 'El alto debe ser un número';
-    }
-    if (formData.length && isNaN(Number(formData.length))) {
-      newErrors.length = 'El largo debe ser un número';
+    if (!formData.paquete_destinatario) {
+      newErrors.paquete_destinatario = 'El nombre del destinatario es requerido';
     }
     
-    const phoneRegex = /^\d{7,15}$/;
-    if (formData.phone && !phoneRegex.test(formData.phone.replace(/[\s-]/g, ''))) {
-      newErrors.phone = 'Ingrese un número de teléfono válido';
+    if (!formData.paquete_peso) {
+      newErrors.paquete_peso = 'El peso es requerido';
+    } else if (isNaN(formData.paquete_peso) || parseFloat(formData.paquete_peso) <= 0) {
+      newErrors.paquete_peso = 'El peso debe ser un número positivo';
     }
+    
+    if (!dimensions.width) {
+      newErrors.width = 'El ancho es requerido';
+    } else if (isNaN(dimensions.width) || parseInt(dimensions.width) <= 0) {
+      newErrors.width = 'El ancho debe ser un número positivo';
+    }
+    
+    if (!dimensions.height) {
+      newErrors.height = 'La altura es requerida';
+    } else if (isNaN(dimensions.height) || parseInt(dimensions.height) <= 0) {
+      newErrors.height = 'La altura debe ser un número positivo';
+    }
+    
+    if (!dimensions.length) {
+      newErrors.length = 'El largo es requerido';
+    } else if (isNaN(dimensions.length) || parseInt(dimensions.length) <= 0) {
+      newErrors.length = 'El largo debe ser un número positivo';
+    }
+    
+    if (!formData.paquete_fecha) newErrors.paquete_fecha = 'La fecha es requerida';
+    if (!formData.usuario_correo) newErrors.usuario_correo = 'El correo del usuario es requerido';
+    if (!formData.ruta_id) newErrors.ruta_id = 'La ruta es requerida';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
   
-  // Advance to next form step if validation passes
-  const goToNextStep = () => {
-    if (validateCurrentStep()) {
-      if (currentStep < steps.length - 1) {
-        setCurrentStep(currentStep + 1);
-        setErrors({});
-      } else {
-        handleSubmit();
-      }
-    }
-  };
-  
-  // Go back to previous step or confirm cancellation
-  const goToPreviousStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-      setErrors({});
-    } else {
-      confirmCancel();
-    }
-  };
-  
-  // Show confirmation dialog when cancelling registration
+  // Show confirmation dialog when user attempts to cancel registration
   const confirmCancel = () => {
     Alert.alert(
       "¿Cancelar registro?",
       "Si sales ahora, perderás todos los datos ingresados.",
       [
         { text: "Seguir editando", style: "cancel" },
-        { text: "Salir", style: "destructive", onPress: () => navigation.goBack() }
+        { 
+          text: "Salir", 
+          style: "destructive", 
+          onPress: () => {
+            setFormData({
+              paquete_peso: '',
+              paquete_dimensiones: '',
+              paquete_destinatario: '',
+              paquete_fecha: new Date().toISOString().split('T')[0],
+              usuario_correo: formData.usuario_correo,
+              ruta_id: availableRoutes.length > 0 ? availableRoutes[0].ruta_id.toString() : ''
+            });
+            setDimensions({
+              width: '',
+              height: '',
+              length: ''
+            });
+            setErrors({});
+            
+            navigation.goBack();
+          } 
+        }
       ]
     );
   };
   
-  // Submit package registration data
-  const handleSubmit = async () => {
+  // Validate form and show review modal if valid
+  const showReview = () => {
     if (validateForm()) {
-      try {
-        setIsSubmitting(true);
-        
-        const dimensions = `${formData.width}x${formData.height}x${formData.length}`;
-        
-        const packageObj = {
-          ...formData,
-          dimensions,
-          id: Math.floor(1000 + Math.random() * 9000).toString(),
-          status: 'Pendiente',
-          date: new Date().toISOString().split('T')[0],
-          createdAt: new Date().toISOString(),
-          estimatedCost
-        };
-        
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        const packagesJson = await AsyncStorage.getItem('packages');
-        const packages = packagesJson ? JSON.parse(packagesJson) : [];
-        
-        packages.push(packageObj);
-        
-        await AsyncStorage.setItem('packages', JSON.stringify(packages));
-        
-        setIsSubmitting(false);
-        
-        Alert.alert(
-          "Registro exitoso", 
-          `Su paquete ha sido registrado con ID: #${packageObj.id}`,
-          [{ text: "OK", onPress: () => navigation.navigate('Home') }]
-        );
-      } catch (error) {
-        setIsSubmitting(false);
-        Alert.alert("Error", "No se pudo registrar el paquete");
-        console.error(error);
-      }
+      setShowReviewModal(true);
     }
   };
   
-  // Update form data and clear related error
+  // Submit package data to the server and handle response
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      setShowReviewModal(false);
+      
+      const packageDataToSubmit = {
+        ...formData,
+        paquete_peso: parseFloat(formData.paquete_peso),
+        ruta_id: parseInt(formData.ruta_id)
+      };
+      
+      const response = await packageService.createPackage(packageDataToSubmit);
+      
+      setIsSubmitting(false);
+      
+      Alert.alert(
+        "Registro exitoso", 
+        "Su paquete ha sido registrado correctamente",
+        [{ 
+          text: "OK", 
+          onPress: () => {
+            setFormData({
+              paquete_peso: '',
+              paquete_dimensiones: '',
+              paquete_destinatario: '',
+              paquete_fecha: new Date().toISOString().split('T')[0],
+              usuario_correo: formData.usuario_correo,
+              ruta_id: availableRoutes.length > 0 ? availableRoutes[0].ruta_id.toString() : ''
+            });
+            setDimensions({
+              width: '',
+              height: '',
+              length: ''
+            });
+            setErrors({});
+            
+            navigation.navigate('ClientHome');
+          }
+        }]
+      );
+    } catch (error) {
+      setIsSubmitting(false);
+      Alert.alert(
+        "Error", 
+        error.message || "No se pudo registrar el paquete"
+      );
+      console.error(error);
+    }
+  };
+  
+  // Update form data and clear related validation errors
   const handleChange = (field, value) => {
     setFormData({
       ...formData,
@@ -279,323 +259,25 @@ const PackageRegistration = ({ navigation }) => {
     }
   };
   
-  // Select an address from suggestions list
-  const selectAddress = (address) => {
-    handleChange('address', address);
-    setShowAddressSuggestions(false);
-  };
-  
-  // Update package type selection
-  const selectPackageType = (type) => {
-    handleChange('packageType', type);
-  };
-  
-  // Render form content based on current step
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0: // Sender information
-        return (
-          <View style={styles.stepContainer}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Nombre completo *</Text>
-              <TextInput
-                style={[styles.input, errors.sender && styles.inputError]}
-                placeholder="Nombre del remitente"
-                value={formData.sender}
-                onChangeText={(text) => handleChange('sender', text)}
-              />
-              {errors.sender && <Text style={styles.errorText}>{errors.sender}</Text>}
-            </View>
-            
-            <View style={styles.infoBox}>
-              <Ionicons name="information-circle-outline" size={20} color="#007AFF" style={styles.infoIcon} />
-              <Text style={styles.infoText}>
-                Como remitente, usted es responsable de proporcionar información precisa sobre el paquete.
-              </Text>
-            </View>
-          </View>
-        );
-        
-      case 1: // Recipient information
-        return (
-          <View style={styles.stepContainer}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Nombre completo del destinatario *</Text>
-              <TextInput
-                style={[styles.input, errors.recipient && styles.inputError]}
-                placeholder="Nombre del destinatario"
-                value={formData.recipient}
-                onChangeText={(text) => handleChange('recipient', text)}
-              />
-              {errors.recipient && <Text style={styles.errorText}>{errors.recipient}</Text>}
-            </View>
-            
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Dirección de entrega *</Text>
-              <View style={styles.addressInputContainer}>
-                <TextInput
-                  style={[
-                    styles.input, 
-                    styles.addressInput,
-                    errors.address && styles.inputError
-                  ]}
-                  placeholder="Ingrese la dirección de entrega"
-                  value={formData.address}
-                  onChangeText={(text) => handleChange('address', text)}
-                />
-                {formData.address.length > 0 && (
-                  <TouchableOpacity 
-                    style={styles.clearButton}
-                    onPress={() => handleChange('address', '')}
-                  >
-                    <Ionicons name="close-circle" size={18} color="#999" />
-                  </TouchableOpacity>
-                )}
-              </View>
-              {errors.address && <Text style={styles.errorText}>{errors.address}</Text>}
-              
-              {/* Address suggestions */}
-              {showAddressSuggestions && (
-                <View style={styles.suggestionsContainer}>
-                  {addressSuggestions.map(suggestion => (
-                    <TouchableOpacity 
-                      key={suggestion.id}
-                      style={styles.suggestionItem}
-                      onPress={() => selectAddress(suggestion.address)}
-                    >
-                      <Ionicons name="location-outline" size={16} color="#007AFF" style={styles.suggestionIcon} />
-                      <Text style={styles.suggestionText}>{suggestion.address}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            </View>
-            
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Teléfono de contacto *</Text>
-              <TextInput
-                style={[styles.input, errors.phone && styles.inputError]}
-                placeholder="Número de teléfono"
-                value={formData.phone}
-                onChangeText={(text) => handleChange('phone', text)}
-                keyboardType="phone-pad"
-              />
-              {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
-            </View>
-          </View>
-        );
-        
-      case 2: // Package information
-        return (
-          <View style={styles.stepContainer}>
-            <Text style={styles.groupTitle}>Tipo de Paquete</Text>
-            <View style={styles.packageTypeContainer}>
-              <TouchableOpacity 
-                style={[
-                  styles.packageTypeOption,
-                  formData.packageType === 'standard' && styles.packageTypeSelected
-                ]}
-                onPress={() => selectPackageType('standard')}
-              >
-                <Ionicons 
-                  name="cube-outline" 
-                  size={28} 
-                  color={formData.packageType === 'standard' ? "#007AFF" : "#666"} 
-                />
-                <Text style={[
-                  styles.packageTypeText,
-                  formData.packageType === 'standard' && styles.packageTypeTextSelected
-                ]}>
-                  Estándar
-                </Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[
-                  styles.packageTypeOption,
-                  formData.packageType === 'fragile' && styles.packageTypeSelected
-                ]}
-                onPress={() => selectPackageType('fragile')}
-              >
-                <Ionicons 
-                  name="wine-outline" 
-                  size={28} 
-                  color={formData.packageType === 'fragile' ? "#007AFF" : "#666"} 
-                />
-                <Text style={[
-                  styles.packageTypeText,
-                  formData.packageType === 'fragile' && styles.packageTypeTextSelected
-                ]}>
-                  Frágil
-                </Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[
-                  styles.packageTypeOption,
-                  formData.packageType === 'express' && styles.packageTypeSelected
-                ]}
-                onPress={() => selectPackageType('express')}
-              >
-                <Ionicons 
-                  name="flash-outline" 
-                  size={28} 
-                  color={formData.packageType === 'express' ? "#007AFF" : "#666"} 
-                />
-                <Text style={[
-                  styles.packageTypeText,
-                  formData.packageType === 'express' && styles.packageTypeTextSelected
-                ]}>
-                  Express
-                </Text>
-              </TouchableOpacity>
-            </View>
-            
-            <Text style={styles.groupTitle}>Dimensiones y Peso</Text>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Peso (kg) *</Text>
-              <TextInput
-                style={[styles.input, errors.weight && styles.inputError]}
-                placeholder="Ej: 2.5"
-                value={formData.weight}
-                onChangeText={(text) => handleChange('weight', text)}
-                keyboardType="numeric"
-              />
-              {errors.weight && <Text style={styles.errorText}>{errors.weight}</Text>}
-            </View>
-            
-            <View style={styles.dimensionsContainer}>
-              <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
-                <Text style={styles.label}>Ancho (cm) *</Text>
-                <TextInput
-                  style={[styles.input, errors.width && styles.inputError]}
-                  placeholder="Ancho"
-                  value={formData.width}
-                  onChangeText={(text) => handleChange('width', text)}
-                  keyboardType="numeric"
-                />
-                {errors.width && <Text style={styles.errorText}>{errors.width}</Text>}
-              </View>
-              
-              <View style={[styles.inputGroup, { flex: 1, marginHorizontal: 4 }]}>
-                <Text style={styles.label}>Alto (cm) *</Text>
-                <TextInput
-                  style={[styles.input, errors.height && styles.inputError]}
-                  placeholder="Alto"
-                  value={formData.height}
-                  onChangeText={(text) => handleChange('height', text)}
-                  keyboardType="numeric"
-                />
-                {errors.height && <Text style={styles.errorText}>{errors.height}</Text>}
-              </View>
-              
-              <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
-                <Text style={styles.label}>Largo (cm) *</Text>
-                <TextInput
-                  style={[styles.input, errors.length && styles.inputError]}
-                  placeholder="Largo"
-                  value={formData.length}
-                  onChangeText={(text) => handleChange('length', text)}
-                  keyboardType="numeric"
-                />
-                {errors.length && <Text style={styles.errorText}>{errors.length}</Text>}
-              </View>
-            </View>
-            
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Descripción (opcional)</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="Descripción del contenido del paquete"
-                value={formData.description}
-                onChangeText={(text) => handleChange('description', text)}
-                multiline
-                numberOfLines={3}
-              />
-            </View>
-            
-            {estimatedCost && (
-              <View style={styles.costEstimation}>
-                <Text style={styles.costEstimationText}>
-                  Costo estimado de envío: <Text style={styles.costEstimationAmount}>${estimatedCost}</Text>
-                </Text>
-                <Text style={styles.costEstimationNote}>Este es un cálculo aproximado basado en las dimensiones y peso.</Text>
-              </View>
-            )}
-          </View>
-        );
-        
-      case 3: // Review and summary
-        return (
-          <View style={styles.stepContainer}>
-            <Text style={styles.reviewTitle}>Resumen de Envío</Text>
-            
-            <View style={styles.reviewSection}>
-              <Text style={styles.reviewSectionTitle}>
-                <Ionicons name="person-outline" size={18} color="#007AFF" style={{marginRight: 6}} /> 
-                Información del Remitente
-              </Text>
-              <Text style={styles.reviewText}>{formData.sender}</Text>
-            </View>
-            
-            <View style={styles.reviewSection}>
-              <Text style={styles.reviewSectionTitle}>
-                <Ionicons name="location-outline" size={18} color="#007AFF" style={{marginRight: 6}} /> 
-                Información del Destinatario
-              </Text>
-              <Text style={styles.reviewText}>{formData.recipient}</Text>
-              <Text style={styles.reviewText}>{formData.address}</Text>
-              <Text style={styles.reviewText}>{formData.phone}</Text>
-            </View>
-            
-            <View style={styles.reviewSection}>
-              <Text style={styles.reviewSectionTitle}>
-                <Ionicons name="cube-outline" size={18} color="#007AFF" style={{marginRight: 6}} /> 
-                Información del Paquete
-              </Text>
-              <View style={styles.reviewRow}>
-                <Text style={styles.reviewLabel}>Tipo:</Text>
-                <Text style={styles.reviewValue}>
-                  {formData.packageType === 'standard' && 'Estándar'}
-                  {formData.packageType === 'fragile' && 'Frágil'}
-                  {formData.packageType === 'express' && 'Express'}
-                </Text>
-              </View>
-              <View style={styles.reviewRow}>
-                <Text style={styles.reviewLabel}>Peso:</Text>
-                <Text style={styles.reviewValue}>{formData.weight} kg</Text>
-              </View>
-              <View style={styles.reviewRow}>
-                <Text style={styles.reviewLabel}>Dimensiones:</Text>
-                <Text style={styles.reviewValue}>{formData.width} x {formData.height} x {formData.length} cm</Text>
-              </View>
-              {formData.description && (
-                <View style={styles.reviewRow}>
-                  <Text style={styles.reviewLabel}>Descripción:</Text>
-                  <Text style={styles.reviewValue}>{formData.description}</Text>
-                </View>
-              )}
-            </View>
-            
-            {estimatedCost && (
-              <View style={styles.costSummary}>
-                <Text style={styles.costSummaryLabel}>Costo estimado:</Text>
-                <Text style={styles.costSummaryValue}>${estimatedCost}</Text>
-              </View>
-            )}
-            
-            <View style={styles.confirmationBox}>
-              <Ionicons name="information-circle" size={22} color="#007AFF" />
-              <Text style={styles.confirmationText}>
-                Al registrar este paquete, confirma que la información proporcionada es correcta.
-              </Text>
-            </View>
-          </View>
-        );
-      
-      default:
-        return null;
+  // Update dimension values and clear related validation errors
+  const handleDimensionChange = (field, value) => {
+    setDimensions({
+      ...dimensions,
+      [field]: value
+    });
+    
+    if (errors[field]) {
+      setErrors({
+        ...errors,
+        [field]: null
+      });
     }
+  };
+  
+  // Utility function to get route name from route ID
+  const getRouteName = (routeId) => {
+    const route = availableRoutes.find(r => r.ruta_id.toString() === routeId);
+    return route ? `${route.ruta_origen} a ${route.ruta_destino}` : 'Ruta no encontrada';
   };
 
   return (
@@ -610,82 +292,216 @@ const PackageRegistration = ({ navigation }) => {
             <Text style={styles.title}>Registro de Paquete</Text>
           </View>
           
-          {/* Progress indicator */}
-          <View style={styles.progressContainer}>
-            <View style={styles.stepIndicatorContainer}>
-              {steps.map((step, index) => (
-                <View key={index} style={styles.stepIndicator}>
-                  <View style={[
-                    styles.stepCircle,
-                    currentStep >= index ? styles.stepCircleActive : styles.stepCircleInactive
-                  ]}>
-                    <Ionicons 
-                      name={currentStep > index ? "checkmark" : step.icon} 
-                      size={16} 
-                      color={currentStep >= index ? "#fff" : "#999"} 
-                    />
-                  </View>
-                  <Text style={[
-                    styles.stepText,
-                    currentStep >= index ? styles.stepTextActive : styles.stepTextInactive
-                  ]}>
-                    {step.title}
-                  </Text>
-                </View>
-              ))}
-            </View>
-            
-            <View style={styles.progressBarContainer}>
-              <View style={styles.progressBarBackground} />
-              <Animated.View 
-                style={[
-                  styles.progressBarFill,
-                  {
-                    width: progressValue.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: ['0%', '100%']
-                    })
-                  }
-                ]} 
-              />
-            </View>
-          </View>
-          
-          {/* Form content */}
+          {/* Form content - All fields in one view */}
           <ScrollView style={styles.formContainer}>
-            {renderStepContent()}
+            <View style={styles.stepContainer}>
+              {/* Recipient Information Section */}
+              <View style={styles.sectionHeader}>
+                <Ionicons name="person-outline" size={20} color="#007AFF" />
+                <Text style={styles.sectionTitle}>Información del Destinatario</Text>
+              </View>
+              
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Nombre completo del destinatario *</Text>
+                <TextInput
+                  style={[styles.input, errors.paquete_destinatario && styles.inputError]}
+                  placeholder="Ej: Juan Pérez González"
+                  value={formData.paquete_destinatario}
+                  onChangeText={(text) => handleChange('paquete_destinatario', text)}
+                />
+                {errors.paquete_destinatario && <Text style={styles.errorText}>{errors.paquete_destinatario}</Text>}
+              </View>
+              
+              <View style={styles.infoBox}>
+                <Ionicons name="information-circle-outline" size={20} color="#007AFF" style={styles.infoIcon} />
+                <Text style={styles.infoText}>
+                  Ingrese el nombre completo de la persona que recibirá el paquete.
+                </Text>
+              </View>
+              
+              {/* Basic Information Section */}
+              <View style={[styles.sectionHeader, {marginTop: 20}]}>
+                <Ionicons name="document-outline" size={20} color="#007AFF" />
+                <Text style={styles.sectionTitle}>Información Básica</Text>
+              </View>
+              
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Peso (kg) *</Text>
+                <TextInput
+                  style={[styles.input, errors.paquete_peso && styles.inputError]}
+                  placeholder="Ej: 2.5"
+                  value={formData.paquete_peso}
+                  onChangeText={(text) => handleChange('paquete_peso', text)}
+                  keyboardType="numeric"
+                />
+                {errors.paquete_peso && <Text style={styles.errorText}>{errors.paquete_peso}</Text>}
+              </View>
+              
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Dimensiones (cm) *</Text>
+                <View style={styles.dimensionsContainer}>
+                  <View style={styles.dimensionInputWrapper}>
+                    <TextInput
+                      style={[styles.dimensionInput, errors.width && styles.inputError]}
+                      placeholder="Ancho"
+                      value={dimensions.width}
+                      onChangeText={(text) => handleDimensionChange('width', text)}
+                      keyboardType="numeric"
+                    />
+                    {errors.width && <Text style={styles.errorText}>{errors.width}</Text>}
+                  </View>
+                  <Text style={styles.dimensionX}>×</Text>
+                  <View style={styles.dimensionInputWrapper}>
+                    <TextInput
+                      style={[styles.dimensionInput, errors.height && styles.inputError]}
+                      placeholder="Alto"
+                      value={dimensions.height}
+                      onChangeText={(text) => handleDimensionChange('height', text)}
+                      keyboardType="numeric"
+                    />
+                    {errors.height && <Text style={styles.errorText}>{errors.height}</Text>}
+                  </View>
+                  <Text style={styles.dimensionX}>×</Text>
+                  <View style={styles.dimensionInputWrapper}>
+                    <TextInput
+                      style={[styles.dimensionInput, errors.length && styles.inputError]}
+                      placeholder="Largo"
+                      value={dimensions.length}
+                      onChangeText={(text) => handleDimensionChange('length', text)}
+                      keyboardType="numeric"
+                    />
+                    {errors.length && <Text style={styles.errorText}>{errors.length}</Text>}
+                  </View>
+                </View>
+              </View>
+              
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Ruta de envío *</Text>
+                {isLoadingRoutes ? (
+                  <ActivityIndicator size="small" color="#007AFF" />
+                ) : (
+                  <View style={[styles.input, errors.ruta_id && styles.inputError]}>
+                    <Picker
+                      selectedValue={formData.ruta_id}
+                      style={{height: 50}}
+                      onValueChange={(itemValue) => handleChange('ruta_id', itemValue)}
+                    >
+                      <Picker.Item label="Seleccione una ruta" value="" />
+                      {availableRoutes.map(route => (
+                        <Picker.Item 
+                          key={route.ruta_id} 
+                          label={`${route.ruta_origen} a ${route.ruta_destino}`} 
+                          value={route.ruta_id.toString()} 
+                        />
+                      ))}
+                    </Picker>
+                  </View>
+                )}
+                {errors.ruta_id && <Text style={styles.errorText}>{errors.ruta_id}</Text>}
+              </View>
+              
+              <View style={styles.infoBox}>
+                <Ionicons name="information-circle-outline" size={20} color="#007AFF" style={styles.infoIcon} />
+                <Text style={styles.infoText}>
+                  Especifique el peso exacto y las dimensiones del paquete para un cálculo correcto.
+                </Text>
+              </View>
+            </View>
           </ScrollView>
           
-          {/* Navigation buttons */}
+          {/* Action buttons */}
           <View style={styles.navigationButtons}>
             <TouchableOpacity 
-              style={[
-                styles.navigationButton,
-                currentStep === 0 ? styles.cancelButton : styles.backButton
-              ]}
-              onPress={goToPreviousStep}
+              style={[styles.navigationButton, styles.cancelButton]}
+              onPress={confirmCancel}
             >
-              <Text style={[
-                styles.navigationButtonText,
-                currentStep === 0 ? styles.cancelButtonText : styles.backButtonText
-              ]}>
-                {currentStep === 0 ? 'Cancelar' : 'Anterior'}
-              </Text>
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
-              style={[
-                styles.navigationButton,
-                styles.nextButton,
-                currentStep === steps.length - 1 ? styles.submitButton : {}
-              ]}
-              onPress={goToNextStep}
+              style={[styles.navigationButton, styles.nextButton]}
+              onPress={showReview}
             >
-              <Text style={styles.navigationButtonText}>
-                {currentStep === steps.length - 1 ? 'Registrar' : 'Siguiente'}
-              </Text>
+              <Text style={styles.navigationButtonText}>Revisar</Text>
             </TouchableOpacity>
           </View>
+          
+          {/* Review Modal */}
+          <Modal
+            transparent={true}
+            visible={showReviewModal}
+            animationType="slide"
+            onRequestClose={() => setShowReviewModal(false)}
+          >
+            <View style={styles.modalBackground}>
+              <View style={styles.reviewModal}>
+                <View style={styles.reviewModalHeader}>
+                  <Text style={styles.reviewModalTitle}>Confirmar Envío</Text>
+                  <TouchableOpacity onPress={() => setShowReviewModal(false)}>
+                    <Ionicons name="close" size={24} color="#555" />
+                  </TouchableOpacity>
+                </View>
+                
+                <ScrollView style={styles.reviewModalContent}>
+                  <Text style={styles.reviewTitle}>Resumen de Envío</Text>
+                  
+                  <View style={styles.reviewSection}>
+                    <Text style={styles.reviewSectionTitle}>
+                      <Ionicons name="person-outline" size={18} color="#007AFF" style={{marginRight: 6}} /> 
+                      Destinatario
+                    </Text>
+                    <Text style={styles.reviewText}>{formData.paquete_destinatario}</Text>
+                  </View>
+                  
+                  <View style={styles.reviewSection}>
+                    <Text style={styles.reviewSectionTitle}>
+                      <Ionicons name="document-outline" size={18} color="#007AFF" style={{marginRight: 6}} /> 
+                      Información Básica
+                    </Text>
+                    <View style={styles.reviewRow}>
+                      <Text style={styles.reviewLabel}>Peso:</Text>
+                      <Text style={styles.reviewValue}>{formData.paquete_peso} kg</Text>
+                    </View>
+                    <View style={styles.reviewRow}>
+                      <Text style={styles.reviewLabel}>Dimensiones:</Text>
+                      <Text style={styles.reviewValue}>{formData.paquete_dimensiones}</Text>
+                    </View>
+                    <View style={styles.reviewRow}>
+                      <Text style={styles.reviewLabel}>Fecha:</Text>
+                      <Text style={styles.reviewValue}>{formData.paquete_fecha}</Text>
+                    </View>
+                    <View style={styles.reviewRow}>
+                      <Text style={styles.reviewLabel}>Ruta:</Text>
+                      <Text style={styles.reviewValue}>{getRouteName(formData.ruta_id)}</Text>
+                    </View>
+                  </View>
+                  
+                  <View style={styles.confirmationBox}>
+                    <Ionicons name="information-circle" size={22} color="#007AFF" />
+                    <Text style={styles.confirmationText}>
+                      Al registrar este paquete, confirma que la información proporcionada es correcta.
+                    </Text>
+                  </View>
+                </ScrollView>
+                
+                <View style={styles.reviewModalActions}>
+                  <TouchableOpacity 
+                    style={[styles.modalButton, styles.modalCancelButton]}
+                    onPress={() => setShowReviewModal(false)}
+                  >
+                    <Text style={styles.modalCancelButtonText}>Volver a editar</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={[styles.modalButton, styles.modalConfirmButton]}
+                    onPress={handleSubmit}
+                  >
+                    <Text style={styles.modalConfirmButtonText}>Confirmar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
           
           {/* Loading modal */}
           <Modal

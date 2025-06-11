@@ -1,9 +1,8 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import ClientHome from '../screens/client/ClientHome/ClientHome';
+import { ClientHomeStack, PackageTrackingStack } from './ClientStackNavigator';
 import ClientProfile from '../screens/client/ClientProfile/ClientProfile';
-import { PackageTrackingStack, PackageRegistrationStack } from './ClientStackNavigator';
 
 import { NavigationStyles } from './Navigation.styles';
 import { getClientTabIcon } from './navigationUtils';
@@ -27,11 +26,7 @@ export const ClientTabNavigator = () => {
     >
       <ClientTab.Screen 
         name={ROUTES.CLIENT.HOME} 
-        component={ClientHome}
-      />
-      <ClientTab.Screen 
-        name={ROUTES.CLIENT.PACKAGE_REGISTRATION} 
-        component={PackageRegistrationStack}
+        component={ClientHomeStack}
       />
       <ClientTab.Screen 
         name={ROUTES.CLIENT.PACKAGE_TRACKING} 

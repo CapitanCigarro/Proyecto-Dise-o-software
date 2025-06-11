@@ -11,74 +11,61 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { PackageDetailScreenRouteProp, PackageDetailScreenNavigationProp } from '../../../navigation/types';
 import SafeAreaWrapper from '../../../components/SafeAreaWrapper';
 import styles from './PackageDetail.styles';
-// Import mockData
-import mockData from '../../../../assets/mockDataClient.json';
 
 const { width } = Dimensions.get('window');
 
-// Component to display detailed information about a package shipment
+// Detailed view screen for displaying package shipping information and status
 const PackageDetail = () => {
-  const navigation = useNavigation<PackageDetailScreenNavigationProp>();
-  const route = useRoute<PackageDetailScreenRouteProp>();
-  const { packageId } = route.params;
+  const navigation = useNavigation();
+  const route = useRoute();
   
-  // State to hold the package data
-  const [packageData, setPackageData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const packageData = route.params?.package;
+  
+  const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
-  // Load package data from mockData.json on component mount
+  // Initialize timeline step based on package status
   useEffect(() => {
-    // Find the package with the matching ID in mockData
-    const foundPackage = mockData.packages.find(pkg => pkg.id === packageId);
-    
-    if (foundPackage) {
-      setPackageData(foundPackage);
-      setCurrentStep(getStatusStep(foundPackage.status));
-    } else {
-      // Handle case where package is not found
-      console.error(`Package with ID ${packageId} not found in mockData`);
+    if (packageData) {
+      setCurrentStep(getStatusStep(packageData.paquete_estado));
     }
-    
-    setLoading(false);
-  }, [packageId]);
+  }, [packageData]);
 
-  // Determine color based on package delivery status
+  // Map package status to appropriate color scheme
   const getStatusColor = (status: string) => {
     switch(status) {
       case 'En tránsito': return '#f0ad4e';
       case 'Entregado': return '#5cb85c';
-      case 'Pendiente': return '#d9534f';
+      case 'Por enviar': return '#d9534f';
       default: return '#0275d8';
     }
   };
   
-  // Convert status string to numeric step for timeline display
+  // Convert status string to numeric step for progress visualization
   function getStatusStep(status: string) {
     switch(status) {
-      case 'Pendiente': return 0;
+      case 'Por enviar': return 0;
       case 'En tránsito': return 1;
       case 'Entregado': return 2;
       default: return 0;
     }
   }
   
-  // Calculate delivery dates based on current status
+  // Calculate estimated delivery dates based on current package status
   const getDeliveryInfo = () => {
     if (!packageData) return { estimatedPickup: 'Cargando...', estimatedDelivery: 'Cargando...' };
     
     const today = new Date();
     
-    switch(packageData.status) {
-      case 'Pendiente':
+    switch(packageData.paquete_estado) {
+      case 'Por enviar':
         const pickup = new Date(today);
         pickup.setDate(today.getDate() + 1);
         return {
           estimatedPickup: pickup.toLocaleDateString(),
-          estimatedDelivery: 'Pendiente de recolección'
+          estimatedDelivery: 'Próximamente'
         };
       case 'En tránsito':
         const delivery = new Date(today);
@@ -90,33 +77,50 @@ const PackageDetail = () => {
       case 'Entregado':
         return {
           estimatedPickup: 'Recogido',
-          estimatedDelivery: 'Entregado el ' + packageData.date
+          estimatedDelivery: 'Entregado el ' + formatDate(packageData.paquete_fecha)
         };
       default:
         return {
-          estimatedPickup: 'Pendiente',
-          estimatedDelivery: 'Pendiente'
+          estimatedPickup: 'Próximamente',
+          estimatedDelivery: 'Próximamente'
         };
+    }
+  };
+  
+  // Format date strings to Chilean format
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      const options = { 
+        timeZone: 'America/Santiago',
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit'
+      };
+      return date.toLocaleDateString('es-CL', options);
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return dateString;
     }
   };
   
   const deliveryInfo = getDeliveryInfo();
   
-  // Share package tracking information with others
+  // Allow users to share package tracking information via device sharing options
   const shareTracking = async () => {
     if (!packageData) return;
     
     try {
       await Share.share({
-        message: `Seguimiento de mi paquete #${packageData.id}. Estado actual: ${packageData.status}. Puedes seguirlo en nuestra aplicación.`,
-        title: `Seguimiento de Paquete #${packageData.id}`
+        message: `Seguimiento de mi paquete #${packageData.paquete_id}. Estado actual: ${packageData.paquete_estado}. Puedes seguirlo en nuestra aplicación.`,
+        title: `Seguimiento de Paquete #${packageData.paquete_id}`
       });
     } catch (error) {
       console.log(error);
     }
   };
 
-  // Show loading indicator while package data is being fetched
+  // Display loading state while fetching package data
   if (loading) {
     return (
       <SafeAreaWrapper>
@@ -128,7 +132,7 @@ const PackageDetail = () => {
     );
   }
 
-  // Handle case where package data is not found
+  // Handle case when package data is not available
   if (!packageData) {
     return (
       <SafeAreaWrapper>
@@ -150,7 +154,7 @@ const PackageDetail = () => {
     <SafeAreaWrapper>
       <View style={styles.container}>
         {/* Header with status */}
-        <View style={[styles.header, { backgroundColor: getStatusColor(packageData.status) + '22' }]}>
+        <View style={[styles.header, { backgroundColor: getStatusColor(packageData.paquete_estado) + '22' }]}>
           <View style={styles.headerTop}>
             <TouchableOpacity 
               style={styles.backButton}
@@ -166,17 +170,17 @@ const PackageDetail = () => {
           <View style={styles.packageHeader}>
             <View style={styles.packageIcon}>
               <Ionicons 
-                name={packageData.status === 'Entregado' ? "checkmark-circle" : "cube"} 
+                name={packageData.paquete_estado === 'Entregado' ? "checkmark-circle" : "cube"} 
                 size={32} 
-                color={getStatusColor(packageData.status)} 
+                color={getStatusColor(packageData.paquete_estado)} 
               />
             </View>
             <View style={styles.packageInfo}>
-              <Text style={styles.packageId}>Paquete #{packageData.id}</Text>
+              <Text style={styles.packageId}>Paquete #{packageData.paquete_id}</Text>
               <View style={styles.statusContainer}>
-                <View style={[styles.statusDot, { backgroundColor: getStatusColor(packageData.status) }]} />
-                <Text style={[styles.statusText, { color: getStatusColor(packageData.status) }]}>
-                  {packageData.status}
+                <View style={[styles.statusDot, { backgroundColor: getStatusColor(packageData.paquete_estado) }]} />
+                <Text style={[styles.statusText, { color: getStatusColor(packageData.paquete_estado) }]}>
+                  {packageData.paquete_estado}
                 </Text>
               </View>
             </View>
@@ -200,7 +204,7 @@ const PackageDetail = () => {
                 </View>
                 <View style={styles.stepContent}>
                   <Text style={styles.stepTitle}>Paquete Registrado</Text>
-                  <Text style={styles.stepDate}>{packageData.date}</Text>
+                  <Text style={styles.stepDate}>{formatDate(packageData.paquete_fecha)}</Text>
                 </View>
               </View>
               
@@ -229,7 +233,7 @@ const PackageDetail = () => {
                 <View style={styles.stepContent}>
                   <Text style={styles.stepTitle}>Entregado</Text>
                   <Text style={styles.stepDate}>
-                    {currentStep >= 2 ? packageData.date : deliveryInfo.estimatedDelivery}
+                    {currentStep >= 2 ? formatDate(packageData.paquete_fecha) : deliveryInfo.estimatedDelivery}
                   </Text>
                 </View>
               </View>
@@ -246,12 +250,12 @@ const PackageDetail = () => {
               </View>
             </View>
             
-            {packageData.status !== 'Pendiente' && (
+            {packageData.paquete_estado !== 'Por enviar' && (
               <View style={styles.deliveryInfoItem}>
                 <Ionicons name="person-outline" size={22} color="#007AFF" />
                 <View style={styles.deliveryInfoText}>
                   <Text style={styles.deliveryInfoLabel}>Entregado por</Text>
-                  <Text style={styles.deliveryInfoValue}>Mensajería Express</Text>
+                  <Text style={styles.deliveryInfoValue}>Próximamente</Text>
                 </View>
               </View>
             )}
@@ -264,24 +268,24 @@ const PackageDetail = () => {
               <View style={styles.infoRow}>
                 <View style={styles.infoItem}>
                   <Text style={styles.infoLabel}>Fecha de Registro</Text>
-                  <Text style={styles.infoValue}>{packageData.date}</Text>
+                  <Text style={styles.infoValue}>{formatDate(packageData.paquete_fecha)}</Text>
                 </View>
                 
                 <View style={styles.infoItem}>
                   <Text style={styles.infoLabel}>Tipo</Text>
-                  <Text style={styles.infoValue}>{packageData.packageType || 'Estándar'}</Text>
+                  <Text style={styles.infoValue}>Estándar</Text>
                 </View>
               </View>
               
               <View style={styles.infoRow}>
                 <View style={styles.infoItem}>
                   <Text style={styles.infoLabel}>Peso</Text>
-                  <Text style={styles.infoValue}>{packageData.weight || '0'} kg</Text>
+                  <Text style={styles.infoValue}>{packageData.paquete_peso} kg</Text>
                 </View>
                 
                 <View style={styles.infoItem}>
                   <Text style={styles.infoLabel}>Dimensiones</Text>
-                  <Text style={styles.infoValue}>{packageData.dimensions || 'N/A'}</Text>
+                  <Text style={styles.infoValue}>{packageData.paquete_dimensiones || 'No especificado'}</Text>
                 </View>
               </View>
             </View>
@@ -297,8 +301,8 @@ const PackageDetail = () => {
                 </View>
                 <View style={styles.addressInfo}>
                   <Text style={styles.addressLabel}>Origen</Text>
-                  <Text style={styles.addressText}>{packageData.origin || 'No especificado'}</Text>
-                  <Text style={styles.addressSecondary}>{packageData.sender || 'No especificado'}</Text>
+                  <Text style={styles.addressText}>Próximamente</Text>
+                  <Text style={styles.addressSecondary}>{packageData.usuario_correo}</Text>
                 </View>
               </View>
               
@@ -310,22 +314,20 @@ const PackageDetail = () => {
                 </View>
                 <View style={styles.addressInfo}>
                   <Text style={styles.addressLabel}>Destino</Text>
-                  <Text style={styles.addressText}>{packageData.address || packageData.destination || 'No especificado'}</Text>
-                  <Text style={styles.addressSecondary}>{packageData.recipient || 'No especificado'}</Text>
+                  <Text style={styles.addressText}>Próximamente</Text>
+                  <Text style={styles.addressSecondary}>{packageData.paquete_destinatario}</Text>
                 </View>
               </View>
             </View>
           </View>
           
           {/* Description */}
-          {(packageData.description || packageData.notes) && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Descripción</Text>
-              <View style={styles.descriptionCard}>
-                <Text style={styles.description}>{packageData.description || packageData.notes || 'Sin descripción'}</Text>
-              </View>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Descripción</Text>
+            <View style={styles.descriptionCard}>
+              <Text style={styles.description}>Próximamente se habilitará la descripción del paquete</Text>
             </View>
-          )}
+          </View>
         </ScrollView>
       </View>
     </SafeAreaWrapper>

@@ -1,11 +1,11 @@
 import { apiRequest } from './api';
 
 /**
- * Authentication service for handling user login, registration, etc.
+ * Service for handling authentication and user account operations
  */
 export const authService = {
   /**
-   * Login a user with email and password
+   * Authenticate user with credentials and role selection
    */
   login: async (email: string, password: string, rolSelected: string) => {
     try {
@@ -29,7 +29,7 @@ export const authService = {
   },
 
   /**
-   * Request password reset
+   * Send password recovery email to user
    */
   requestPasswordReset: async (email: string) => {
     try {
@@ -45,7 +45,7 @@ export const authService = {
   },
 
   /**
-   * Register a new user
+   * Create new user account with provided information
    */
   register: async (userData: any) => {
     try {

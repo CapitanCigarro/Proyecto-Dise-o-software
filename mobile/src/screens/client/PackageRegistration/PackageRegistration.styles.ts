@@ -1,14 +1,15 @@
 import { StyleSheet } from 'react-native';
 import { colors, typography, spacing, borderRadius, shadows } from '../../../theme/globalStyles';
 
+// Styles for the package registration screen components
 const styles = StyleSheet.create({
-  // Main container for the package registration screen
+  // Main container for the entire screen
   container: {
     flex: 1,
     backgroundColor: colors.background.main,
   },
   
-  // Header bar with screen title
+  // Header with title
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -24,70 +25,7 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
   },
   
-  // Progress indicator showing current step in registration flow
-  progressContainer: {
-    backgroundColor: colors.background.card,
-    paddingBottom: spacing.section,
-    marginBottom: spacing.sm,
-  },
-  stepIndicatorContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: spacing.section,
-    marginBottom: spacing.sm + 2,
-  },
-  stepIndicator: {
-    alignItems: 'center',
-  },
-  stepCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xs + 1,
-  },
-  stepCircleActive: {
-    backgroundColor: colors.primary,
-  },
-  stepCircleInactive: {
-    backgroundColor: colors.text.tertiary + '40', // Usando color terciario con opacidad
-  },
-  stepText: {
-    fontSize: typography.fontSize.tiny,
-  },
-  stepTextActive: {
-    color: colors.text.primary,
-    fontWeight: typography.fontWeight.semiBold,
-  },
-  stepTextInactive: {
-    color: colors.text.tertiary,
-  },
-  
-  // Progress bar showing overall completion
-  progressBarContainer: {
-    height: 4,
-    backgroundColor: colors.border,
-    marginHorizontal: spacing.xl,
-    borderRadius: borderRadius.small,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  progressBarBackground: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: colors.border,
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.small,
-  },
-  
-  // Form container for input fields
+  // Form container and scrollable content
   formContainer: {
     flex: 1,
     backgroundColor: colors.background.card,
@@ -96,7 +34,7 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
   },
   
-  // Input field styling and groups
+  // Form input field styling
   inputGroup: {
     marginBottom: spacing.section,
   },
@@ -115,20 +53,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.main,
   },
   
-  // Address input with clear button
-  addressInputContainer: {
-    position: 'relative',
-  },
-  addressInput: {
-    paddingRight: 40,
-  },
-  clearButton: {
-    position: 'absolute',
-    right: spacing.md,
-    top: spacing.md,
-  },
-  
-  // Error state for form validation
+  // Error styling for validation feedback
   inputError: {
     borderColor: colors.palette.red,
   },
@@ -138,13 +63,13 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs + 1,
   },
   
-  // Multiline text area input
+  // Multiline text input
   textArea: {
     minHeight: 80,
     textAlignVertical: 'top',
   },
   
-  // Navigation buttons for form steps
+  // Bottom navigation buttons
   navigationButtons: {
     flexDirection: 'row',
     padding: spacing.section,
@@ -160,11 +85,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: spacing.xs + 1,
   },
-  backButton: {
-    backgroundColor: colors.background.main,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
   nextButton: {
     backgroundColor: colors.primary,
   },
@@ -173,46 +93,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.palette.red + '50',
   },
-  submitButton: {
-    backgroundColor: colors.palette.green,
-  },
   navigationButtonText: {
     fontWeight: typography.fontWeight.bold,
     color: colors.text.light,
-  },
-  backButtonText: {
-    color: colors.text.secondary,
   },
   cancelButtonText: {
     color: colors.palette.red,
   },
   
-  // Address suggestions dropdown
-  suggestionsContainer: {
-    backgroundColor: colors.background.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.medium,
-    marginTop: spacing.xs + 1,
-    maxHeight: 120,
-    overflow: 'hidden',
-  },
-  suggestionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  suggestionIcon: {
-    marginRight: spacing.sm,
-  },
-  suggestionText: {
-    fontSize: typography.fontSize.bodySmall,
-    color: colors.text.primary,
-  },
-  
-  // Information box for additional guidance
+  // Information box for help text
   infoBox: {
     flexDirection: 'row',
     backgroundColor: colors.primary + '15',
@@ -232,72 +121,33 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   
-  // Package type selection options
-  groupTitle: {
-    fontSize: typography.fontSize.body,
-    fontWeight: typography.fontWeight.bold,
-    marginBottom: spacing.sm + 2,
-    color: colors.text.primary,
-  },
-  packageTypeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.xl,
-  },
-  packageTypeOption: {
-    flex: 1,
-    marginHorizontal: spacing.xs + 1,
-    padding: spacing.md,
-    borderRadius: borderRadius.medium,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.background.main,
-  },
-  packageTypeSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primary + '15',
-  },
-  packageTypeText: {
-    marginTop: spacing.xs + 1,
-    color: colors.text.secondary,
-    fontSize: typography.fontSize.bodySmall,
-  },
-  packageTypeTextSelected: {
-    color: colors.primary,
-    fontWeight: typography.fontWeight.semiBold,
-  },
-  
-  // Package dimensions input row
+  // Package dimensions input layout
   dimensionsContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
   },
-  
-  // Cost estimation display
-  costEstimation: {
-    backgroundColor: colors.background.main,
-    padding: spacing.section,
-    borderRadius: borderRadius.medium,
-    marginTop: spacing.xl,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.palette.green,
+  dimensionInputWrapper: {
+    flex: 1,
   },
-  costEstimationText: {
-    fontSize: typography.fontSize.body,
-    color: colors.text.primary,
+  dimensionInput: {
+    height: 50,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    textAlign: 'center',
   },
-  costEstimationAmount: {
-    fontWeight: typography.fontWeight.bold,
-    color: colors.palette.green,
-  },
-  costEstimationNote: {
-    fontSize: typography.fontSize.tiny,
-    color: colors.text.secondary,
-    marginTop: spacing.xs + 1,
+  dimensionX: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#555',
+    marginHorizontal: 8,
   },
   
-  // Review form section for final confirmation
+  // Review form section styles
   reviewTitle: {
     fontSize: typography.fontSize.subheading,
     fontWeight: typography.fontWeight.bold,
@@ -339,28 +189,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   
-  // Cost summary display in review
-  costSummary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.palette.green,
-    padding: spacing.section,
-    borderRadius: borderRadius.medium,
-    marginVertical: spacing.section,
-  },
-  costSummaryLabel: {
-    fontSize: typography.fontSize.body,
-    color: colors.text.light,
-    fontWeight: typography.fontWeight.semiBold,
-  },
-  costSummaryValue: {
-    fontSize: typography.fontSize.subheading,
-    color: colors.text.light,
-    fontWeight: typography.fontWeight.bold,
-  },
-  
-  // Terms confirmation checkbox
+  // Terms and conditions confirmation box
   confirmationBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -376,7 +205,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   
-  // Loading indicator modal
+  // Modal background overlay
   modalBackground: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -395,6 +224,75 @@ const styles = StyleSheet.create({
     marginTop: spacing.section,
     fontSize: typography.fontSize.body,
     color: colors.text.primary,
+  },
+  
+  // Section header with icon and title
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 8,
+  },
+  
+  // Confirmation modal styling
+  reviewModal: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    width: '90%',
+    maxHeight: '80%',
+    padding: 0,
+    overflow: 'hidden',
+  },
+  reviewModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  reviewModalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  reviewModalContent: {
+    padding: 16,
+  },
+  reviewModalActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  modalButton: {
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    minWidth: '45%',
+    alignItems: 'center',
+  },
+  modalCancelButton: {
+    backgroundColor: '#f1f1f1',
+  },
+  modalCancelButtonText: {
+    fontSize: 16,
+    color: '#555',
+    fontWeight: '500',
+  },
+  modalConfirmButton: {
+    backgroundColor: '#007AFF',
+  },
+  modalConfirmButtonText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '500',
   },
 });
 
