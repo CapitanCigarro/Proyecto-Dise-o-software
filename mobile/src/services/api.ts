@@ -1,5 +1,5 @@
 // Base URL for all API requests
-const API_URL = 'http://192.168.50.19:3007/api'; //Reemplaza http://TU_IP:3007/api
+const API_URL = 'http://192.168.50.20:3007/api'; //Reemplaza http://TU_IP:3007/api
 
 // Central function for making HTTP requests to the backend API
 export const apiRequest = async (
