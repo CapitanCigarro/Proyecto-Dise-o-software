@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { getPaquetes, crearPaquete } from '../controllers/paqueteController';
-import { verifyToken } from '../middleware/authMiddleware';
+import { getPaquetes, crearPaquete } from '../controllers/paqueteController.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
 
 const router = Router();
 

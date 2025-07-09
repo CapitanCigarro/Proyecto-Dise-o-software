@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import pool from '../db';
+import pool from '../db.js';
 
 export const getPaquetes = async (req: Request, res: Response): Promise<Response | void> => {
   const { usuario_correo } = req.params; // Lo tomas de la URL

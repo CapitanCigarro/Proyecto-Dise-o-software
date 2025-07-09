@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import pool from '../db'; // tu pool o cliente PG
+import pool from '../db.js'; // tu pool o cliente PG
 import bcrypt from 'bcryptjs'; // para comparar hash de contraseñas (si usas)
 import jwt from 'jsonwebtoken';
 

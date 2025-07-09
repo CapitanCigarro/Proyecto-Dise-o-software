@@ -1,11 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import pool from './db'; // Importamos el pool ya configurado
-import userRoutes from './routes/userRoutes';
-import paqueteRoutes from './routes/paqueteRoutes';
-import osrmRoutes from './routes/osrm';
-import rutaRoutes from './routes/rutaRoutes';
+//import pool from './db'; // Importamos el pool ya configurado
+import pool from './db.js';
+
+import userRoutes from './routes/userRoutes.js';
+import paqueteRoutes from './routes/paqueteRoutes.js';
+import osrmRoutes from './routes/osrm.js';
+import rutaRoutes from './routes/rutaRoutes.js';
 
 // Load environment variables first
 dotenv.config();
